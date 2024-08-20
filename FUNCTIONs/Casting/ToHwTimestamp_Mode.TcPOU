@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ToHwTimestamp_Mode" Id="{008b018c-1ede-4353-b584-cee6b08b388c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ToHwTimestamp_Mode : BOOL
+VAR_INPUT
+	ipChObject : I_CH_OBJECT;
+	ipEL2596_Mode : REFERENCE TO I_HwTimestamp_Mode;
+END_VAR
+
+VAR
+	ipTmp : I_HwTimestamp_Mode;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* 
+   1. Test if the interface exists
+   2. Test if the object implements a "Object" interface 
+   3. Write reference to interface in parameter
+   4. Returne TRUE if succesfull
+*)
+IF ipChObject <> 0 AND_THEN __QUERYINTERFACE(ipChObject,ipTmp) THEN
+	ipEL2596_Mode := ipTmp;
+	ToHwTimestamp_Mode := TRUE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

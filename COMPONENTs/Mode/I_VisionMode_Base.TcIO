@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VisionMode_Base" Id="{49c36f49-4e97-429e-94cd-b3e214e845f8}">
+    <Declaration><![CDATA[INTERFACE I_VisionMode_Base EXTENDS I_CH_Object, I_VisionMode_StatusOnly, __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Method Name="LinkComponents" Id="{418f4974-c676-414c-b2a9-155325073295}">
+      <Declaration><![CDATA[METHOD LinkComponents : HRESULT
+VAR_INPUT
+	ipVisionSystem				: I_VisionSystem;
+	ipCameraController 			: I_CameraController_Base;
+	ipImageProvider 			: I_ImageProvider_Base;	
+	ipIlluminationController1 : I_IlluminationController_Base;
+	ipIlluminationController2 : I_IlluminationController_Base;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Name" Id="{051c6680-8ae9-4120-973c-aed51f4eec58}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Name or description of this mode
+PROPERTY Name : STRING]]></Declaration>
+      <Get Name="Get" Id="{bfd0726f-80ba-493e-9092-011919a94e6f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

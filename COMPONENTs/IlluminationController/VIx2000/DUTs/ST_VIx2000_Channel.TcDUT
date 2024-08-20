@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_VIx2000_Channel" Id="{17e2028d-3bf8-4334-8dd2-f4458a804748}">
+    <Declaration><![CDATA[TYPE ST_VIx2000_Channel :
+STRUCT
+	nBrightness 	 : UINT;
+	nDuration_1us 	 : UDINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

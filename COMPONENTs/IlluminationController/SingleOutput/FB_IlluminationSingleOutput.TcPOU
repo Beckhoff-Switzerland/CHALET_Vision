@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_IlluminationSingleOutput" Id="{66fc1f84-c92c-45bf-8ae6-4b81cb14572f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_IlluminationSingleOutput EXTENDS FB_IlluminationController_Base
+VAR
+	bTrigger 			AT %Q* 	: BOOL;			// Trigger for lighting
+	
+	nImpulseLength 		: UINT;   				// Impulse length of the lighting period [ms]
+	eState				: E_StateTerminal  := E_StateTerminal.READY;		// Current terminal state
+	
+	fbTriggerOffDelay	: TOF;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Busy" Id="{8dab6930-986a-44bd-98c2-e85b7389de09}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{28eef3d5-f096-4240-9b58-581047bf59b4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := THIS^.eState = E_StateTerminal.TRIGGERING;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Configure" Id="{33fe0590-d13b-4397-a4c0-cafcbff29ffb}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{12ac0228-6cc7-4ae0-be66-1a0fdadaaea3}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	nImpulseLength 	: UINT;   	// Impulse length of the lighting period [ms]
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	
+
+	THIS^.nImpulseLength 	:= nImpulseLength; 	 	
+
+
+END_IF
+
+bFBInitCalledOnce := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initialize" Id="{eed5b4f2-ac2e-49cf-ad27-44d94e0ff188}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR
+	hr : HRESULT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[hr := SUPER^.Initialize();
+
+THIS^.eState := E_StateTerminal.READY;
+THIS^.fbTriggerOffDelay.PT := UINT_TO_TIME(THIS^.nImpulseLength);
+
+Initialize := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Operational" Id="{b7061c55-35a2-416e-8996-1a541c7fd4a7}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{8a769e10-d1fc-498c-829c-5066c214802b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Operational := (THIS^.eState = E_StateTerminal.READY) OR (THIS^.eState = E_StateTerminal.TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{d3d04f71-337c-4af2-8241-d50ab6429c78}">
+      <Declaration><![CDATA[METHOD  Reset : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Reset := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{9010870a-98ae-4bff-b0cd-29907816347b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{7c21af19-91c6-470f-bba6-95327ae6b9f3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+State := THIS^.eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{e1007a5d-c465-4566-8c7c-b8d5a3607485}">
+      <Declaration><![CDATA[METHOD  Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* The trigger methode can be called in each state. 
+Is the output is already set, the off-timer is resetet *)
+
+THIS^.fbTriggerOffDelay.IN := TRUE;;
+Trigger := S_OK;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{4d42c2e7-9489-4c36-8ccf-cdb080d1bb2b}">
+      <Declaration><![CDATA[METHOD PUBLIC Update : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* The trigger methode call be called in each state. 
+Is the output is already set, the off-timer is resetet *)
+
+(* Handle terminal state machine *)
+CASE THIS^.eState OF
+	(* Terminal is ready *)
+	E_StateTerminal.READY:
+		;		
+	(* Terminal is triggering *)
+	E_StateTerminal.TRIGGERING:
+		;
+END_CASE
+
+THIS^.fbTriggerOffDelay();
+THIS^.fbTriggerOffDelay.IN := FALSE;
+
+//Set Output
+THIS^.bTrigger := THIS^.fbTriggerOffDelay.Q;
+
+//Set State
+IF THIS^.bTrigger THEN
+	THIS^.eState := E_StateTerminal.TRIGGERING;
+ELSE	
+	THIS^.eState := E_StateTerminal.READY;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

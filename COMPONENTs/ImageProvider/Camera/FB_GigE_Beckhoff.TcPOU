@@ -1,0 +1,435 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_GigE_Beckhoff" Id="{c5db4651-2270-4115-b914-da68dd6f18c7}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_GigE_Beckhoff EXTENDS FB_ImageProvider_Base IMPLEMENTS I_GigEVision_Mode, I_GigEVision_Register_Connection
+VAR
+	fbCamera 						: FB_VN_GevCameraControl;	// Interface object for camera use
+	
+	{attribute 'hide'}
+	bResetCommand	: BOOL;
+END_VAR
+
+
+VAR	
+	//GigE-Camera-Register
+	//Read/Write
+	{attribute 'hide'}
+	fbRegAcquisitionMode 		: FB_VnRegister_UDINT(ipCameraConnection := THIS^, nAddress := 16#10000040, nEndian := 0);
+	{attribute 'hide'}
+	fbRegTriggerMode	 		: FB_VnRegister_UDINT(ipCameraConnection := THIS^, nAddress := 16#31000400, nEndian := 0);
+	{attribute 'hide'}
+	fbRegTriggerSource	 		: FB_VnRegister_UDINT(ipCameraConnection := THIS^, nAddress := 16#31000408, nEndian := 0);
+	{attribute 'hide'}
+	fbRegExposureTime	 		: FB_VnRegister_UDINT(ipCameraConnection := THIS^, nAddress := 16#30000024, nEndian := 0);
+	
+	//Read only
+	{attribute 'hide'}
+	fbRegDeviceVendorName		: FB_VnRegister_Memory(ipCameraConnection := THIS^, nAddress := 16#00000048, nLength := 32); //String	
+	{attribute 'hide'}
+	fbRegDeviceModelName	 	: FB_VnRegister_Memory(ipCameraConnection := THIS^, nAddress := 16#00000068, nLength := 32); //String	
+	{attribute 'hide'}
+	fbRegDeviceVersion	 		: FB_VnRegister_Memory(ipCameraConnection := THIS^, nAddress := 16#00000088, nLength := 32); //String	
+	{attribute 'hide'}
+	fbRegDeviceSerialNumber	 	: FB_VnRegister_Memory(ipCameraConnection := THIS^, nAddress := 16#000000D8, nLength := 16); //String	
+	{attribute 'hide'}
+	fbRegCurrentIPAddress	 	: FB_VnRegister_Memory(ipCameraConnection := THIS^, nAddress := 16#00000024, nLength := 4);  //4Byte	T_IPv4AddrArr
+
+	//List
+	{attribute 'hide'}
+	fbVnRegisterList 			: FB_CH_List;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="RegisterParameter" Id="{e1fb51f3-78fc-4c56-b78f-05326ce7384c}" />
+    <Property Name="DeviceModeNamel" Id="{03bd15a9-1c45-49e5-a038-9ab2dc693615}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY DeviceModeNamel : STRING]]></Declaration>
+      <Get Name="Get" Id="{1d00a522-65a2-4295-a8c3-4c24d4fcf854}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceModelName.ReadData(ADR(DeviceModeNamel));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceSerialNumber" Id="{57c5193f-8922-46c3-b8d1-393fe4e76f3d}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY DeviceSerialNumber : STRING]]></Declaration>
+      <Get Name="Get" Id="{bcd24646-2ef7-4b5e-9ea1-aded9754e78e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceSerialNumber.ReadData(ADR(DeviceSerialNumber));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceVendorName" Id="{2558721b-4848-479f-8582-ca14d7b42cc3}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY DeviceVendorName : STRING]]></Declaration>
+      <Get Name="Get" Id="{3178686c-ac8f-42af-a3ad-50bffcfafaa5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceVendorName.ReadData(ADR(DeviceVendorName));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceVersion" Id="{7435b480-861e-45ed-a84a-19234e4ff19f}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY DeviceVersion : STRING]]></Declaration>
+      <Get Name="Get" Id="{2fac1087-6a36-454e-b7ef-713d8796dcf5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceVersion.ReadData(ADR(DeviceVersion));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Exposure_1us" Id="{39b985d9-25a3-4a23-a072-b5b5d276041a}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Exposure_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{fb516852-e79d-4b3d-a6cc-aedd2b755cb7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Exposure_1us := THIS^.fbRegExposureTime.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{d66e4574-17b2-4d34-98b0-0940aad311b3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.fbRegExposureTime.Value <> Exposure_1us THEN
+ 	//Set Camera from AQUIRING in OPENED - only on new value
+	THIS^.fbCamera.StopAcquisition();
+END_IF
+
+THIS^.fbRegExposureTime.Value := Exposure_1us;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{3243493b-939c-4369-b536-35c534775fe4}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	//Read/Write
+	fbVnRegisterList.AddObject(fbRegAcquisitionMode);
+	fbVnRegisterList.AddObject(fbRegTriggerMode);
+	fbVnRegisterList.AddObject(fbRegTriggerSource);
+	fbVnRegisterList.AddObject(fbRegExposureTime);
+	
+	//Read only
+	fbVnRegisterList.AddObject(fbRegDeviceVendorName);
+	fbVnRegisterList.AddObject(fbRegDeviceModelName);
+	fbVnRegisterList.AddObject(fbRegDeviceVersion);
+	fbVnRegisterList.AddObject(fbRegDeviceSerialNumber);
+	fbVnRegisterList.AddObject(fbRegCurrentIPAddress);
+
+	
+	//Prepare for EtherCat-TimeStamp-Trigger use
+	fbRegAcquisitionMode.Value 	:=  16#00; 	//Continous
+	fbRegTriggerMode.Value		:=  16#01; 	//ON	 
+	fbRegTriggerSource.Value	:=  E_TriggerSource.EtherCAT; 	//EtherCat	 
+	fbRegExposureTime.Value	 	:= 	15; 	//[us] smallest allowed value
+
+	
+END_IF
+
+bFBInitCalledOnce := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="GevCameraControl" Id="{ac808f9d-333f-40e5-bc7a-e123bc7d79c3}">
+      <Declaration><![CDATA[//Reference to base function block
+PROPERTY GevCameraControl : REFERENCE TO FB_VN_GevCameraControl]]></Declaration>
+      <Get Name="Get" Id="{c9c8e51e-5f7e-4420-be3c-d9bd25e5d804}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[GevCameraControl REF= THIS^.fbCamera;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{f7af7719-aec2-4b1b-812e-2b8bf5e9a432}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR 
+	fbTaskInfo		 : PlcTaskSystemInfo;
+END_VAR
+VAR_INST
+	//This error cannot be reset. Requires a reset cold
+	{attribute 'hide'}	
+	fbInitError : FB_TcAlarm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Initialize();
+
+
+// Object id of ImagePoovider is not set
+IF THIS^.fbCamera.oidITcVnGevImageProvider = 0 THEN
+	IF NOT fbInitError.bRaised THEN 
+		//This error cannot be reset. Requires a reset cold
+		fbInitError.CreateEx(stEventEntry:=TC_EVENTS.CHALET_Vision_Events.ObjectIdNotSet, ipSourceInfo := THIS^.fbSourceInfo, bWithConfirmation := FALSE);
+		fbInitError.Raise(0);
+	END_IF
+	Initialize := E_FAIL;
+	RETURN;
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IPAddress" Id="{d9b7f394-eb02-47a9-ad9c-ab91897d8760}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//IP-Adress as STRING(15)
+PROPERTY IPAddress : T_IPv4Addr ]]></Declaration>
+      <Get Name="Get" Id="{f7f7a4fa-1f0a-4f7b-a4dd-dd80d1958349}">
+        <Declaration><![CDATA[VAR
+	ipAdressByteArray   : T_IPv4AddrArr; // Byte-Array
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegCurrentIPAddress.ReadData(ADR(ipAdressByteArray));
+IPAddress := F_CreateIPv4Addr(ipAdressByteArray); //Byte-Array to String]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OID" Id="{a91633f1-2378-468f-8f55-37e834a66447}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OID : CHALET_BaseComponents.OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{358c8f90-e561-434b-8452-882b3c7aa7fd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OID := THIS^.fbCamera.oidITcVnGevImageProvider;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{86651282-66f1-4ffe-b74b-695371ed84c2}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bResetCommand := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Softtrigger" Id="{0bc66e1e-48b8-4052-8330-0c630b85329c}">
+      <Declaration><![CDATA[METHOD PUBLIC Softtrigger : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Check if not in wrong state *)
+IF NOT ((THIS^.eState = ETcVnCameraState.TCVN_CS_ACQUIRING) OR (THIS^.eState = ETcVnCameraState.TCVN_CS_OPENED)) THEN
+	Softtrigger := E_FAIL;
+	RETURN;
+END_IF
+
+
+THIS^.eState := ETcVnCameraState.TCVN_CS_TRIGGERING;
+
+// Trigger image
+Softtrigger := fbCamera.TriggerImage();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{dba207bf-1f36-4cd8-8643-230bb6792b23}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{2644a444-d507-4768-bbd1-a81b9f9d9642}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State := THIS^.eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TriggerSource" Id="{9cb87d73-7742-48b2-9fa4-2f71bc990dda}" FolderPath="RegisterParameter\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TriggerSource : E_TriggerSource]]></Declaration>
+      <Get Name="Get" Id="{aac00672-68d5-4a31-9559-7107cd11291d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerSource := THIS^.fbRegTriggerSource.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b1b7a110-381a-404c-b304-ec73ca485152}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.fbRegTriggerSource.Value <> TriggerSource THEN
+ 	//Set Camera from AQUIRING in OPENED - only on new value
+	THIS^.fbCamera.StopAcquisition();
+END_IF
+
+fbRegTriggerSource.Value := TriggerSource;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="TryGetImage" Id="{26bc9454-4c38-4515-8d82-968a94b826e2}">
+      <Declaration><![CDATA[METHOD  TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stImageWithInfo) THEN
+	//Error, invalide input
+	TryGetImage := E_FAIL;
+	RETURN;
+END_IF
+
+
+(* Release the old image before overwriting it with the new one *)	
+IF stImageWithInfo.ipImage <> 0 THEN
+	FW_SafeRelease(ADR(stImageWithInfo.ipImage));
+END_IF
+
+(*  Lock the image to prevent multiple access *)
+(*	🔒 LOCKED FROM HERE --------------------------------------------- *)
+IF THIS^.fbCrititcalSection.Enter() THEN
+	
+	(* Get current image from camera *)
+	TryGetImage := fbCamera.GetCurrentImageWithGvspInfo(
+						ipImage := stImageWithInfo.ipImage,
+						stGvspInfo := stImageWithInfo.stGvspInfo
+						);
+
+	(* Get image info from received image *)
+	F_VN_GetImageInfo(	ipImage:=stImageWithInfo.ipImage, 
+						stImageInfo:=stImageWithInfo.stInfo, 
+						hrPrev:=TryGetImage );
+	
+	(* for a camera a fictitious name *)
+	stImageWithInfo.sCurrentImageFileName := TO_STRING(stImageWithInfo.stGvspInfo.BlockId);			
+
+	(*	🔓 LOCKED TO HERE ----------------------------------------------- *)
+	THIS^.fbCrititcalSection.Leave();
+END_IF
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{b5d93e74-2e89-46bc-8466-a550db444c7f}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	ipVnRegisterStatus : I_VnRegister_Status;
+	bAllReadDone : BOOL := TRUE;
+	bAllWriteDone : BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Get current source state *)					
+eState := fbCamera.GetState();
+
+(* Source state machine *)
+CASE eState OF
+	TCVN_CS_INITIAL, TCVN_CS_INITIALIZING:
+		fbFeedback.ActiveCommand := 'InitializeCamera';
+		fbFeedback.hr := fbCamera.InitializeCamera();
+
+	TCVN_CS_INITIALIZED,  TCVN_CS_OPENING:
+		// Reset all read and write flags 
+		THIS^.fbVnRegisterList.ResetIterator();
+		WHILE THIS^.fbVnRegisterList.HasNextObject() DO
+			//Redo a read oder write for each parameter
+			THIS^.fbVnRegisterList.GetNextObject().Initialize();
+		END_WHILE
+		THIS^.fbVnRegisterList.RestoreIterator();
+		
+		fbFeedback.ActiveCommand := 'OpenCamera';
+		fbFeedback.hr := fbCamera.OpenCamera();
+		
+	TCVN_CS_OPENED:
+		// Read and write all camera parameter in this OPENED-State 
+		THIS^.fbVnRegisterList.ResetIterator();
+		WHILE THIS^.fbVnRegisterList.HasNextObject() DO
+			IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+				bAllReadDone := bAllReadDone AND ipVnRegisterStatus.ReadDone;
+				bAllWriteDone := bAllWriteDone AND ipVnRegisterStatus.WriteDone;
+			END_IF
+		END_WHILE
+		THIS^.fbVnRegisterList.RestoreIterator();
+		
+		IF bAllReadDone AND bAllWriteDone THEN
+			(* Done - Process with state machine *)
+			fbFeedback.ActiveCommand := 'StartAcquisition';
+			fbFeedback.hr := fbCamera.StartAcquisition();
+		ELSE
+			fbFeedback.ActiveCommand := 'ReadWrite Camaera Parameters';
+			fbFeedback.Busy	:= TRUE;;
+		END_IF
+	
+		
+	TCVN_CS_STARTACQUISITION:
+		fbFeedback.ActiveCommand := 'StartAcquisition';
+		fbFeedback.hr := fbCamera.StartAcquisition();
+		
+		
+	TCVN_CS_STOPACQUISITION:
+		fbFeedback.ActiveCommand := 'StopAcquisition';
+		fbFeedback.hr := fbCamera.StopAcquisition();
+		
+	TCVN_CS_ACQUIRING:
+		//wait for trigger
+		;
+		
+	TCVN_CS_TRIGGERING:
+		(* Execute the triggering until done *)
+		fbFeedback.ActiveCommand := 'TriggerImage';
+		fbFeedback.hr := fbCamera.TriggerImage();
+		
+	TCVN_CS_ERROR:	
+	
+		(* Reset if commanded *)
+		IF THIS^.bResetCommand THEN
+			fbFeedback.ActiveCommand := 'Reset';
+			fbFeedback.hr := THIS^.fbCamera.Reset();			
+		END_IF
+END_CASE
+
+(* Clear Alarm if not in Error-State *)
+IF eState <> TCVN_CS_ERROR THEN
+	THIS^.bResetCommand := FALSE;
+END_IF
+
+
+(* Update camera parameters*)
+fbVnRegisterList.Update();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_StateTerminal" Id="{6ebd9e89-937d-4c09-9492-92ff0537e75c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_StateTerminal :
+(
+	RESET := 0,
+	RESETING,
+	INIT := 10,
+	READY := 20,
+	TRIGGERING := 30,
+	ERROR := 100
+):=INIT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

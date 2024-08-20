@@ -1,0 +1,498 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0234f32a-48a0-4f76-9e06-4dd517a1494c}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>true</WriteProductVersion>
+    <GenerateTpy>false</GenerateTpy>
+    <Name>Plc_CHALET_Vision</Name>
+    <ProgramVersion>3.1.4023.0</ProgramVersion>
+    <Application>{93a4ac9c-f3b7-4da0-bd78-f6c396de53f4}</Application>
+    <TypeSystem>{55e0eab5-0d01-42ff-9205-08d61a695095}</TypeSystem>
+    <Implicit_Task_Info>{10e43833-4945-4397-af31-49c760b84bc0}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{a3e19e8f-0bc9-4640-9ce5-a0cc09c14706}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{93673a8b-0cd3-4783-b7b1-9a137c288766}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{82cade90-12a2-4c54-a095-e98fa6d5d667}</LibraryReferences>
+    <Company>Beckhoff CH</Company>
+    <Released>false</Released>
+    <Title>CHALET_Vision</Title>
+    <ProjectVersion>2.0.1</ProjectVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="LICENSE.md">
+      <SubType>Content</SubType>
+    </Content>
+    <None Include="Plc_CHALET_Vision.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="CHALET_BaseComponents">
+      <DefaultResolution>CHALET_BaseComponents, * (Beckhoff CH)</DefaultResolution>
+      <Namespace>CHALET_BaseComponents</Namespace>
+      <PublishSymbolsInContainer>true</PublishSymbolsInContainer>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Utilities">
+      <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Vision">
+      <DefaultResolution>Tc3_Vision, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Vision</Namespace>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="COMPONENTs\CameraController\Base FB\FB_CameraController_Base.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\Base FB\I_CameraController_Base.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\Base FB\I_CameraController_StatusOnly.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\EL2258 - 8Ch. digital output timestamp\FB_EL2258_1Ch_TSO.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger\FB_EL2596.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger\I_HwTimestamp_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger\FB_EtherCAT_Trigger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger\I_SwTimestamp_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\GigE - Softwaretrigger\FB_GigeSoftwaretrigger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\CameraController\GigE - Softwaretrigger\I_GigeSoftTrigger_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\EL2595 - 1Ch. LED output timestamp\FB_EL2595.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\FB_IlluminationController_Base.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\I_IlluminationController_Base.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\I_IlluminationController_StatusOnly.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\SingleOutput\FB_IlluminationSingleOutput.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\SingleOutput\I_IlluminationSingleOutput_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\E_VIx2000_Status.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_Channel.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_InDevice.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_OutDevice.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_Pulse.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\FB_VIx2000.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\IlluminationController\VIx2000\I_VIx2000_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Base FB\FB_ImageProvider_Base.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Base FB\I_ImageProvider_Base.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Base FB\I_ImageProvider_StatusOnly.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\E_TriggerSource.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\FB_GigE_Vision.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\FB_GigE_Beckhoff.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\I_GigEVision_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\I_GigEVision_Register_Connection.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\Camera\ST_AlarmCodes.TcDUT">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\ImageFromFile\FB_ImageFromFile.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\ImageProvider\ImageFromFile\I_ImageFromFile_Mode.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\FB_VisionMode_Base.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\I_VisionMode_Base.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\I_VisionMode_StatusOnly.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\Combined illumination and camera triggers\FB_VisionMode_Pulse_combined.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\Combined illumination and camera triggers\I_VisionMode_Pulse_combined.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\Separate illumination and camera triggers\FB_VisionMode_Pulse_separate.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Mode\Separate illumination and camera triggers\I_VisionMode_Pulse_separate.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_UDINT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VisionSystem\FB_VisionSystem.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VisionSystem\I_VisionSystem.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_REAL.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_Memory.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_ULINT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\internal\FB_VnRegister_Base.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\VnRegister-Access\internal\I_VnRegister_Status.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToCameraController.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToHwTimestamp_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToGigeSoftTrigger_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToSwTimestamp_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToIlluminationSingleOutput_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToGigEVision_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToImageFromFile_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToImageProvider.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\TolluminationController.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToVisionMode_Pulse_combined.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToVisionMode_Pulse_separate.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Casting\ToVIx2000_Mode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Color\E_Color_ARGB.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Color\F_ColorEnumToVector4.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Sharpness\F_VND_Sharpness_SumModifiedLaplace_ULINT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_StateTerminal.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\ST_ImageWithInfo.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="VisionParameterlist.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="COMPONENTs" />
+    <Folder Include="COMPONENTs\CameraController" />
+    <Folder Include="COMPONENTs\CameraController\EL2258 - 8Ch. digital output timestamp">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger" />
+    <Folder Include="COMPONENTs\CameraController\GigE - Softwaretrigger">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="COMPONENTs\CameraController\Base FB" />
+    <Folder Include="COMPONENTs\IlluminationController" />
+    <Folder Include="COMPONENTs\IlluminationController\EL2595 - 1Ch. LED output timestamp">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="COMPONENTs\IlluminationController\SingleOutput">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="COMPONENTs\IlluminationController\VIx2000" />
+    <Folder Include="COMPONENTs\IlluminationController\VIx2000\DUTs" />
+    <Folder Include="COMPONENTs\ImageProvider" />
+    <Folder Include="COMPONENTs\ImageProvider\Camera" />
+    <Folder Include="COMPONENTs\ImageProvider\ImageFromFile" />
+    <Folder Include="COMPONENTs\ImageProvider\Base FB" />
+    <Folder Include="COMPONENTs\Mode" />
+    <Folder Include="COMPONENTs\Mode\Combined illumination and camera triggers" />
+    <Folder Include="COMPONENTs\Mode\Separate illumination and camera triggers" />
+    <Folder Include="COMPONENTs\VnRegister-Access" />
+    <Folder Include="COMPONENTs\VisionSystem" />
+    <Folder Include="COMPONENTs\VnRegister-Access\internal" />
+    <Folder Include="FUNCTIONs" />
+    <Folder Include="FUNCTIONs\Casting" />
+    <Folder Include="FUNCTIONs\Color" />
+    <Folder Include="FUNCTIONs\Sharpness" />
+    <Folder Include="TYPEs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PinnedGlobalDataType Include="ST_CHALET_Base_Events" />
+    <PinnedGlobalDataType Include="ST_CHALET_Vision_Events" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderResolution Include="CHALET_BaseComponents">
+      <Resolution>CHALET_BaseComponents, * (Beckhoff CH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_EtherCAT">
+      <Resolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Standard">
+      <Resolution>Tc2_Standard, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_System">
+      <Resolution>Tc2_System, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Utilities">
+      <Resolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_EventLogger">
+      <Resolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_Module">
+      <Resolution>Tc3_Module, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_Vision">
+      <Resolution>Tc3_Vision, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+  </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="FB_CameraController_Base.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_EL2258_1Ch_TSO.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_EL2596.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_EtherCAT_Trigger.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="FB_GigeSoftwaretrigger.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="I_CameraController_Base.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="I_CameraController_StatusOnly.Busy">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+        <v>{8F99A816-E488-41E4-9FA3-846536012284}</v>
+        <o>
+          <v n="Name">"{8F99A816-E488-41E4-9FA3-846536012284}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
+        <o>
+          <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
+          <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>NamingConventions</v>
+            <o>
+              <v n="Name">"NamingConventions"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+            <v>Metrics</v>
+            <o>
+              <v n="Name">"Metrics"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+            <v>Rules</v>
+            <o>
+              <v n="Name">"Rules"</v>
+              <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+                <v>167</v>
+                <o>
+                  <v n="Name">"167"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>4</v>
+                <o>
+                  <v n="Name">"4"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>33</v>
+                <o>
+                  <v n="Name">"33"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>6</v>
+                <o>
+                  <v n="Name">"6"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>27</v>
+                <o>
+                  <v n="Name">"27"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+                <v>28</v>
+                <o>
+                  <v n="Name">"28"</v>
+                  <d n="SubKeys" t="Hashtable" />
+                  <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+                    <v>bActive</v>
+                    <v>False</v>
+                  </d>
+                </o>
+              </d>
+              <d n="Values" t="Hashtable" />
+            </o>
+          </d>
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>PerformStaticAnalyse</v>
+            <v>False</v>
+          </d>
+        </o>
+        <v>{40450F57-0AA3-4216-96F3-5444ECB29763}</v>
+        <o>
+          <v n="Name">"{40450F57-0AA3-4216-96F3-5444ECB29763}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>ActiveVisuProfile</v>
+            <v>IR0whWr8bwfwBwAAiD2qpQAAAABVAgAA37x72QAAAAABAAAAAAAAAAEaUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwACTHsAZgA5ADUAYgBiADQAMgA2AC0ANQA1ADIANAAtADQAYgA0ADUALQA5ADQAMAAwAC0AZgBiADAAZgAyAGUANwA3AGUANQAxAGIAfQADCE4AYQBtAGUABDBUAHcAaQBuAEMAQQBUACAAMwAuADEAIABCAHUAaQBsAGQAIAA0ADAAMgA0AC4ANwAFFlAAcgBvAGYAaQBsAGUARABhAHQAYQAGTHsAMQA2AGUANQA1AGIANgAwAC0ANwAwADQAMwAtADQAYQA2ADMALQBiADYANQBiAC0ANgAxADQANwAxADMAOAA3ADgAZAA0ADIAfQAHEkwAaQBiAHIAYQByAGkAZQBzAAhMewAzAGIAZgBkADUANAA1ADkALQBiADAANwBmAC0ANABkADYAZQAtAGEAZQAxAGEALQBhADgAMwAzADUANgBhADUANQAxADQAMgB9AAlMewA5AGMAOQA1ADgAOQA2ADgALQAyAGMAOAA1AC0ANAAxAGIAYgAtADgAOAA3ADEALQA4ADkANQBmAGYAMQBmAGUAZABlADEAYQB9AAoOVgBlAHIAcwBpAG8AbgALBmkAbgB0AAwKVQBzAGEAZwBlAA0KVABpAHQAbABlAA4aVgBpAHMAdQBFAGwAZQBtAE0AZQB0AGUAcgAPDkMAbwBtAHAAYQBuAHkAEAxTAHkAcwB0AGUAbQARElYAaQBzAHUARQBsAGUAbQBzABIwVgBpAHMAdQBFAGwAZQBtAHMAUwBwAGUAYwBpAGEAbABDAG8AbgB0AHIAbwBsAHMAEyhWAGkAcwB1AEUAbABlAG0AcwBXAGkAbgBDAG8AbgB0AHIAbwBsAHMAFCRWAGkAcwB1AEUAbABlAG0AVABlAHgAdABFAGQAaQB0AG8AcgAVIlYAaQBzAHUATgBhAHQAaQB2AGUAQwBvAG4AdAByAG8AbAAWFHYAaQBzAHUAaQBuAHAAdQB0AHMAFwxzAHkAcwB0AGUAbQAYGFYAaQBzAHUARQBsAGUAbQBCAGEAcwBlABkmRABlAHYAUABsAGEAYwBlAGgAbwBsAGQAZQByAHMAVQBzAGUAZAAaCGIAbwBvAGwAGyJQAGwAdQBnAGkAbgBDAG8AbgBzAHQAcgBhAGkAbgB0AHMAHEx7ADQAMwBkADUAMgBiAGMAZQAtADkANAAyAGMALQA0ADQAZAA3AC0AOQBlADkANAAtADEAYgBmAGQAZgAzADEAMABlADYAMwBjAH0AHRxBAHQATABlAGEAcwB0AFYAZQByAHMAaQBvAG4AHhRQAGwAdQBnAGkAbgBHAHUAaQBkAB8WUwB5AHMAdABlAG0ALgBHAHUAaQBkACBIYQBmAGMAZAA1ADQANAA2AC0ANAA5ADEANAAtADQAZgBlADcALQBiAGIANwA4AC0AOQBiAGYAZgBlAGIANwAwAGYAZAAxADcAIRRVAHAAZABhAHQAZQBJAG4AZgBvACJMewBiADAAMwAzADYANgBhADgALQBiADUAYwAwAC0ANABiADkAYQAtAGEAMAAwAGUALQBlAGIAOAA2ADAAMQAxADEAMAA0AGMAMwB9ACMOVQBwAGQAYQB0AGUAcwAkTHsAMQA4ADYAOABmAGYAYwA5AC0AZQA0AGYAYwAtADQANQAzADIALQBhAGMAMAA2AC0AMQBlADMAOQBiAGIANQA1ADcAYgA2ADkAfQAlTHsAYQA1AGIAZAA0ADgAYwAzAC0AMABkADEANwAtADQAMQBiADUALQBiADEANgA0AC0ANQBmAGMANgBhAGQAMgBiADkANgBiADcAfQAmFk8AYgBqAGUAYwB0AHMAVAB5AHAAZQAnVFUAcABkAGEAdABlAEwAYQBuAGcAdQBhAGcAZQBNAG8AZABlAGwARgBvAHIAQwBvAG4AdgBlAHIAdABpAGIAbABlAEwAaQBiAHIAYQByAGkAZQBzACgQTABpAGIAVABpAHQAbABlACkUTABpAGIAQwBvAG0AcABhAG4AeQAqHlUAcABkAGEAdABlAFAAcgBvAHYAaQBkAGUAcgBzACs4UwB5AHMAdABlAG0ALgBDAG8AbABsAGUAYwB0AGkAbwBuAHMALgBIAGEAcwBoAHQAYQBiAGwAZQAsEnYAaQBzAHUAZQBsAGUAbQBzAC1INgBjAGIAMQBjAGQAZQAxAC0AZAA1AGQAYwAtADQAYQAzAGIALQA5ADAANQA0AC0AMgAxAGYAYQA3ADUANgBhADMAZgBhADQALihJAG4AdABlAHIAZgBhAGMAZQBWAGUAcgBzAGkAbwBuAEkAbgBmAG8AL0x7AGMANgAxADEAZQA0ADAAMAAtADcAZgBiADkALQA0AGMAMwA1AC0AYgA5AGEAYwAtADQAZQAzADEANABiADUAOQA5ADYANAAzAH0AMBhNAGEAagBvAHIAVgBlAHIAcwBpAG8AbgAxGE0AaQBuAG8AcgBWAGUAcgBzAGkAbwBuADIMTABlAGcAYQBjAHkAMzBMAGEAbgBnAHUAYQBnAGUATQBvAGQAZQBsAFYAZQByAHMAaQBvAG4ASQBuAGYAbwA0MEwAbwBhAGQATABpAGIAcgBhAHIAaQBlAHMASQBuAHQAbwBQAHIAbwBqAGUAYwB0ADUaQwBvAG0AcABhAHQAaQBiAGkAbABpAHQAeQDQAAIaA9ADAS0E0AUGGgfQBwgaAUUHCQjQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtDtAPAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60BAAAA0A0BLRHQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0S0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAUAAAA0AwLrQIAAADQDQEtE9APAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAAAAAANAMC60CAAAA0A0BLRTQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0V0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtFtAPAS0X0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60EAAAA0A0BLRjQDwEtENAZGq0BRRscAdAAHBoCRR0LBAMAAAAFAAAADQAAAAAAAADQHh8tINAhIhoCRSMkAtAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAAAAANADAS0n0CgBLRHQKQEtENAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAQAAANADAS0n0CgBLRHQKQEtEJoqKwFFAAEC0AABLSzQAAEtF9AAHy0t0C4vGgPQMAutAQAAANAxC60XAAAA0DIarQDQMy8aA9AwC60CAAAA0DELrQMAAADQMhqtANA0Gq0A0DUarQA=</v>
+          </d>
+        </o>
+        <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
+        <o>
+          <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{F66C7017-BDD8-4114-926C-81D6D687E35F}</v>
+        <o>
+          <v n="Name">"{F66C7017-BDD8-4114-926C-81D6D687E35F}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{246001F4-279D-43AC-B241-948EB31120E1}</v>
+        <o>
+          <v n="Name">"{246001F4-279D-43AC-B241-948EB31120E1}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+      </d>
+      <d n="Values" t="Hashtable" />
+    </o>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>

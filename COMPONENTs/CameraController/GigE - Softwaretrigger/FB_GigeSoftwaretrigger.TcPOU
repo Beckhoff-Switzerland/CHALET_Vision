@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_GigeSoftwaretrigger" Id="{4d4c8667-4a97-431e-8b0f-b9c8737c3d35}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_GigeSoftwaretrigger EXTENDS FB_CameraController_Base IMPLEMENTS I_GigeSoftTrigger_Mode
+VAR
+	{attribute 'hide'}
+	eState							: E_StateTerminal;		// Current terminal state
+	nTimeNextTrigger : T_DCTIME64;
+	nTriggerDelay : UDINT := 10;			// Delay between lighting and camera trigger [in 1ns]
+	ipGigeCamera : I_GigEVision_Mode;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Busy" Id="{5dfd9ed1-2950-4af3-bd0b-f1e86197a94e}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9e8a3cc8-d362-4722-a99e-adb5f0e000b6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := (THIS^.eState = E_StateTerminal.TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Duration_1us" Id="{835c36b1-fc96-4206-a154-a72422715c8e}">
+      <Declaration><![CDATA[PROPERTY Duration_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{1de4a509-106b-4991-8ee6-5bc2f30c8c87}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{66004df4-78ff-42ad-b6a9-906a010e93f4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="GigeCamera" Id="{c08bee45-d010-45a0-a7fa-857ea4a69a85}">
+      <Declaration><![CDATA[PROPERTY GigeCamera : I_GigEVision_Mode]]></Declaration>
+      <Get Name="Get" Id="{0be765a7-d7e4-4388-bf82-badb4048e2f6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[GigeCamera := ipGigeCamera;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{51f89f28-470e-4dbb-94cb-1268b3ddd7d5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ipGigeCamera := GigeCamera;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Reset" Id="{795e6abb-7842-4644-bea3-be00e9d15c2a}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (THIS^.eState = E_StateTerminal.ERROR) THEN
+	fbFeedback.ActiveCommand := 'Reset';
+	fbFeedback.Busy := TRUE;	
+
+	THIS^.eState := E_StateTerminal.RESET;
+END_IF
+	
+	
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Trigger" Id="{6fb8e6d0-8ccd-4842-aa25-75b585598239}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.nTimeNextTrigger := nDCTimeStamp;
+THIS^.eState := E_StateTerminal.TRIGGERING;
+
+fbFeedback.ActiveCommand := 'Trigger';
+fbFeedback.Busy := TRUE;	
+
+
+
+Trigger := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TriggerDelay_1ns" Id="{ad620c21-eab9-4bd5-9d07-6e4af35bd423}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// The given trigger time is delayed by this value. E.g. to wait for the maximum lighting value before taking a picture  [in 1ns]
+PROPERTY TriggerDelay_1ns : UDINT]]></Declaration>
+      <Get Name="Get" Id="{1156f9e7-2d1b-4c01-886a-a78aba295149}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerDelay_1ns := THIS^.nTriggerDelay;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{8f5c2b8e-ce42-4a50-b956-7a4745379a04}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.nTriggerDelay := TriggerDelay_1ns;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Update" Id="{2a78d7ea-203c-445d-87d8-a702d717b15a}">
+      <Declaration><![CDATA[METHOD PUBLIC Update : HRESULT
+VAR_INST
+
+END_VAR
+VAR
+	
+	fbTaskInfo		 : PlcTaskSystemInfo;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.ipGigeCamera = 0 THEN
+	THIS^.eState := E_StateTerminal.ERROR;
+END_IF
+
+
+(* Handle terminal state machine *)
+CASE THIS^.eState OF
+	(* Reset all control variables *)
+	E_StateTerminal.RESET:
+		THIS^.eState := E_StateTerminal.RESETING;
+		
+	(* Reset all control variables *)
+	E_StateTerminal.RESETING:
+		THIS^.eState := E_StateTerminal.INIT;	
+		
+	(* Enable terminal if ready *)
+	E_StateTerminal.INIT:			
+		THIS^.eState := E_StateTerminal.READY;
+	
+	(* Terminal is ready *)
+	E_StateTerminal.READY:
+		fbFeedback.Done := TRUE;	
+		
+	(* Terminal is triggering *)
+	E_StateTerminal.TRIGGERING:
+		IF (F_GetCurDcTaskTime64()  >=   (THIS^.nTimeNextTrigger - TO_ULINT(THIS^.nTriggerDelay))) THEN
+			THIS^.ipGigeCamera.Softtrigger();
+			THIS^.eState := E_StateTerminal.READY;
+		END_IF
+	
+	(* Error occured *)	
+	E_StateTerminal.ERROR:
+		fbFeedback.HR := E_FAIL;
+		;
+
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

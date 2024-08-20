@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_GigEVision_Register_Connection" Id="{78b73cfc-88c7-45bc-b2d3-6a858fdc6b20}">
+    <Declaration><![CDATA[INTERFACE I_GigEVision_Register_Connection
+]]></Declaration>
+    <Property Name="OID" Id="{46229178-a492-401c-b1e0-31c06669a2df}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OID : CHALET_BaseComponents.OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{46950453-e22d-48aa-bd29-68def87f2eaa}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

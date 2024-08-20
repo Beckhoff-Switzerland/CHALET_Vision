@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<TcModuleClass>
+	<DataTypes>
+		<DataType>
+			<Name GUID="{A3BB26DC-66C3-46AE-8A26-D3056A24E572}">CHALET_Vision_Events</Name>
+			<DisplayName TxtId=""><![CDATA[CHALET_Vision]]></DisplayName>
+			<EventId>
+				<Name Id="1">ObjectIdNotSet</Name>
+				<DisplayName TxtId=""><![CDATA[ObjectID is not set in PLC_Instance]]></DisplayName>
+				<Severity>Error</Severity>
+				<CauseRemedy Idx="1">
+					<Cause TxtId=""><![CDATA[ObjectID is not set]]></Cause>
+					<Remedy TxtId=""><![CDATA[enter a valid value in the PLC_Instance in the "Symbol Initilization" tab, e.g. for the image provider]]></Remedy>
+				</CauseRemedy>
+			</EventId>
+			<EventId>
+				<Name Id="2">TimeOut</Name>
+				<DisplayName TxtId=""><![CDATA[Timeout in state {0}]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="3">NoReactionToTheTrigger</Name>
+				<DisplayName TxtId=""><![CDATA[The component did not react to the trigger.]]></DisplayName>
+				<Comment TxtId=""><![CDATA[nSwitch_on_counter should have been increased]]></Comment>
+				<Severity>Error</Severity>
+			</EventId>
+			<Hides>
+				<Hide GUID="{CDAD6064-7CA1-46D4-9C9E-9EAD1F13906E}"/>
+				<Hide GUID="{E87C1C60-257C-4AA5-9001-25EE5F4E2501}"/>
+				<Hide GUID="{6360E066-A468-48C7-8B7F-DDBAEB62C6C4}"/>
+				<Hide GUID="{427F65F8-C7C7-42FA-BFA8-F7CDF3A9E0CA}"/>
+				<Hide GUID="{FC9ADB88-9BCA-4EB6-889F-5E3EAD6E5A11}"/>
+				<Hide GUID="{E02FF9F6-0CA1-467B-9CDB-6FEE7CB38442}"/>
+				<Hide GUID="{A6482FE1-7345-4F5A-A127-675B6434F5A7}"/>
+				<Hide GUID="{11EA6718-1DFC-48EB-A41C-72F90C56CCAC}"/>
+				<Hide GUID="{BCC4DE9E-04D7-4916-808E-AFF951D73B69}"/>
+				<Hide GUID="{F2664310-AFE4-42C4-8BF7-02F37F2A35EA}"/>
+			</Hides>
+		</DataType>
+	</DataTypes>
+</TcModuleClass>

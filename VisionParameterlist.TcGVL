@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="VisionParameterlist" Id="{dc7bd9d3-b5d1-4e98-9bc5-16ef928d1db0}" ParameterList="True">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	(*Maximum GigE-Register read at same time*)
+	MAX_VN_REGISTER_READ 			: UDINT := 1;
+	
+	(*Maximum GigE-Register write at same time*)
+	MAX_VN_REGISTER_WRITE 			: UDINT := 1;
+	
+	(* The state machine for the illuminaton waits in the “Triggering” state until the component has increased the nSwitch_on_counter *)
+	ILLUMINATION_WAIT_FOR_TRIGGER_FEEDBACK : BOOL := FALSE;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

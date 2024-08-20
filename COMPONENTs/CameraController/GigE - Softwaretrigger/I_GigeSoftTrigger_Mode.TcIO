@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_GigeSoftTrigger_Mode" Id="{9fc15e05-923a-4f26-bd96-2504bd266e8b}">
+    <Declaration><![CDATA[INTERFACE I_GigeSoftTrigger_Mode EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="GigeCamera" Id="{d72b9a73-615d-4bf4-8c06-f18b484dede6}">
+      <Declaration><![CDATA[PROPERTY GigeCamera : I_GigEVision_Mode]]></Declaration>
+      <Get Name="Get" Id="{4f2b4bc5-1090-4a68-ae49-287cbb11a8a1}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{bc4f83ee-c487-497c-8adc-d3419a65cd16}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="Trigger" Id="{d2062b57-95fc-4baf-9fa5-b89454f4c435}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="TriggerDelay_1ns" Id="{b51e6435-ed51-46fd-8b6f-65d4ab29eac5}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TriggerDelay_1ns : UDINT]]></Declaration>
+      <Get Name="Get" Id="{a5398265-c909-4aff-b1fa-8c17f6abce3c}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{0a687b8f-cf76-4123-b039-693288612315}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

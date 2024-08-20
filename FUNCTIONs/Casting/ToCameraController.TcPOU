@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ToCameraController" Id="{845cc01b-2e37-4cd0-b4fc-919f85692f84}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ToCameraController : BOOL
+VAR_INPUT
+	ipChObject : I_CH_OBJECT;
+	ipTriggerSource : REFERENCE TO I_CameraController_Base;
+END_VAR
+
+VAR
+	ipTmp : I_CameraController_Base;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* 
+   1. Test if the interface exists
+   2. Test if the object implements a "Object" interface 
+   3. Write reference to interface in parameter
+   4. Returne TRUE if succesfull
+*)
+IF ipChObject <> 0 AND_THEN __QUERYINTERFACE(ipChObject,ipTmp) THEN
+	ipTriggerSource := ipTmp;
+	ToCameraController := TRUE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

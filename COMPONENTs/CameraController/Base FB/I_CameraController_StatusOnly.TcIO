@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_CameraController_StatusOnly" Id="{7ffd4102-feab-4be4-98d6-0b66b4de880e}">
+    <Declaration><![CDATA[INTERFACE I_CameraController_StatusOnly EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="Busy" Id="{83e2f361-7022-4476-b8cc-05a87be452ca}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{3344a9d1-0757-411c-8052-8cfd6667f4fa}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Feedback" Id="{84cc1c20-ea8e-45e9-9322-85d518dd98b6}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{bc19461c-6222-4900-8293-d34009269456}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{f5a70faf-e239-4abe-8ce9-b92e4fa6e596}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{50380eaa-8a23-4862-916d-fdceefe74e2e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="State" Id="{6257981d-b373-486d-a16b-0191c41bd090}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{591af97c-ac9f-4a8b-bbc5-49e5e569bc48}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

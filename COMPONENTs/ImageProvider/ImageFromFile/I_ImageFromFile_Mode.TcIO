@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_ImageFromFile_Mode" Id="{01a44739-11dc-4993-a27b-e62ed32d0739}">
+    <Declaration><![CDATA[INTERFACE I_ImageFromFile_Mode
+]]></Declaration>
+    <Property Name="RequestSpecificImageName" Id="{766906fb-9541-4904-9832-aaf93c7b25eb}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Next trigger will load a specific image in the list by name. ('' = any image)
+PROPERTY RequestSpecificImageName : STRING]]></Declaration>
+      <Get Name="Get" Id="{5770da1f-60ba-4e20-8987-d675f989ca3e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{447f6564-dfdb-42a5-8fa3-6df5083a721f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="Trigger" Id="{1af6b335-5cca-4062-9d4b-e8ddd40aa05f}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	nTimeStamp : T_DCTIME64;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

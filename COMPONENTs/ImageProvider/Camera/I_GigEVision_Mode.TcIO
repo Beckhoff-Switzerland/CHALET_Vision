@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_GigEVision_Mode" Id="{e655179a-3725-4168-84b0-70acecd06e08}">
+    <Declaration><![CDATA[INTERFACE I_GigEVision_Mode
+]]></Declaration>
+    <Property Name="Exposure_1us" Id="{a450ec9e-a88f-44a8-b54e-7b72551e9a46}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Exposure_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{6cc1e990-75c9-4b18-8f65-0a4de77d0789}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{862dd41a-220a-44a2-a2d2-aa69974f153f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="Softtrigger" Id="{502604d9-e8d5-4e08-a58a-c49d6130d153}">
+      <Declaration><![CDATA[METHOD PUBLIC Softtrigger : HRESULT
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

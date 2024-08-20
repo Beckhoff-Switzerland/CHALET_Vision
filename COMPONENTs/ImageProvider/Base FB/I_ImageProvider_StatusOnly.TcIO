@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_ImageProvider_StatusOnly" Id="{5315d8c6-77a0-49d3-b066-16e5122b0d9d}">
+    <Declaration><![CDATA[INTERFACE I_ImageProvider_StatusOnly EXTENDS __SYSTEM.IQueryInterface
+]]></Declaration>
+    <Property Name="Feedback" Id="{0d34151c-23d1-47bc-b5d9-ca2ef0005fbd}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{7c329043-f6ac-4134-a627-1c4c91dbb6a4}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{8a2e9f20-58dd-489e-8132-c9be3eb291a0}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Operational : BOOL
+// Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{04d7d082-12f1-43ac-b344-ec4c0e53002d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="State" Id="{2aab09a2-2257-45a2-b8c1-5cbd5758a97c}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{83502ac1-ffb7-4c4e-8cf3-ca183b9e05a9}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

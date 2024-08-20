@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VisionMode_Pulse_separate" Id="{e7326152-0048-4405-99f9-81fc3ab0a047}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := '[FB_VisionMode_Pulse] Do not call the body - Stick to OOP'}
+//Pulse - A trigger activates an image acquisition with simultaneous triggering of the lighting 
+FUNCTION_BLOCK FB_VisionMode_Pulse_separate EXTENDS FB_VisionMode_Base IMPLEMENTS I_VisionMode_Pulse_Separate
+VAR
+	bInitDone : BOOL;
+	nLastTriggerTime_Camera : T_DCTIME64;
+	nLastTriggerTime_Illumination : T_DCTIME64;
+	
+	
+	(* Supported/requested interfaces. Minimum one must be supported per ImageProvider/CameraController/IlluminationController *)
+	(* ImageProvider *)
+	ipGigeVision_Mode 	: I_GigEVision_Mode;	
+	ipImageFromFile_Mode	: I_ImageFromFile_Mode;	
+	
+	(* Supported/requested interfaces. Minimum one must be supported per ImageProvider/CameraController/IlluminationController *)
+	(* CameraController *)
+	ipHwTimestamp_Mode 		: I_HwTimestamp_Mode;
+	ipSwTimestamp_Mode		: I_SwTimestamp_Mode;
+	ipGigeSoftwaretrigger 	: I_GigeSoftTrigger_Mode;
+	
+	(* Supported/requested interfaces. Minimum one must be supported per ImageProvider/CameraController/IlluminationController *)
+	(* lluminationController 1 *)
+	ipVIx2000_Mode_1 		: I_VIx2000_Mode;
+	ipSingleOutput_Mode_1 	: I_IlluminationSingleOutput_Mode;
+		
+	(* Supported/requested interfaces. Minimum one must be supported per ImageProvider/CameraController/IlluminationController *)
+	(* lluminationController 2 *)
+	ipVIx2000_Mode_2 	: I_VIx2000_Mode;
+	ipSingleOutput_Mode_2 	: I_IlluminationSingleOutput_Mode;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Configure" Id="{fd3004f4-2d84-473f-b0e9-abdefda778e0}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+	nOrange 	: UINT(0..511); //0-511
+	nGreen 		: UINT(0..511); //0-511
+	nBlue 		: UINT(0..511); //0-511
+	nInfrared 	: UINT(0..511); //0-511
+	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start
+	nExposure_1us : UDINT;			//Camera 
+	nIlluminationDuration_1us: UDINT;
+	nIlluminationOverride : USINT(1..100); // 1-100
+END_VAR
+VAR
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitDone THEN
+	Configure := E_FAIL;
+	RETURN;
+END_IF	
+
+
+(* CameraController *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipHwTimestamp_Mode <> 0 THEN
+	ipHwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns;
+	ipHwTimestamp_Mode.Duration_1us := nExposure_1us + TO_UDINT(nExposureDelay_100ns/10); //exposure + warm up time
+END_IF
+
+IF ipSwTimestamp_Mode <> 0 THEN
+	ipSwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns;
+END_IF
+
+IF ipGigeSoftwaretrigger <> 0 THEN
+	ipGigeSoftwaretrigger.GigeCamera := ipGigeVision_Mode;
+	ipGigeSoftwaretrigger.TriggerDelay_1ns := nExposureDelay_100ns;
+END_IF
+(* -------------------------------------------------------------------------------------------------------- *)
+
+
+(* ImageProvider *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipGigeVision_Mode <> 0 THEN
+	ipGigeVision_Mode.Exposure_1us := nExposure_1us;
+END_IF
+(* -------------------------------------------------------------------------------------------------------- *)
+
+
+
+
+(* lluminationController1 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipVIx2000_Mode_1 <> 0 THEN
+	hr := GetMostSignificant(hr, ipVIx2000_Mode_1.Configure(
+															nOrange		:= (nOrange*nIlluminationOverride/100), 
+															nGreen		:= (nGreen*nIlluminationOverride/100), 
+															nBlue		:= (nBlue*nIlluminationOverride/100), 
+															nInfrared	:= (nInfrared*nIlluminationOverride/100), 
+															nDuration_1us:= nIlluminationDuration_1us));
+END_IF
+(* -------------------------------------------------------------------------------------------------------- *)
+
+
+
+
+(* lluminationController2 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipVIx2000_Mode_2 <> 0 THEN
+	hr := GetMostSignificant(hr, ipVIx2000_Mode_2.Configure(
+															nOrange		:= (nOrange*nIlluminationOverride/100), 
+															nGreen		:= (nGreen*nIlluminationOverride/100), 
+															nBlue		:= (nBlue*nIlluminationOverride/100), 
+															nInfrared	:= (nInfrared*nIlluminationOverride/100), 
+															nDuration_1us:= nIlluminationDuration_1us));
+END_IF
+(* -------------------------------------------------------------------------------------------------------- *)
+
+
+
+Configure := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initialize" Id="{06481a03-b448-4d9e-8c04-496f6a6040fe}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR 
+	bSupportedCameraController, bSupportedlluminationController1, bSupportedlluminationController2, bSupportedlImageProvider : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+(* CameraController *)
+bSupportedCameraController := 	ToHwTimestamp_Mode(ipCameraController, ipHwTimestamp_Mode)
+							OR 	ToSwTimestamp_Mode(ipCameraController, ipSwTimestamp_Mode)
+							OR 	(ToImageFromFile_Mode(ipImageProvider, ipImageFromFile_Mode) AND ipCameraController=0)	//No Cameracontrolle is allowed if ImageFromFile				
+							OR (ToGigeSoftTrigger_Mode(ipCameraController, ipGigeSoftwaretrigger) AND ToGigEVision_Mode(ipImageProvider, ipGigeVision_Mode));//GigE Softtrigger requires a GigE ImageProvider
+							// OR ...
+
+							
+(* ImageProvider *)
+bSupportedlImageProvider := ToGigEVision_Mode(ipImageProvider, ipGigeVision_Mode)	
+						 OR ToImageFromFile_Mode(ipImageProvider, ipImageFromFile_Mode); 
+							// OR ...
+
+							
+(* lluminationController1 *)
+bSupportedlluminationController1 := 	ToVIx2000_Mode(ipIlluminationController1, ipVIx2000_Mode_1)
+									OR 	ToIlluminationSingleOutput_Mode(ipIlluminationController1, ipSingleOutput_Mode_1)
+									OR 	(ipIlluminationController1 = 0); //Ilumination1+2 is optional -> Empty or valide
+									// OR ...
+
+									
+(* lluminationController2 *)
+bSupportedlluminationController2 := 	ToVIx2000_Mode(ipIlluminationController2, ipVIx2000_Mode_2)
+									OR 	ToIlluminationSingleOutput_Mode(ipIlluminationController2, ipSingleOutput_Mode_2)
+									OR 	(ipIlluminationController2 = 0); //Ilumination1+2 is optional -> Empty or valide
+									// OR ...
+
+									
+
+bInitDone := bSupportedCameraController AND bSupportedlImageProvider AND bSupportedlluminationController1 AND bSupportedlluminationController2;
+
+
+IF bInitDone THEN 
+	Initialize := S_OK;
+ELSE
+	Initialize := E_FAIL;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="LastTriggerTime_Camera" Id="{64ff3fd0-161e-4bbe-95c0-55c5493c3d43}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime_Camera : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{e83ee250-b5c9-4248-b2db-247d499a6fe1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastTriggerTime_Camera := nLastTriggerTime_Camera;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="LastTriggerTime_Illumination" Id="{269b242e-0157-42cf-9eba-387e985df095}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime_Illumination : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{be096740-9f25-41aa-b8fc-a29ededb4e4a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastTriggerTime_Illumination := nLastTriggerTime_Illumination;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Name" Id="{5ccf4f4f-4afb-4376-97bf-fbfde5e75e9d}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Name or description of this mode
+PROPERTY Name : STRING]]></Declaration>
+      <Get Name="Get" Id="{02f95f5e-4685-4ea9-8cff-ece2764bb2ff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := 'Acquisition with separate triggering of the lighting';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{305aa82e-ef1c-4115-a8b3-738f66ce9cb1}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{abf72e53-554e-4c35-a392-1609eae05f94}">
+        <Declaration><![CDATA[VAR
+	nEtherCatCycles 	: UINT;	
+END_VAR]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//If attribute 'TcCallAfterOutputUpdate' is set, it takes 1 cycle more to send timestamp to hardware
+IF TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].InCallAfterOutputUpdate THEN
+	nEtherCatCycles := 3;
+ELSE
+	nEtherCatCycles := 2;
+END_IF
+
+
+NextPossibleTriggerTime := F_GetCurDcTaskTime64()(*1ns*) + (THIS^.ipVisionSystem.TaskCycleTimeNs(*1ns*) * nEtherCatCycles (*Cycles*)) + 300_000(*300us(determined by testing)*);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="TriggerAtDcTime_Camera" Id="{3fddc879-406a-4ca8-aa28-f7532b2ec793}">
+      <Declaration><![CDATA[METHOD TriggerAtDcTime_Camera : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+VAR
+	hr : HRESULT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitDone THEN
+	TriggerAtDcTime_Camera := E_FAIL;
+	RETURN;
+END_IF	
+
+(* Check if the trigger is minimum 3 EtherCat cycles in future *)
+IF NOT (nDCTimeStamp >= THIS^.NextPossibleTriggerTime) THEN
+	TriggerAtDcTime_Camera := E_FAIL;
+	RETURN;
+END_IF
+
+
+(* CameraController *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipHwTimestamp_Mode <> 0 THEN
+	hr := GetMostSignificant(hr, ipHwTimestamp_Mode.Trigger(nDCTimeStamp));
+END_IF
+IF ipSwTimestamp_Mode <> 0 THEN
+	hr := GetMostSignificant(hr, ipSwTimestamp_Mode.Trigger(nDCTimeStamp));
+END_IF
+IF ipGigeSoftwaretrigger <> 0 THEN
+	hr := GetMostSignificant(hr, ipGigeSoftwaretrigger.Trigger(nDCTimeStamp));
+END_IF
+
+
+
+(* ImageProvider *)
+IF ipImageFromFile_Mode <> 0 THEN
+	hr := GetMostSignificant(hr, ipImageFromFile_Mode.Trigger(nDCTimeStamp));
+END_IF
+
+
+IF hr = S_OK THEN
+	THIS^.nLastTriggerTime_Camera := nDCTimeStamp;
+END_IF
+
+TriggerAtDcTime_Camera := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TriggerAtDcTime_Illumination" Id="{692e93ca-0ab5-466e-9140-05ba572945fe}">
+      <Declaration><![CDATA[METHOD TriggerAtDcTime_Illumination : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+VAR
+	hr : HRESULT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitDone THEN
+	TriggerAtDcTime_Illumination := E_FAIL;
+	RETURN;
+END_IF	
+
+(* Check if the trigger is minimum 3 EtherCat cycles in future *)
+IF NOT (nDCTimeStamp >= THIS^.NextPossibleTriggerTime) THEN
+	TriggerAtDcTime_Illumination := E_FAIL;
+	RETURN;
+END_IF
+
+
+
+(* lluminationController1 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipVIx2000_Mode_1 <> 0 THEN
+	hr := GetMostSignificant(hr, ipVIx2000_Mode_1.Trigger(nDCTimeStamp));
+END_IF
+IF ipSingleOutput_Mode_1 <> 0 THEN
+	hr := GetMostSignificant(hr, ipSingleOutput_Mode_1.Trigger(nDCTimeStamp));
+END_IF
+
+
+
+(* lluminationController2 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipVIx2000_Mode_2 <> 0 THEN
+	hr := GetMostSignificant(hr, ipVIx2000_Mode_2.Trigger(nDCTimeStamp));
+END_IF
+IF ipSingleOutput_Mode_2 <> 0 THEN
+	hr := GetMostSignificant(hr, ipSingleOutput_Mode_2.Trigger(nDCTimeStamp));
+END_IF
+
+IF hr = S_OK THEN
+	THIS^.nLastTriggerTime_Illumination := nDCTimeStamp;
+END_IF
+
+TriggerAtDcTime_Illumination := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TriggerNow_Camera" Id="{b8edcf39-80f5-40ed-880b-44376a549735}">
+      <Declaration><![CDATA[METHOD TriggerNow_Camera : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Trigger the vision system *)
+TriggerNow_Camera := THIS^.TriggerAtDcTime_Camera(nDCTimeStamp := THIS^.NextPossibleTriggerTime);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TriggerNow_Illumination" Id="{94dfd95f-1652-4c31-8ece-755e1850cd1e}">
+      <Declaration><![CDATA[METHOD TriggerNow_Illumination : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Trigger the vision system *)
+TriggerNow_Illumination := THIS^.TriggerAtDcTime_Illumination(nDCTimeStamp := THIS^.NextPossibleTriggerTime);
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

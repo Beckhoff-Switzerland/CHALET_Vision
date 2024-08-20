@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_VIx2000_Pulse" Id="{086025bb-7216-455a-b0cf-3fdd6708c858}">
+    <Declaration><![CDATA[TYPE ST_VIx2000_Pulse :
+STRUCT
+	nTimestamp 		: T_DCTIME64;
+	nFlashDelay 	: UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

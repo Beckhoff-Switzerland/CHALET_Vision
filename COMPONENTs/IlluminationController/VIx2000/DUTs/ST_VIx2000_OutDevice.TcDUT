@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_VIx2000_OutDevice" Id="{4693b93a-3ed2-45bb-bb6d-41257d7a4787}">
+    <Declaration><![CDATA[TYPE ST_VIx2000_OutDevice :
+STRUCT
+	bEnable					: BOOL 	:= FALSE;					// Illumination enable
+	bReset					: BOOL	:= FALSE;					// Illumination reset
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

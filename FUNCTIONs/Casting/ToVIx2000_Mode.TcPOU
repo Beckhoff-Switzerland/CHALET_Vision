@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ToVIx2000_Mode" Id="{0663d7df-3862-4a16-9605-6dc55a58fd50}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ToVIx2000_Mode : BOOL
+VAR_INPUT
+	ipChObject : I_CH_OBJECT;
+	ipVIx2000_Mode : REFERENCE TO I_VIx2000_Mode;
+END_VAR
+
+VAR
+	ipTmp : I_VIx2000_Mode;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* 
+   1. Test if the interface exists
+   2. Test if the object implements a "Object" interface 
+   3. Write reference to interface in parameter
+   4. Returne TRUE if succesfull
+*)
+IF ipChObject <> 0 AND_THEN __QUERYINTERFACE(ipChObject,ipTmp) THEN
+	ipVIx2000_Mode := ipTmp;
+	ToVIx2000_Mode := TRUE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_IlluminationController_StatusOnly" Id="{6df00ed0-934e-4040-8eba-8c3512cabfb7}">
+    <Declaration><![CDATA[INTERFACE I_IlluminationController_StatusOnly EXTENDS  __SYSTEM.IQueryInterface]]></Declaration>
+    <Property Name="Busy" Id="{f23de217-6599-414c-ba8d-f091e9759a5f}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{cf3a3cf9-6779-4390-a192-5c40268ef192}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{5a09df8e-e8fc-4e4a-9a48-58a9d961aa5f}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9ab958d2-ac5b-451e-8aad-91e3186d7dc5}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="State" Id="{543a09c5-ab31-4332-b529-99608eba5752}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{d5405189-e9c5-4fcb-907b-785e9414ab9d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

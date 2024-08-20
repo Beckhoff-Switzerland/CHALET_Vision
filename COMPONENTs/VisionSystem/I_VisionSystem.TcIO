@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VisionSystem" Id="{d22a6911-8cf7-42f7-8976-d5641f69810b}">
+    <Declaration><![CDATA[INTERFACE I_VisionSystem EXTENDS I_CH_Object
+]]></Declaration>
+    <Folder Name="Components" Id="{6bdfb1c0-07f7-4ab2-a306-1bdcf1bf56dd}" />
+    <Folder Name="Mode" Id="{2537d6b3-ec7d-4b96-b236-8f00dfe760e2}" />
+    <Property Name="ActiveMode" Id="{55adf6c9-75e7-4764-ba28-60745b620e40}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ActiveMode : I_VisionMode_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{79c32c20-e121-41a8-806f-a1fab9ac77ce}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Busy" Id="{c0f546a9-8a7c-4666-b8e7-ad0ee63a5054}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY ABSTRACT Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{0eeaa3ba-c39e-498a-8c6a-8ff8b367b6ed}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="CameraController" Id="{498f799c-9531-4d4f-b1c5-e8b281411b37}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY CameraController : I_CameraController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{02564bfd-509b-4ff7-9288-ad84839a288b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Error" Id="{08c27c77-22d9-4344-8f8f-8a9544fcc758}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Error : BOOL  // Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{6694e027-2a55-497d-a8a3-ec5a86b6c35f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="IlluminationController1" Id="{c8e1b57c-94ef-4336-9db0-71faa8445e1b}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY IlluminationController1 : I_IlluminationController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{7be87a4e-047c-4530-901d-6762d1ceb9d0}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="IlluminationController2" Id="{3946914d-a430-4fc1-92c2-685febe91950}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY IlluminationController2 : I_IlluminationController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{bef72a9f-7a37-4108-a5a4-9a7198e79c42}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="ImageProvider" Id="{b30f6fa9-8eb7-4b50-ae9c-c3f8e9b1a226}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ImageProvider : I_ImageProvider_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{d7b14c62-14e2-40ad-9cb4-1e710d109855}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Initialized" Id="{1000753c-1b8d-4702-adb0-384d59c3a3a7}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{72ab92c7-0d47-482c-a759-2e78172c9e7a}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{ac3221a6-405a-4fb9-b339-6ccd6d340e07}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Operational : BOOL // Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{9629f052-1273-414d-95ea-187549be34f3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{f441d469-1f41-4357-8d28-158cf306ae28}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetMode" Id="{e38da28d-0c5c-4308-b0d1-509c7bd2ad75}" FolderPath="Mode\">
+      <Declaration><![CDATA[METHOD SetMode : HRESULT
+VAR_INPUT
+	ipAnyMode : I_VisionMode_Base;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="TaskCycleTimeNs" Id="{c54cd02a-ce3e-42be-806c-3a7e5243e2f8}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TaskCycleTimeNs : UDINT // Set task cycle time in multiples of 100 ns]]></Declaration>
+      <Get Name="Get" Id="{8e6b3f61-3e9f-44f7-9c24-81beb842cb88}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TryGetImage" Id="{b6c05e42-049b-464e-88bb-847c470ed48d}">
+      <Declaration><![CDATA[METHOD TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

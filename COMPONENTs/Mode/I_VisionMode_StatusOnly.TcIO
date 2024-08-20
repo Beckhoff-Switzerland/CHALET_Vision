@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VisionMode_StatusOnly" Id="{d39b5128-c8a6-4334-85c6-fc07f8fa9e11}">
+    <Declaration><![CDATA[INTERFACE I_VisionMode_StatusOnly EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="Name" Id="{783f4089-51e2-4fec-b6d9-b0e373fa969c}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Name or description of this mode
+PROPERTY Name : STRING]]></Declaration>
+      <Get Name="Get" Id="{d634363b-13be-4432-9a3f-f15de60392d9}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

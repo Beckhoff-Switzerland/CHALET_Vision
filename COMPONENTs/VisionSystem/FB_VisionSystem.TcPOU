@@ -1,0 +1,472 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VisionSystem" Id="{de51db01-5164-4b9c-b5a7-05eded4deb66}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_VisionSystem EXTENDS FB_CH_Object IMPLEMENTS I_VisionSystem
+VAR
+	ipImageProvider 			: I_ImageProvider_Base;
+	ipCameraController 			: I_CameraController_Base;
+	ipIlluminationController1 	: I_IlluminationController_Base;
+	ipIlluminationController2 	: I_IlluminationController_Base;
+	ipActiveVisionMode			: I_VisionMode_Base;
+		
+	bInitDone 					: BOOL;
+	bMethodeExecuteError		: BOOL;
+	nPlcTaskCycleTime 			: UDINT; // In 100ns
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Components" Id="{5c15d593-f8f3-4310-a62b-f7c06c1d1195}" />
+    <Folder Name="Internal" Id="{1c3027e8-3548-4915-808d-7735140de491}" />
+    <Folder Name="Mode" Id="{6844ca18-42c1-4d19-b3ea-48c39a4f8a76}" />
+    <Property Name="ActiveMode" Id="{d4abd77d-c778-45c5-89fe-078097a18d1b}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ActiveMode : I_VisionMode_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{53a2d293-1c13-46a9-97ec-f5e4677a486c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ActiveMode := ipActiveVisionMode;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ActiveModeName" Id="{6b302557-f369-4799-9348-df8096cdde68}" FolderPath="Mode\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Name or description of the active mode
+PROPERTY ActiveModeName : STRING]]></Declaration>
+      <Get Name="Get" Id="{c655fe8f-1bb8-4bc1-af38-6ac0692bead8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF  THIS^.ipActiveVisionMode <> 0 THEN
+	ActiveModeName := THIS^.ipActiveVisionMode.Name;
+ELSE
+	ActiveModeName := 'No mode selected or error during activation';
+END_IF]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Busy" Id="{d2224ac3-b6a4-44b7-a4fb-3e26da913f7c}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{1c24cf0c-f4ee-4694-97ea-543f2f1b55e4}">
+        <Declaration><![CDATA[VAR
+	bBusy : BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.ipImageProvider <> 0 THEN
+	bBusy := bBusy OR THIS^.ipImageProvider.Feedback.Busy;
+END_IF
+
+IF THIS^.ipCameraController <> 0 THEN
+	bBusy := bBusy OR THIS^.ipCameraController.Feedback.Busy;
+END_IF
+
+IF THIS^.ipIlluminationController1 <> 0 THEN
+	bBusy := bBusy OR THIS^.ipIlluminationController1.Busy;
+END_IF
+
+IF THIS^.ipIlluminationController2 <> 0 THEN
+	bBusy := bBusy OR THIS^.ipIlluminationController2.Busy;
+END_IF
+
+Busy := bBusy;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CameraController" Id="{69273b97-7e7f-4496-9ca2-75933e552ffc}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY CameraController : I_CameraController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{40dafe5c-0732-4f20-af62-66b2f2cc428d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CameraController := ipCameraController;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Error" Id="{af3749e9-c59a-479f-9860-894b182e42a6}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Error : BOOL  // Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{d88329cf-f123-40b1-8666-f977124daaf9}">
+        <Declaration><![CDATA[VAR
+	bError : BOOL := FALSE;;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.ipImageProvider <> 0 THEN
+	bError := bError OR THIS^.ipImageProvider.State = ETcVnCameraState.TCVN_CS_ERROR;
+END_IF
+
+IF THIS^.ipCameraController <> 0 THEN
+	bError := bError OR THIS^.ipCameraController.State = E_StateTerminal.ERROR;
+END_IF
+
+IF THIS^.ipIlluminationController1 <> 0 THEN
+	bError := bError OR THIS^.ipIlluminationController1.State = E_StateTerminal.ERROR;
+END_IF
+
+IF THIS^.ipIlluminationController2 <> 0 THEN
+	bError := bError OR THIS^.ipIlluminationController2.State = E_StateTerminal.ERROR;
+END_IF
+
+
+Error := bError;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_exit" Id="{1b2a3d04-af94-4e61-a9a3-d87e573a97dd}" FolderPath="Internal\">
+      <Declaration><![CDATA[METHOD FB_exit : BOOL
+VAR_INPUT
+	bInCopyCode : BOOL; // if TRUE, the exit method is called for exiting an instance that is copied afterwards (online change).
+END_VAR
+VAR
+	pUkn : POINTER TO ITcUnknown;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//IF THIS^.iVisionMode <> 0 AND_THEN __QUERYPOINTER(THIS^.iVisionMode, pUkn) THEN
+//	THIS^.iVisionMode := 0;
+//	FW_SafeRelease(PipUnk := ADR(pUkn));
+//END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{2ff47053-7e44-4923-90d7-9e38d41dcf47}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipImageProvider 			: I_ImageProvider_Base;	
+	ipCameraController 			: I_CameraController_Base;
+	ipIlluminationController1 	: I_IlluminationController_Base;
+	ipIlluminationController2 	: I_IlluminationController_Base;
+
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	
+	THIS^.ipCameraController 			:= ipCameraController;
+	THIS^.ipImageProvider 				:= ipImageProvider;
+	THIS^.ipIlluminationController1 	:= ipIlluminationController1;
+	THIS^.ipIlluminationController2 	:= ipIlluminationController2;
+
+END_IF
+
+bFBInitCalledOnce := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IlluminationController1" Id="{85574f32-0b10-4845-85fe-06c2cb057891}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY IlluminationController1 : I_IlluminationController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{dd0a61d3-ef20-435e-bbed-28f3c4f991f2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IlluminationController1 := ipIlluminationController1;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="IlluminationController2" Id="{fb479322-b04f-4529-856c-b05f5678d745}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY IlluminationController2 : I_IlluminationController_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{db1abe65-5009-453f-bd28-968d9cb655fc}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IlluminationController2 := ipIlluminationController2;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ImageProvider" Id="{de3817b6-3f67-4e18-bc1b-e054f4ea13b5}" FolderPath="Components\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ImageProvider : I_ImageProvider_StatusOnly]]></Declaration>
+      <Get Name="Get" Id="{1b7aa57a-708a-4fd5-a569-701a9e5caef1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ImageProvider := ipImageProvider;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{2c417a90-d442-45d3-a8bf-da1233763669}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR
+	hr : HRESULT;
+END_VAR
+VAR_INST
+	bParentSet : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.nPlcTaskCycleTime(*100ns*) := TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].CycleTime;
+
+//(* Validate all inputs *)
+//IF (iImageProvider = 0 OR iCameraController = 0 )THEN
+//	Initialize := E_FAIL;
+//	RETURN;
+//END_IF
+
+IF NOT bParentSet THEN
+	bParentSet := TRUE;
+	
+	IF ipCameraController <> 0 THEN
+		THIS^.ipCameraController.SetParent(THIS^);
+	END_IF		
+	
+	IF ipImageProvider <> 0 THEN
+		THIS^.ipImageProvider.SetParent(THIS^);
+	END_IF		
+	
+	IF ipIlluminationController1 <> 0 THEN
+		THIS^.ipIlluminationController1.SetParent(THIS^);
+	END_IF	
+	
+	IF ipIlluminationController2 <> 0 THEN
+		THIS^.ipIlluminationController2.SetParent(THIS^);
+	END_IF
+END_IF
+
+hr := SUPER^.Initialize();
+
+IF ipImageProvider <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipImageProvider.Initialize());
+END_IF	
+IF ipCameraController <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipCameraController.Initialize());
+END_IF	
+IF ipIlluminationController1 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController1.Initialize());
+END_IF	
+IF ipIlluminationController2 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController2.Initialize());
+END_IF	
+
+
+IF CheckOk(hr) THEN
+	bInitDone := TRUE;
+END_IF
+
+
+bMethodeExecuteError := bMethodeExecuteError OR FAILED(hr);
+
+
+Initialize := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{50b1bb30-22bb-40e0-820c-6d48241b5100}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e69226ed-c1fa-4594-8cb7-9a828faabd25}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := THIS^.bInitDone;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OID" Id="{81ccd8cf-333d-466f-9e0c-5992903e7dad}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OID : OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{80d2e0d8-9dba-4ce6-ac8d-e5b538e6e1f6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.ipImageProvider <> 0 THEN
+	OID := THIS^.ipImageProvider.OID;
+ELSE
+	OID := SUPER^.OID;
+END_IF
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{ac5b2009-55eb-4d98-9ed0-59cff9cb40fe}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL  // Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{fe3c06c1-5c9a-47e6-8f17-e6b5df070e5b}">
+        <Declaration><![CDATA[VAR
+	bReady : BOOL := TRUE;;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF THIS^.ipImageProvider <> 0 THEN
+	bReady := bReady AND THIS^.ipImageProvider.Operational;
+END_IF
+
+IF THIS^.ipCameraController <> 0 THEN
+	bReady := bReady AND THIS^.ipCameraController.Operational;
+END_IF
+
+IF THIS^.ipIlluminationController1 <> 0 THEN
+	bReady := bReady AND THIS^.ipIlluminationController1.Operational;
+END_IF
+
+IF THIS^.ipIlluminationController2 <> 0 THEN
+	bReady := bReady AND THIS^.ipIlluminationController2.Operational;
+END_IF
+
+Operational := bReady AND NOT THIS^.Error;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{981a106f-a74a-470d-a796-f3a3d2a15882}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+VAR
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitDone THEN
+	Reset := E_FAIL;
+	RETURN;
+END_IF
+
+IF ipImageProvider <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipImageProvider.Reset());
+END_IF
+
+IF ipCameraController <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipCameraController.Reset());
+END_IF
+
+IF ipIlluminationController1 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController1.Reset());
+END_IF
+	
+IF ipIlluminationController2 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController2.Reset());
+END_IF	
+
+
+bMethodeExecuteError := FALSE;
+bMethodeExecuteError := bMethodeExecuteError OR FAILED(hr);
+
+Reset := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetMode" Id="{cba9e7f8-acf4-4786-885a-b592b5c68f65}" FolderPath="Mode\">
+      <Declaration><![CDATA[METHOD SetMode : HRESULT
+VAR_INPUT
+	ipAnyMode : I_VisionMode_Base;
+END_VAR
+VAR 
+	hr : HRESULT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ipAnyMode = 0 THEN
+	//Error, invalide input
+	SetMode := E_FAIL;
+	RETURN;
+END_IF
+
+//Set new Mode
+THIS^.ipActiveVisionMode := ipAnyMode;
+
+//Handover interface to componets
+hr := GetMostSignificant(hr, THIS^.ipActiveVisionMode.LinkComponents(
+														ipVisionSystem 	:= THIS^,
+														ipImageProvider 		:= THIS^.ipImageProvider, 
+														ipCameraController 		:= THIS^.ipCameraController, 
+														ipIlluminationController1 := THIS^.ipIlluminationController1, 
+														ipIlluminationController2 := THIS^.ipIlluminationController2));
+	
+hr := GetMostSignificant(hr, THIS^.ipActiveVisionMode.Initialize());
+
+IF (hr <> S_OK) THEN
+	//Reject new mode on error during link or initialize
+	THIS^.ipActiveVisionMode := 0;
+END_IF
+
+SetMode := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TaskCycleTimeNs" Id="{c81f4fb3-3e1f-4884-b79d-06de49b45a08}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TaskCycleTimeNs : UDINT // Set task cycle time in multiples of 100 ns]]></Declaration>
+      <Get Name="Get" Id="{f70b9061-d03d-4fbc-8a05-708640cfadf5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TaskCycleTimeNs := THIS^.nPlcTaskCycleTime * 100;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="TryGetImage" Id="{68816a6f-d6be-4b73-9536-51b0c8d37d45}">
+      <Declaration><![CDATA[METHOD TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo	: REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.ipImageProvider <> 0 THEN
+	TryGetImage := THIS^.ipImageProvider.TryGetImage(stImageWithInfo);
+ELSE
+	TryGetImage := E_FAIL;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{83e5d42e-2ea0-4139-8fa0-eee1d8c0dbef}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInitDone THEN
+	Update := E_FAIL;
+	RETURN;
+END_IF
+
+hr := SUPER^.Update();
+
+IF ipCameraController <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipCameraController.Update());
+END_IF
+
+IF ipImageProvider <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipImageProvider.Update());
+END_IF
+
+IF ipIlluminationController1 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController1.Update());
+END_IF
+	
+IF ipIlluminationController2 <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipIlluminationController2.Update());
+END_IF	
+
+IF THIS^.ipActiveVisionMode <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipActiveVisionMode.Update());
+END_IF
+
+
+bMethodeExecuteError := bMethodeExecuteError OR FAILED(hr);
+
+Update := hr;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

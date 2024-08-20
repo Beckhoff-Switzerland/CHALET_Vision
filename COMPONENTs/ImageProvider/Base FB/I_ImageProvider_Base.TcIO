@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_ImageProvider_Base" Id="{0d087f03-38ef-43bf-b6c9-bf0b099675b7}">
+    <Declaration><![CDATA[INTERFACE I_ImageProvider_Base EXTENDS I_CH_Object, I_ImageProvider_StatusOnly, __SYSTEM.IQueryInterface
+]]></Declaration>
+    <Property Name="Feedback" Id="{8fed0dbc-e5d3-409b-a0e0-2a84b477d6f3}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{40e97a90-6fe9-4186-ad7b-5417f66a0dd7}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{292e160a-caac-4b0e-a722-208885869d05}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Operational : BOOL
+// Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{5dbc1d52-f63e-49da-99b8-16436cb30c74}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{b8fe9290-4dda-4b84-804f-6f37a31b997f}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="SetParent" Id="{1c98868e-a9bb-42ee-9e5f-64fcd30652eb}">
+      <Declaration><![CDATA[METHOD SetParent
+VAR_INPUT
+	ipObject : I_CH_Object;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="State" Id="{fa13a3a0-e9c2-4b2b-a044-ed0d241e3d63}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{3c42efff-607d-499b-83d5-3de6c4a120f2}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TryGetImage" Id="{544401e7-10de-4b48-93fd-6fb1692d61e5}">
+      <Declaration><![CDATA[METHOD TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo	: REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

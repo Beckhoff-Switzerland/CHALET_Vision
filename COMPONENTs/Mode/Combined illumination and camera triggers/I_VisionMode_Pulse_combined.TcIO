@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VisionMode_Pulse_combined" Id="{7b17ba27-9a7b-4958-8fe6-18bf8467631f}">
+    <Declaration><![CDATA[INTERFACE I_VisionMode_Pulse_combined
+]]></Declaration>
+    <Method Name="Configure" Id="{3a6700d4-9738-4b16-b29f-622d8ada7ec3}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+	nOrange 	: UINT(0..511); //0-511
+	nGreen 		: UINT(0..511); //0-511
+	nBlue 		: UINT(0..511); //0-511
+	nInfrared 	: UINT(0..511); //0-511
+	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start
+	nExposure_1us : UDINT;			//Camera 
+	nIlluminationDuration_1us: UDINT;
+	nIlluminationOverride : USINT(1..100); // 1-100
+END_VAR]]></Declaration>
+    </Method>
+    <Property Name="LastTriggerTime" Id="{adefca27-944e-4819-a0df-599f69c7741a}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{9965b2e8-eb4b-4cdc-b74e-7224e2a8c9d4}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{49039d61-4025-4d79-8041-e4ef227393b8}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{60436481-0a91-4384-be68-85560cb5a2e3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TriggerAtDcTime" Id="{b9c06c18-7947-4023-bc22-d0ffe3427f74}">
+      <Declaration><![CDATA[METHOD TriggerAtDcTime : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerNow" Id="{702155cc-daa2-44b3-a7a4-d70f8fde2c54}">
+      <Declaration><![CDATA[METHOD TriggerNow : HRESULT
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

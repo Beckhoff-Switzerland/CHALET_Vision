@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_VIx2000_Status" Id="{09335c9f-34ad-4378-8625-c8e081578ecf}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_VIx2000_Status :
+(
+	INIT := 0,
+	READY,
+	TRIGGERING,
+	ERROR,
+	RESET,
+	RESETING
+):=INIT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_Color_ARGB" Id="{640c9064-9628-49d6-baf6-301282c040db}">
+    <Declaration><![CDATA[TYPE E_Color_ARGB : CHALET_BaseComponents.E_Colors_ARGB; END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

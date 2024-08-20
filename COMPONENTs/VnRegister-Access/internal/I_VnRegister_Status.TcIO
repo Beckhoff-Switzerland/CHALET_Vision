@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VnRegister_Status" Id="{4abec9b2-99ef-4920-b246-1713bdec0650}">
+    <Declaration><![CDATA[INTERFACE I_VnRegister_Status
+]]></Declaration>
+    <Property Name="ReadDone" Id="{a64668fc-38ec-496e-ad44-5b8d3187cae1}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY ReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{41bdfc70-33a8-46f8-9ae8-9b1ac717054a}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="WriteDone" Id="{bc1db8c3-9212-4ae5-8894-d3f35f3f6930}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY WriteDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{978f1658-50be-4939-a2a1-d07157bebb1d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

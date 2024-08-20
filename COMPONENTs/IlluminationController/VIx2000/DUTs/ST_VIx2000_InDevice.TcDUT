@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_VIx2000_InDevice" Id="{90ce20cf-5812-43b1-bf79-88e576a87544}">
+    <Declaration><![CDATA[TYPE ST_VIx2000_InDevice :
+STRUCT
+	bReady					: BOOL := FALSE;		// Illumination ready
+	bWarning				: BOOL := FALSE;		// Illumination has warning
+	bError					: BOOL := FALSE;		// Illumination has error
+	bDiag					: BOOL := FALSE;		// ???
+	nStatus					: UDINT := 0;			// Illumination state
+	nSwitch_on_counter		: UDINT := 0;			// Illumination switching counter
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

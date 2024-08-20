@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="F_VND_Sharpness_SumModifiedLaplace_ULINT" Id="{508827f3-7a72-4182-8c61-d9cbb18ca90f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_VND_Sharpness_SumModifiedLaplace_ULINT : HRESULT
+VAR_INPUT
+	ipImg			: REFERENCE TO ITcVnImage;	
+	nKernelSize		: USINT; //3 or 5
+	hrPrev			: HRESULT;
+END_VAR
+VAR_OUTPUT
+	nSharpness		: ULINT:=0;
+END_VAR
+VAR
+	ppData			: POINTER TO REAL;
+	ipTmp			: ITcVnImage;
+	ipImgData		: ITcVnData;
+	nDataSize		: ULINT;
+	nJ				: ULINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Bad error has occurred in the previous processing chain
+IF FAILED(hrPrev) THEN
+	F_VND_Sharpness_SumModifiedLaplace_ULINT := hrPrev;
+	RETURN;
+END_IF
+
+//Invalide input
+IF ipImg = 0 THEN
+    F_VND_Sharpness_SumModifiedLaplace_ULINT := Tc2_System.E_HRESULTAdsErr.INVALIDPARM;
+    RETURN;
+END_IF
+
+hrPrev := F_VN_LaplacianFilterExp(
+	ipSrcImage:=ipImg, 
+	ipDestImage:=ipTmp, 
+	eDestDepth:=ETcVnElementType.TCVN_ET_REAL, 
+	nKernelSize:=nKernelSize, 
+	fScale:=1, 
+	fDelta:=0, 
+	eBorderType:=ETcVnBorderInterpolationMethod.TCVN_BIM_DEFAULT, 
+	hrPrev:=hrPrev);
+
+ipTmp.GetImageData(
+	pipImageData:=ADR(ipImgData));
+
+ipImgData.GetDataPointer(
+	ppData:=ADR(ppData));
+
+ipImgData.GetSize(
+	nSize:=nDataSize);
+
+FOR nJ:=0 TO nDataSize/4-1 DO
+	nSharpness := nSharpness + TO_ULINT(ABS(ppData[nJ]));
+END_FOR
+
+ipImgData.ReleaseDataPointer(ppData:=ADR(ppData));
+FW_SafeRelease(pipUnk:=ADR(ipImgData));
+FW_SafeRelease(pipUnk:=ADR(ipTmp));
+
+F_VND_Sharpness_SumModifiedLaplace_ULINT := hrPrev;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

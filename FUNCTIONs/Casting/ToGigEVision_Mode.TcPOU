@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ToGigEVision_Mode" Id="{0dcc3cc9-8139-42e5-899c-554e39e2990d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ToGigEVision_Mode : BOOL
+VAR_INPUT
+	ipChObject : I_CH_OBJECT;
+	ipGigEVision_Mode : REFERENCE TO I_GigEVision_Mode;
+END_VAR
+
+VAR
+	ipTmp : I_GigEVision_Mode;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* 
+   1. Test if the interface exists
+   2. Test if the object implements a "Object" interface 
+   3. Write reference to interface in parameter
+   4. Returne TRUE if succesfull
+*)
+IF ipChObject <> 0 AND_THEN __QUERYINTERFACE(ipChObject,ipTmp) THEN
+	ipGigEVision_Mode := ipTmp;
+	ToGigEVision_Mode := TRUE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VisionMode_Pulse_separate" Id="{72aca76d-4fb2-4ee9-967f-21becf320d0a}">
+    <Declaration><![CDATA[INTERFACE I_VisionMode_Pulse_separate
+]]></Declaration>
+    <Method Name="Configure" Id="{e5fee441-a849-435d-bd5c-a1160d3b8a0a}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+	nOrange 	: UINT(0..511); //0-511
+	nGreen 		: UINT(0..511); //0-511
+	nBlue 		: UINT(0..511); //0-511
+	nInfrared 	: UINT(0..511); //0-511
+	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start
+	nExposure_1us : UDINT;			//Camera 
+	nIlluminationDuration_1us: UDINT;
+	nIlluminationOverride : USINT(1..100); // 1-100
+END_VAR]]></Declaration>
+    </Method>
+    <Property Name="LastTriggerTime_Camera" Id="{9d22cdab-1b9a-4822-a16b-26a2046ed70f}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime_Camera : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{76fc43d1-23c9-48f0-857f-9322be0bd92d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="LastTriggerTime_Illumination" Id="{3a583975-9eea-41fc-a211-db37a0e5c192}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime_Illumination : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{2eb8a46f-ab0e-44ea-8ea9-25bbeb056b54}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{ee252ed3-74f6-43e6-973a-bc9fb0482022}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{0eb1c6ee-555c-4425-ae22-5a73d727a970}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TriggerAtDcTime_Camera" Id="{1084f2c7-ddc9-47d2-bb2f-a150c3c061e7}">
+      <Declaration><![CDATA[METHOD TriggerAtDcTime_Camera : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerAtDcTime_Illumination" Id="{f2cebc6b-8c96-479e-ba84-b1736562a650}">
+      <Declaration><![CDATA[METHOD TriggerAtDcTime_Illumination : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerNow_Camera" Id="{9937c1c5-a56a-41a0-9a08-54153032e106}">
+      <Declaration><![CDATA[METHOD TriggerNow_Camera : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerNow_Illumination" Id="{8463851b-4265-4c26-b5cd-e4b2fca644e0}">
+      <Declaration><![CDATA[METHOD TriggerNow_Illumination : HRESULT
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

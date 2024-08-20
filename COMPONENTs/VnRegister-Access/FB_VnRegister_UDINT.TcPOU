@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VnRegister_UDINT" Id="{20dfe33a-fa0b-4acc-bd14-d040506660e7}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_VnRegister_UDINT EXTENDS FB_VnRegister_Base
+VAR
+	{attribute 'hide'}
+	nValue : UDINT;
+	
+	{attribute 'hide'}	
+	fbVnReadRegister_UDINT : FB_VN_ReadRegister_UDINT;
+	{attribute 'hide'}
+	fbVnWriteRegister_UDINT : FB_VN_WriteRegister_UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{ccbd6296-cf44-4f6f-a88a-475217da77ff}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCameraConnection : I_GigEVision_Register_Connection;
+	nAddress : GVCP_REGISTER_ADDRESS;
+    nEndian  : UINT;
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	nCtsVnRegisterObject := nCtsVnRegisterObject +1;
+	
+
+	THIS^.nEndian 		:= nEndian;
+	
+	//Copy ObjectId from Camera to this fbVnReadRegister.
+	MEMCPY(destAddr := ADR(fbVnReadRegister_UDINT.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+	MEMCPY(destAddr := ADR(fbVnWriteRegister_UDINT.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+
+	//Force to do an init after set OID
+	fbVnReadRegister_UDINT.FB_init(FALSE,FALSE);	
+	fbVnWriteRegister_UDINT.FB_init(FALSE,FALSE);
+END_IF
+
+bFBInitCalledOnce := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{7d06487c-7e9c-4e3d-96bc-b75491c37ff3}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Update();
+
+
+fbVnReadRegister_UDINT(
+	nAddress:= SUPER^.nAddress, 
+	nEndian:= SUPER^.nEndian, 
+	bRead:= SUPER^.bExecuteRead, 
+	bBusy=> SUPER^.bReadBusy, 
+	bError=> SUPER^.bReadError
+	);
+IF fbRTrigReadDone.Q AND THIS^.bWriteDone THEN
+	nValue := fbVnReadRegister_UDINT.nValue;
+END_IF
+	
+	
+fbVnWriteRegister_UDINT(
+	nAddress:= SUPER^.nAddress, 
+	nValue:= nValue,  
+	nEndian:= SUPER^.nEndian,   
+	bWrite:= SUPER^.bExecuteWrite, 
+	bBusy=> SUPER^.bWriteBusy, 
+	bError=> SUPER^.bWriteError,
+	);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Value" Id="{95f359b6-fc0e-4238-aea5-e0d69d0ae63c}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Value : UDINT]]></Declaration>
+      <Get Name="Get" Id="{4bacdee9-ea2b-4881-bacf-7b3b864859f2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Value := nValue;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{d1ca1938-9414-4b75-a2e1-197b6568add9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nValue := Value;
+
+//Trigger a new write cycle
+THIS^.bWriteDone 	:= FALSE;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

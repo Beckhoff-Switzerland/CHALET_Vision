@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_CameraController_Base" Id="{aa9ae568-67e2-47a0-95ce-dbd7482f46d4}">
+    <Declaration><![CDATA[INTERFACE I_CameraController_Base EXTENDS I_CH_Object, I_CameraController_StatusOnly, __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="Busy" Id="{28674240-f034-4bf1-9d24-ff8774c52f64}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{095c5c69-dbeb-492f-b66e-e9eb4b5c736f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Feedback" Id="{9e6fbdd0-ae7d-4535-a95c-fc7b9c85e2eb}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{70bcbfb7-3cc2-4a8b-a50d-e52f226309e8}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{1143ef1b-0642-44cf-a0a3-e52203d8a2d3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4794da0f-0c4e-4e38-8eb7-25bba5d6d2f1}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{4e802e25-633c-4869-be97-9c7955cfd9f6}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="SetParent" Id="{f3c72435-0f41-4bbf-91d8-43244914af85}">
+      <Declaration><![CDATA[METHOD SetParent
+VAR_INPUT
+	ipVisionSystem  : I_VisionSystem;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="State" Id="{5a2a76d0-c386-40d6-b5fc-77c525853a26}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{4d7c9e15-df7b-497d-836d-757611cb6a39}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

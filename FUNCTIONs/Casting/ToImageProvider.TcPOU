@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ToImageProvider" Id="{344a51ab-13c1-491d-bd68-b5aecf2ede74}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION ToImageProvider : BOOL
+VAR_INPUT
+	ipChObject : I_CH_OBJECT;
+	ipImageProvider : REFERENCE TO I_ImageProvider_Base;
+END_VAR
+
+VAR
+	ipTmp : I_ImageProvider_Base;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* 
+   1. Test if the interface exists
+   2. Test if the object implements a "Object" interface 
+   3. Write reference to interface in parameter
+   4. Returne TRUE if succesfull
+*)
+IF ipChObject <> 0 AND_THEN __QUERYINTERFACE(ipChObject,ipTmp) THEN
+	ipImageProvider := ipTmp;
+	ToImageProvider := TRUE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

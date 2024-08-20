@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VIx2000" Id="{f49705c5-b6a6-477b-943d-03b69a2c31ab}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_VIx2000 EXTENDS FB_IlluminationController_Base IMPLEMENTS I_IlluminationController_Base, I_VIx2000_Mode
+VAR
+	DeviceInputs 	 		AT %I* 	: ST_VIx2000_InDevice;
+	DeviceOutputs			AT %Q*	: ST_VIx2000_OutDevice;		
+	Pulse_DC_Outputs		AT %Q*	: ST_VIx2000_Pulse;		
+	ChannelOrange 			AT %Q*	: ST_VIx2000_Channel;
+	ChannelGreen 			AT %Q*	: ST_VIx2000_Channel;
+	ChannelBlue 			AT %Q*	: ST_VIx2000_Channel;
+	ChannelInfrared 		AT %Q*	: ST_VIx2000_Channel;
+	
+	
+	{attribute 'hide'}
+	bInitDone 						: BOOL;
+	{attribute 'hide'}	
+	eState							: E_VIx2000_Status;
+	{attribute 'hide'}	
+	nDuration_1us					: UDINT := 100_000; //Puls duration
+	{attribute 'hide'}
+	nSwitchOnCounterOnTrigger		: UDINT;				// Old operation counter as reference
+	{attribute 'hide'}
+	fbFeedBackTrigger 				: FB_CH_Feedback(THIS^.fbSourceInfo);
+END_VAR
+VAR CONSTANT
+	N_MAX_BRIGHTNESS : UINT := 511;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Busy" Id="{4795ca6d-23f5-444c-ae5c-0d85ef5d31e4}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{3596b834-2415-4c64-b21e-683781f1f017}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := (THIS^.eState = E_VIx2000_Status.TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Configure" Id="{f91031d8-81b0-4943-aa61-d1dcf8e6bcdd}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+	nOrange 	: UINT(0..N_MAX_BRIGHTNESS);
+	nGreen 		: UINT(0..N_MAX_BRIGHTNESS);
+	nBlue 		: UINT(0..N_MAX_BRIGHTNESS);
+	nInfrared 	: UINT(0..N_MAX_BRIGHTNESS);
+	nDuration_1us : UDINT; //Duration of pulse
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.ChannelOrange.nBrightness := LIMIT(0, nOrange, N_MAX_BRIGHTNESS);
+THIS^.ChannelGreen.nBrightness := LIMIT(0, nGreen, N_MAX_BRIGHTNESS);
+THIS^.ChannelBlue.nBrightness := LIMIT(0, nBlue, N_MAX_BRIGHTNESS);
+THIS^.ChannelInfrared.nBrightness := LIMIT(0, nInfrared, N_MAX_BRIGHTNESS);
+
+THIS^.ChannelOrange.nDuration_1us := nDuration_1us;
+THIS^.ChannelGreen.nDuration_1us := nDuration_1us;
+THIS^.ChannelBlue.nDuration_1us := nDuration_1us;
+THIS^.ChannelInfrared.nDuration_1us := nDuration_1us;
+
+THIS^.nDuration_1us := nDuration_1us;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Duration_1us" Id="{b7452bac-b7bd-4a25-ab1d-4724f3388cc4}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Duration_1us : UDINT
+]]></Declaration>
+      <Get Name="Get" Id="{14c4b670-0448-4bc7-bfff-f8062aadf30c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Duration_1us := THIS^.nDuration_1us;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e36009ae-0357-4d9f-94a8-78bafad8549f}">
+        <Declaration><![CDATA[VAR
+END_VAR]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.nDuration_1us := Duration_1us;
+
+THIS^.ChannelOrange.nDuration_1us := Duration_1us;
+THIS^.ChannelGreen.nDuration_1us := Duration_1us;
+THIS^.ChannelBlue.nDuration_1us := Duration_1us;
+THIS^.ChannelInfrared.nDuration_1us := Duration_1us;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Enable" Id="{cbdf3e46-ccca-43d7-a23d-7e56b96b37c5}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Enable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{2fcd0910-7c5b-442c-a41e-d0be37331817}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Enable := THIS^.DeviceOutputs.bEnable;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{b5b5da47-2504-4cf1-bb0c-09d4f0c58e50}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR
+	ipChObject 			: I_CH_OBJECT;
+	hr: HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[hr := SUPER^.Initialize();
+
+//Init some default data 
+Configure(
+	nOrange:= 50, 
+	nGreen:= 50, 
+	nBlue:= 50, 
+	nInfrared:= 50, 
+	nDuration_1us:= 10_000);
+
+IF CheckOk(hr) THEN
+	THIS^.bInitDone := TRUE;
+END_IF
+
+Initialize := hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Operational" Id="{3e3c9f04-deb0-46c4-b84c-6b24c701b973}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{def79ce1-1ea8-46e7-ac21-6368303a3dbb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Operational := (THIS^.eState = E_VIx2000_Status.READY) OR (THIS^.eState = E_VIx2000_Status.TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{a3a557c9-473c-458a-a664-b520dbe7873c}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT THIS^.Operational THEN
+	 THIS^.eState := E_VIx2000_Status.RESET;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{dbb7b6ad-2008-4bcf-bda7-ff95b67f29e1}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{c3d0d5d1-af42-450a-aae2-6fd8102bfce3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CASE THIS^.eState OF
+	E_VIx2000_Status.INIT:
+		State := E_StateTerminal.INIT;
+		
+	E_VIx2000_Status.READY:
+		State := E_StateTerminal.READY;
+		
+	E_VIx2000_Status.TRIGGERING:
+		State := E_StateTerminal.TRIGGERING;
+		
+	E_VIx2000_Status.ERROR:
+		State := E_StateTerminal.ERROR;
+		
+	E_VIx2000_Status.RESET:
+		State := E_StateTerminal.RESET;
+		
+	E_VIx2000_Status.RESETING:	
+		State := E_StateTerminal.RESETING;
+END_CASE
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{004d11e1-396b-4acf-8681-78bedc4fc277}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp : T_DCTIME64;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (THIS^.eState = E_VIx2000_Status.READY) THEN
+	THIS^.nSwitchOnCounterOnTrigger := THIS^.DeviceInputs.nSwitch_on_counter;
+	THIS^.Pulse_DC_Outputs.nTimestamp 	:= nDCTimeStamp;
+	THIS^.Pulse_DC_Outputs.nFlashDelay 	:= 0;
+
+	THIS^.eState := E_VIx2000_Status.TRIGGERING;
+	
+	THIS^.fbFeedbackTrigger.hr := S_OK;
+ELSE
+	THIS^.fbFeedbackTrigger.hr := E_FAIL;
+END_IF
+
+Trigger := THIS^.fbFeedbackTrigger.hr;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{cb0110ad-4a64-4b31-9790-ef4e54e0ef0d}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	bNewCounterValue : BOOL;
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	nSwitchOnCounterShouldValue : UDINT;
+	{attribute 'hide'}
+	nSwitchOnCounterLastCycle : UDINT;
+	{attribute 'hide'}
+	fbTimeOutNoReactionToTrigger : TON;
+	{attribute 'hide'}
+	fbStateTimeout : TON;
+	{attribute 'hide'}
+	fbTimeoutAlarm : FB_TcAlarm;
+	{attribute 'hide'}
+	fbAlarmNoReactionToTrigger : FB_TcAlarm;
+	{attribute 'hide'}
+	eStateOld : E_VIx2000_Status;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Check for terminal errors *)
+IF THIS^.DeviceInputs.bError AND NOT ((THIS^.eState = E_VIx2000_Status.RESET) OR (THIS^.eState = E_VIx2000_Status.RESETING))THEN 
+	THIS^.eState := E_VIx2000_Status.ERROR;
+END_IF
+
+(* Handle terminal state machine *)
+CASE THIS^.eState OF
+	(* Reset all control variables *)
+	E_VIx2000_Status.RESET:
+		THIS^.DeviceOutputs.bEnable := FALSE;
+		THIS^.DeviceOutputs.bReset := FALSE;
+		THIS^.Pulse_DC_Outputs.nTimestamp := 0;		
+		THIS^.Pulse_DC_Outputs.nTimestamp := 0;	
+		fbTimeoutAlarm.Clear(0,0);	
+		fbAlarmNoReactionToTrigger.Clear(0,0);
+		THIS^.fbFeedbackTrigger.HR := S_OK;
+		
+		THIS^.eState := E_VIx2000_Status.RESETING;
+		
+	(* Reset all control variables *)
+	E_VIx2000_Status.RESETING:
+		THIS^.DeviceOutputs.bEnable := FALSE;
+		THIS^.DeviceOutputs.bReset := TRUE;
+		THIS^.eState := E_VIx2000_Status.INIT;
+	
+	(* Enable terminal if ready *)
+	E_VIx2000_Status.INIT:			
+		THIS^.DeviceOutputs.bEnable := TRUE;
+		THIS^.DeviceOutputs.bReset := FALSE;
+		IF THIS^.DeviceInputs.bReady THEN
+			THIS^.fbAlarmGeneral.Clear(0, TRUE);
+			nSwitchOnCounterShouldValue := THIS^.DeviceInputs.nSwitch_on_counter;
+			THIS^.eState := E_VIx2000_Status.READY;
+		END_IF
+	
+	(* Terminal is ready *)
+	E_VIx2000_Status.READY:
+		;
+		
+	(* Terminal is triggering *)
+	E_VIx2000_Status.TRIGGERING:
+	IF VisionParameterlist.ILLUMINATION_WAIT_FOR_TRIGGER_FEEDBACK THEN
+		//Wait - timeout if no change
+		IF (THIS^.nSwitchOnCounterOnTrigger +1) = THIS^.DeviceInputs.nSwitch_on_counter THEN
+			THIS^.eState := E_VIx2000_Status.READY;
+		END_IF
+	ELSE
+		//Do not wait
+		IF (F_GetCurDcTaskTime64()  >=  THIS^.Pulse_DC_Outputs.nTimestamp)  THEN
+			nSwitchOnCounterShouldValue := nSwitchOnCounterShouldValue + 1;
+			THIS^.eState := E_VIx2000_Status.READY;
+		END_IF
+	END_IF
+
+	
+	(* Error occured *)	
+	E_VIx2000_Status.ERROR:
+		IF NOT THIS^.fbAlarmGeneral.bRaised THEN
+			THIS^.fbAlarmGeneral.Raise(0);	
+		END_IF
+		
+		IF (THIS^.fbAlarmGeneral.eConfirmationState = TcEventConfirmationState.Confirmed) THEN
+			THIS^.Reset();			
+		END_IF			
+END_CASE
+
+(* Timeout if an state is to long active *)
+fbStateTimeout.IN := (THIS^.eState = eStateOld) AND (THIS^.eState = E_VIx2000_Status.INIT) OR (THIS^.eState = E_VIx2000_Status.RESETING) OR (THIS^.eState = E_VIx2000_Status.TRIGGERING);
+eStateOld := THIS^.eState;
+fbStateTimeout.PT := T#5S;
+fbStateTimeout();
+IF fbStateTimeout.Q THEN
+	//Raise TC3-Eventlogger Alarm
+	IF NOT fbTimeOutAlarm.bRaised THEN
+		fbTimeoutAlarm.CreateEx(stEventEntry := TC_EVENTS.CHALET_Vision_Events.TimeOut, bWithConfirmation := FALSE, ipSourceInfo := THIS^.fbSourceInfo);
+		fbTimeoutAlarm.ipArguments.AddStringByValue(TO_STRING(THIS^.eState));
+		fbTimeoutAlarm.Raise(0);
+	END_IF
+	
+	//Change in alarm state
+	THIS^.eState := E_VIx2000_Status.ERROR;
+END_IF
+
+
+//Check that the lighting reacts to the trigger signal within the given time and increments its switch-on counter
+IF NOT VisionParameterlist.ILLUMINATION_WAIT_FOR_TRIGGER_FEEDBACK THEN
+	bNewCounterValue := nSwitchOnCounterLastCycle <> THIS^.DeviceInputs.nSwitch_on_counter;
+	nSwitchOnCounterLastCycle := THIS^.DeviceInputs.nSwitch_on_counter;
+	fbTimeOutNoReactionToTrigger.IN := NOT bNewCounterValue AND (nSwitchOnCounterShouldValue <> THIS^.DeviceInputs.nSwitch_on_counter);
+	fbTimeOutNoReactionToTrigger.PT := T#1S;
+	fbTimeOutNoReactionToTrigger();
+	IF fbTimeOutNoReactionToTrigger.Q THEN
+		//Raise TC3-Eventlogger Alarm
+		IF NOT fbAlarmNoReactionToTrigger.bRaised THEN
+			fbAlarmNoReactionToTrigger.CreateEx(stEventEntry := TC_EVENTS.CHALET_Vision_Events.NoReactionToTheTrigger, bWithConfirmation := FALSE, ipSourceInfo := THIS^.fbSourceInfo);
+			fbAlarmNoReactionToTrigger.Raise(0);
+		END_IF
+		
+		//Change in alarm state
+		THIS^.eState := E_VIx2000_Status.ERROR;
+	END_IF
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

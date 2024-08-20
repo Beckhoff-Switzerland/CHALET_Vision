@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ImageProvider_Base" Id="{bf3fb1c1-81c7-48d2-a7bf-e63bc62d7d6f}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK ABSTRACT FB_ImageProvider_Base EXTENDS FB_CH_Object IMPLEMENTS I_ImageProvider_Base
+VAR      	
+	{attribute 'hide'}							
+    fbCrititcalSection : FB_IecCriticalSection;    						// Internal lock for test & set function                                  	
+	{attribute 'hide'}														    		
+	eState 				: ETcVnCameraState;		
+	{attribute 'hide'}  						
+	fbFeedback 			: FB_CH_Feedback(THIS^.fbSourceInfo); 
+	{attribute 'hide'}
+	fbAlarmOIDNotSet 	: FB_TcAlarm;									// Alarm due to source state	
+	{attribute 'hide'}
+	ipVisionSystem		: I_CH_Object;									// Interface to "Owner" of this module. Visionsystem
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{4b1cd9f8-a714-44c1-875c-e48f99598692}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	
+	;
+
+END_IF
+
+bFBInitCalledOnce := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Feedback" Id="{cd45db2a-56ac-47a2-a0d6-24f06a604e3f}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{2ad5b969-35cd-45fb-93cb-7c37f0a4b972}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Feedback := THIS^.fbFeedback;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{9f33c10e-8c00-4c2e-9a21-23c839664d19}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Initialize := S_OK;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Operational" Id="{39a09296-e519-4432-8a28-3cade38785ec}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC Operational : BOOL
+// Module started successfully and entered aquiring mode]]></Declaration>
+      <Get Name="Get" Id="{afc683a0-9af2-4481-bec3-223eb5dd4c24}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Operational := (eState = TCVN_CS_ACQUIRING) OR (eState = TCVN_CS_TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{8b38ff39-8520-40bf-b48c-db9b3bb9634e}">
+      <Declaration><![CDATA[METHOD ABSTRACT Reset : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetParent" Id="{5b368a7a-a990-4be7-a47a-2bed57c03212}">
+      <Declaration><![CDATA[METHOD SetParent
+VAR_INPUT
+	ipObject : I_CH_Object;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.ipVisionSystem := ipObject;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{8cdfd5c0-02d7-4c1e-8957-35feb6b166a1}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY ABSTRACT State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{7c54de11-52f2-45de-a6da-9510af03e46c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="TryGetImage" Id="{a6e95791-e403-4fa8-bcf0-43e93d96c7a0}">
+      <Declaration><![CDATA[METHOD ABSTRACT TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

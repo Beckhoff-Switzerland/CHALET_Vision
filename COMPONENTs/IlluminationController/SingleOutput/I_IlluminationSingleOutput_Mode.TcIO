@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_IlluminationSingleOutput_Mode" Id="{f3c03982-850a-4708-b627-75f5c37d9e71}">
+    <Declaration><![CDATA[INTERFACE I_IlluminationSingleOutput_Mode
+]]></Declaration>
+    <Property Name="Duration_1us" Id="{9227bb47-19dc-44fb-832f-827c063dc18b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Duration_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{608a6549-ac6c-4850-b1b2-82ff8187ebb6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{edfa4c21-f944-4372-b7f0-015459a6a607}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="Trigger" Id="{30693729-8171-478b-b9ca-56cbb99fcfe3}">
+      <Declaration><![CDATA[METHOD  Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

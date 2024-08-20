@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_AlarmCodes" Id="{9ddd3323-e46c-418a-ab99-e513676eec99}">
+    <Declaration><![CDATA[TYPE ST_AlarmCodes :
+STRUCT
+	sAdsCode : STRING(3);		// ADS Alarm code
+	sErrCode : STRING(10);		// Full HResult code
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

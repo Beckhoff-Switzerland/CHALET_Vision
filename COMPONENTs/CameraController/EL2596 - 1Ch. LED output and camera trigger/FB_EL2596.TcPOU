@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_EL2596" Id="{bbe45a09-faaf-4e4c-a753-61965d389d65}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_EL2596 EXTENDS FB_CameraController_Base IMPLEMENTS I_HwTimestamp_Mode
+VAR
+	bEnable					AT %Q* 	: BOOL;					// Terminal enable
+	bTriggerImage 			AT %Q* 	: BOOL;					// Trigger for lighting and camera	 
+	bReset					AT %Q*	: BOOL;					// Terminal reset
+	
+	TimeStamp 				AT %Q*	: T_DCTIME64;				// Trigger time stamp
+	
+	bReadyToActivate		AT %I*	: BOOL := FALSE;		// Terminal ready
+	bWarning				AT %I*	: BOOL := FALSE;		// Terminal has warning
+	bError					AT %I*	: BOOL := FALSE;		// Terminal has error
+	nOperationCounter		AT %I*  : USINT := 0;			// Terminal switching counter
+	
+		 
+	bEnableCameraTrigger 	AT %Q* 	: BOOL := TRUE;			// Enable trigger to be used for the camera
+	nImpulseLength 			AT %Q* 	: UDINT := 20000;   	// Impulse length of the lighting period [in 1us]
+	nTriggerDelay 			AT %Q* 	: UDINT := 10;			// Delay between lighting and camera trigger [in 100ns]
+
+	{attribute 'hide'}
+	eState							: E_StateTerminal;		// Current terminal state
+	
+	{attribute 'hide'}
+	nOperationCounterAtTriggerStart			: USINT;				// Old operation counter as reference
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Busy" Id="{9c8a7e70-dd6d-425d-ad9f-3350847f3061}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Module already has a task - already a trigger active
+PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9363b0a2-2faf-4180-9b5f-8aefdcbc8071}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := (THIS^.eState = E_StateTerminal.TRIGGERING) OR (THIS^.eState = E_StateTerminal.RESETING) OR (THIS^.eState = E_StateTerminal.RESET);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Duration_1us" Id="{52b6c598-06f2-4d7a-885e-7869de8ca2a3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Duration_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{3664e7b0-1434-4a65-8c70-9a90fafd61af}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Duration_1us := THIS^.nImpulseLength;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{642d0d17-2dda-488c-89f0-fb3dca4422fb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.nImpulseLength := Duration_1us;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Operational" Id="{8239cfd9-6f04-4475-b58e-6bfcd6b0a874}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e343d884-266a-472b-b3fe-91cb93242067}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Operational := (THIS^.eState = E_StateTerminal.READY) OR (THIS^.eState = E_StateTerminal.TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{2c88b949-3154-4b91-8cd2-8eb97ce10bab}">
+      <Declaration><![CDATA[METHOD PUBLIC Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.bError OR (THIS^.eState = E_StateTerminal.ERROR) THEN
+	fbFeedback.ActiveCommand := 'Reset';
+	fbFeedback.Busy := TRUE;	
+	
+	THIS^.eState := E_StateTerminal.RESET;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{1a05223c-36fc-4698-b6db-aeacb1d01c19}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY PUBLIC State : E_StateTerminal]]></Declaration>
+      <Get Name="Get" Id="{688a3156-d2d5-496f-9068-006c923a8ed4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State := THIS^.eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{3dff123e-ca37-4985-802f-4a2b07056f99}">
+      <Declaration><![CDATA[METHOD PUBLIC Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+VAR
+	nEarliestPossibleTime : T_DCTIME64;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Check if the trigger is minimum 3 EtherCat cycles in future *)
+nEarliestPossibleTime := F_GetCurDcTaskTime64()(*1ns*) + THIS^.ipVisionSystem.TaskCycleTimeNs * 3 (*Cycles*);
+IF nDCTimeStamp < nEarliestPossibleTime THEN
+	Trigger := E_FAIL;
+	RETURN;
+END_IF
+
+(* Check if not in wrong state *)
+IF NOT (THIS^.eState = E_StateTerminal.READY) THEN
+	Trigger := E_FAIL;
+	RETURN;
+END_IF
+
+fbFeedback.ActiveCommand := 'Trigger';
+fbFeedback.Busy := TRUE;	
+
+
+THIS^.nOperationCounterAtTriggerStart := THIS^.nOperationCounter;
+THIS^.TimeStamp := nDCTimeStamp;
+THIS^.eState := E_StateTerminal.TRIGGERING;
+Trigger := S_OK;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="TriggerDelay_1ns" Id="{32785852-eba1-4adc-976b-dceffed00ad2}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// The given trigger time is delayed by this value. E.g. to wait for the maximum lighting value before taking a picture  [in 1ns]
+PROPERTY TriggerDelay_1ns : UDINT]]></Declaration>
+      <Get Name="Get" Id="{ffb3248e-28dd-4e77-adfa-17033d5bc310}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerDelay_1ns := THIS^.nTriggerDelay*100;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{5629806c-7651-46af-b4cc-ee81db363c74}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.nTriggerDelay := TriggerDelay_1ns/100;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Update" Id="{31954bcb-9510-418f-879b-25910b1aef16}">
+      <Declaration><![CDATA[METHOD PUBLIC Update : HRESULT
+VAR_INST
+	fbTimeOut : TON;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Check for terminal errors *)
+IF THIS^.bError AND NOT (THIS^.eState = E_StateTerminal.RESET) THEN 
+	THIS^.eState := E_StateTerminal.ERROR;
+END_IF
+
+(* Handle terminal state machine *)
+CASE THIS^.eState OF
+	(* Reset all control variables *)
+	E_StateTerminal.RESET:
+		THIS^.bReset := TRUE;
+		THIS^.bEnable := FALSE;
+		THIS^.bTriggerImage := FALSE;
+		THIS^.eState := E_StateTerminal.RESETING;
+		
+	(* Reset all control variables *)
+	E_StateTerminal.RESETING:
+		THIS^.bReset := FALSE;
+		THIS^.bEnable := FALSE;
+		THIS^.bTriggerImage := FALSE;
+		THIS^.eState := E_StateTerminal.INIT;	
+		
+	(* Enable terminal if ready *)
+	E_StateTerminal.INIT:			
+		IF THIS^.bReadyToActivate THEN
+			THIS^.bReset := FALSE;
+			THIS^.bEnable := TRUE;
+			THIS^.fbAlarmGeneral.Clear(0, TRUE);
+			THIS^.eState := E_StateTerminal.READY;
+		END_IF
+	
+	(* Terminal is ready *)
+	E_StateTerminal.READY:
+		fbFeedback.Done := TRUE;	
+		
+	(* Terminal is triggering *)
+	E_StateTerminal.TRIGGERING:
+		THIS^.bTriggerImage := TRUE;
+		IF THIS^.nOperationCounterAtTriggerStart <> THIS^.nOperationCounter THEN
+			THIS^.bTriggerImage := FALSE;
+			THIS^.eState := E_StateTerminal.READY;
+		END_IF
+	
+	(* Error occured *)	
+	E_StateTerminal.ERROR:
+		fbFeedback.HR := E_FAIL;
+		IF NOT THIS^.fbAlarmGeneral.bRaised THEN
+			THIS^.fbAlarmGeneral.Raise(0);	
+		END_IF
+		
+		IF (THIS^.fbAlarmGeneral.eConfirmationState = TcEventConfirmationState.Confirmed) THEN
+			THIS^.Reset();			
+		END_IF			
+END_CASE
+
+(* Timeout if an state is to long active *)
+fbTimeOut.IN := (THIS^.eState = E_StateTerminal.INIT) OR (THIS^.eState = E_StateTerminal.RESETING) OR (THIS^.eState = E_StateTerminal.TRIGGERING);
+fbTimeOut.PT := T#5S;
+fbTimeOut();
+IF fbTimeOut.Q THEN
+	THIS^.eState := E_StateTerminal.ERROR;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

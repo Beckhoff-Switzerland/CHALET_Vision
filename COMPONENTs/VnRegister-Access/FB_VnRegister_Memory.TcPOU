@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VnRegister_Memory" Id="{03d7b645-a394-4d9f-ba43-675e81b370bb}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_VnRegister_Memory EXTENDS FB_VnRegister_Base
+VAR
+	{attribute 'hide'}
+	ValueBuffer 			: ARRAY[0..535] OF BYTE;
+	nLength       : UINT;
+	
+	{attribute 'hide'}	
+	fbVnReadRegister_Memory	: FB_VN_ReadMemory;
+	{attribute 'hide'}
+	fbVnWriteRegister_Memory : FB_VN_WriteMemory;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{44d69e02-7046-4291-a3ee-b9873cbdfb7d}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCameraConnection : I_GigEVision_Register_Connection;
+	nAddress : GVCP_REGISTER_ADDRESS;
+	//The number of bytes to write, starting at nAddress (must be a multiple of 4, not more than 536)
+	nLength       : UINT; 
+END_VAR
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	nCtsVnRegisterObject := nCtsVnRegisterObject +1;
+	
+
+	THIS^.nLength 		:=  LIMIT(4, nLength, 536);
+	
+	//Copy ObjectId from Camera to this fbVnReadRegister.
+	MEMCPY(destAddr := ADR(fbVnReadRegister_Memory.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+	MEMCPY(destAddr := ADR(fbVnWriteRegister_Memory.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+
+	//Force to do an init after set OID
+	fbVnReadRegister_Memory.FB_init(FALSE,FALSE);	
+	fbVnWriteRegister_Memory.FB_init(FALSE,FALSE);
+END_IF
+
+bFBInitCalledOnce := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadData" Id="{78b8f538-36f4-4389-9991-fa7e3a4d6200}">
+      <Declaration><![CDATA[METHOD ReadData : BOOL
+VAR_INPUT
+	//ADR(destination)
+	pBuffer  : PVOID; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMCPY(destAddr := pBuffer, srcAddr:=ADR(ValueBuffer), n:= nLength);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{a1972bb5-81e6-4c87-a032-42798cbd8943}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Update();
+
+fbVnReadRegister_Memory(
+	nAddress:= SUPER^.nAddress, 
+	nLength:= nLength, 
+	pBuffer:= ADR(ValueBuffer), 
+	bRead:= SUPER^.bExecuteRead, 
+	bBusy=> SUPER^.bReadBusy, 
+	bError=> SUPER^.bReadError
+	);
+	
+fbVnWriteRegister_Memory(
+	nAddress:= SUPER^.nAddress, 
+	nLength:= nLength, 
+	pData:= ADR(ValueBuffer), 
+	bWrite:= SUPER^.bExecuteWrite, 
+	bBusy=> SUPER^.bWriteBusy, 
+	bError=> SUPER^.bWriteError,
+	);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="WriteData" Id="{a8306223-a3a9-4d3d-b6b9-2c7dd1d2296f}">
+      <Declaration><![CDATA[METHOD WriteData : BOOL
+VAR_INPUT
+	//ADR(source)
+	pBuffer  : PVOID; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMCPY(destAddr := ADR(ValueBuffer), srcAddr:= pBuffer, n:= nLength);
+
+//Trigger a new write cycle
+THIS^.bWriteDone 	:= FALSE;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

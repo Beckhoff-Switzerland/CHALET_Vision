@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VnRegister_Base" Id="{39ac05e2-6434-4ca1-a1e0-088b534daa74}" SpecialFunc="None">
+    <Declaration><![CDATA[(* This FB is abstract and is the base class  *)
+FUNCTION_BLOCK ABSTRACT FB_VnRegister_Base EXTENDS FB_CH_Object IMPLEMENTS I_VnRegister_Status
+VAR
+
+	{attribute 'hide'}
+	bErrorInvalideInterface : BOOL;
+	
+	{attribute 'hide'}	
+	OidCamera : OTCID;
+	{attribute 'hide'}
+	//The address of the first byte to write to the camera 
+    nAddress : GVCP_REGISTER_ADDRESS;
+	{attribute 'hide'}
+	//The endianness of the register. 0 = Big, 1 = Little. Default: 0
+    nEndian  : UINT;
+	
+	//in the event of a connection interruption to the device, either a read under write command is repeated
+	{attribute 'hide'}
+	eCommandToRepeadAfterReconnect : (READ, WRITE) := READ;
+	
+	//Read/write 
+	{attribute 'hide'}
+	bReadDone : BOOL;
+	{attribute 'hide'}
+	fbRTrigReadDone : R_TRIG();
+	{attribute 'hide'}
+	nSeqRead : UINT;
+	{attribute 'hide'}
+	bExecuteRead : BOOL;
+	{attribute 'hide'}
+	bReadError : BOOL;
+	{attribute 'hide'}
+	bReadBusy : BOOL;
+	
+	{attribute 'hide'}
+	bWriteDone : BOOL := TRUE;
+	{attribute 'hide'}
+	nSeqWrite : UINT;
+
+	{attribute 'hide'}
+	bExecuteWrite : BOOL;	
+	{attribute 'hide'}
+	bWriteError : BOOL;
+	{attribute 'hide'}
+	bWriteBusy : BOOL;
+	
+	{attribute 'hide'}
+	fbDelayOnError : TON := ( PT:= T#100MS);
+END_VAR
+VAR_STAT
+	{attribute 'hide'}
+	nCtsVnRegisterObject : UDINT;
+	{attribute 'hide'}
+	nCtsReadActive : UDINT;
+	{attribute 'hide'}
+	nCtsWriteActive : UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Error" Id="{b995d8eb-0f4d-4731-afa0-bce8127363b1}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Error : BOOL]]></Declaration>
+      <Get Name="Get" Id="{4995a4ec-259b-46d7-bc38-ab4431d12f4d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error := THIS^.bReadError OR THIS^.bWriteError OR THIS^.bErrorInvalideInterface;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_init" Id="{bd220b36-1d50-4305-9dfb-2219c7af7252}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCameraConnection : I_GigEVision_Register_Connection;
+    nAddress : GVCP_REGISTER_ADDRESS;
+END_VAR
+
+VAR_INST
+	{attribute 'hide'}
+	bFBInitCalledOnce : BOOL; //Do the following code once during start up and not during onlinechange
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bFBInitCalledOnce THEN 
+	THIS^.nAddress 		:= nAddress;
+
+	IF ipCameraConnection <> 0 THEN
+		OidCamera := ipCameraConnection.OID;
+	ELSE
+		bErrorInvalideInterface := TRUE;
+	END_IF
+END_IF
+
+bFBInitCalledOnce := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Initialize" Id="{b080f94e-871d-42ae-b861-c9fff024d797}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eCommandToRepeadAfterReconnect = READ THEN
+	//the reading of the parameter should be restarted again
+	THIS^.bReadDone := FALSE;
+END_IF
+
+IF eCommandToRepeadAfterReconnect = WRITE THEN
+	//the reading of the parameter should be restarted again
+	THIS^.bWriteDone := FALSE;
+END_IF
+
+
+Initialize := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="OID" Id="{7d0bc485-ce5d-4202-a27e-09578466fbb1}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY OID : OTCID]]></Declaration>
+      <Get Name="Get" Id="{b0245f4d-5c5b-40e8-b0ca-f1e960b5ae00}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OID := OidCamera;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReadDone" Id="{94be5db8-7ed4-473a-9cbe-691efefef7b2}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY ReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{cfb47ace-93d6-4fbc-a0b5-62920c2dcbcf}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReadDone := bReadDone;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{34402ef8-6889-42cc-93b1-39a47082fdfb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Only allow set to FALSE
+IF NOT ReadDone THEN
+	bReadDone := FALSE;
+END_IF]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Update" Id="{aec45a8f-6052-413d-86b9-1d2194f37d40}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bErrorInvalideInterface THEN
+	//Error
+	RETURN;
+END_IF
+
+
+(*--- Read ---*)
+bExecuteRead := FALSE;
+CASE nSeqRead OF
+	0: //Start/Restart if required
+		IF NOT bReadDone  AND bWriteDone(* Write has higher priority*) AND (nCtsReadActive < VisionParameterlist.MAX_VN_REGISTER_READ) AND (nSeqWrite = 0) THEN
+			bExecuteRead := TRUE; // Rising edge	
+			nCtsReadActive := nCtsReadActive +1;	
+			nSeqRead := 1;
+		END_IF
+	
+	1: //Check if done or error
+		IF bReadError THEN
+			//Error
+			nSeqRead := 99;
+			fbDelayOnError.IN := TRUE;
+			nCtsReadActive := nCtsReadActive -1;	
+			
+		ELSIF NOT bReadBusy AND NOT bReadError THEN
+			//Done
+			THIS^.bReadDone := TRUE;
+			nSeqRead := 0;
+			nCtsReadActive := nCtsReadActive -1;	
+			
+		ELSE
+			;//Busy
+		END_IF	
+		
+	99: // Delay on error to reduce amount of errors
+		IF fbDelayOnError.Q THEN
+			fbDelayOnError.IN := FALSE;
+			nSeqRead := 0;
+		END_IF
+END_CASE
+
+fbRTrigReadDone(CLK := THIS^.bReadDone);
+
+
+
+
+(*--- Write ---*)
+bExecuteWrite := FALSE;
+CASE nSeqWrite OF
+	0: //Start/Restart if required
+		IF NOT bWriteDone AND (nCtsWriteActive < VisionParameterlist.MAX_VN_REGISTER_WRITE) AND (nSeqRead = 0) THEN
+			bExecuteWrite := TRUE; // Rising edge	
+			nCtsWriteActive := nCtsWriteActive +1;	
+			nSeqWrite := 1;
+		END_IF
+	
+	1: //Check if done or error
+		IF bWriteError THEN
+			//Error
+			nSeqWrite := 99;
+			fbDelayOnError.IN := TRUE;
+			nCtsWriteActive := nCtsWriteActive -1;	
+			
+		ELSIF NOT bWriteBusy AND NOT bWriteError THEN
+			//Done
+			THIS^.bWriteDone := TRUE;
+			nSeqWrite := 0;
+			nCtsWriteActive := nCtsWriteActive -1;
+			
+		ELSE
+			;//Busy
+		END_IF	
+		
+	99: // Delay on error to reduce amount of errors
+		IF fbDelayOnError.Q THEN
+			fbDelayOnError.IN := FALSE;
+			nSeqWrite := 0;
+		END_IF		
+
+END_CASE
+
+
+
+//Update
+fbDelayOnError();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="WriteDone" Id="{64646644-1f16-4a76-899e-2e3a04062534}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY WriteDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{209c29a8-c950-4c14-b378-1d6a4d571595}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WriteDone := bWriteDone;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{accac2ee-ee8b-405e-8841-0fceea1aa973}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Only allow set to FALSE
+IF NOT WriteDone THEN
+	bWriteDone := FALSE;
+END_IF
+
+//in the event of a connection interruption to the device, either a read under write command is repeated
+eCommandToRepeadAfterReconnect := WRITE;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

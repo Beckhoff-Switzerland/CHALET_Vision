@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ImageFromFile" Id="{410c89b0-6cb5-45e9-a5df-b3111cffc1c9}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_ImageFromFile EXTENDS FB_ImageProvider_Base IMPLEMENTS I_ImageFromFile_Mode
+VAR
+	fbFileSourceCtl 	: FB_VN_FileSourceControl;	// Interface object for file source use
+	{attribute 'hide'}
+	sRequestSpecificImageName : STRING;
+	{attribute 'hide'}
+	nTimeNextTrigger  	: T_DCTIME64; 
+	{attribute 'hide'}
+	bResetCommand	: BOOL;
+	{attribute 'hide'}
+	sLastImageFileName : STRING(500);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="FileSourceControl" Id="{4c788d36-54c7-4bb3-93b8-db44b62b68f4}">
+      <Declaration><![CDATA[//Reference to base function block
+PROPERTY FileSourceControl : REFERENCE TO FB_VN_FileSourceControl]]></Declaration>
+      <Get Name="Get" Id="{f3c95fce-1e06-440c-8797-873d8c1d237c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[FileSourceControl REF= THIS^.fbFileSourceCtl;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{24b2af31-ac28-4033-8570-27e280c6f75f}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR
+
+END_VAR
+VAR_INST
+	//This error cannot be reset. Requires a reset cold
+	{attribute 'hide'}	
+	fbInitError : FB_TcAlarm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Initialize();
+
+// Object id of ImagePoovider is not set
+IF THIS^.fbFileSourceCtl.oidITcVnFileImageProvider = 0 THEN
+	IF NOT fbInitError.bRaised THEN 
+		//This error cannot be reset. Requires a reset cold
+		fbInitError.CreateEx(stEventEntry:=TC_EVENTS.CHALET_Vision_Events.ObjectIdNotSet, ipSourceInfo := THIS^.fbSourceInfo, bWithConfirmation := FALSE);
+		fbInitError.Raise(0);
+	END_IF
+	Initialize := E_FAIL;
+	RETURN;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="LastImageFileName" Id="{0194a796-ab29-4642-a475-f84ec16b0704}">
+      <Declaration><![CDATA[PROPERTY LastImageFileName : STRING(500)]]></Declaration>
+      <Get Name="Get" Id="{0a3420cd-7571-4216-8f03-cd0fcfc9540f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastImageFileName := sLastImageFileName;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OID" Id="{7e6370b6-d01b-46cc-be1e-d82c39f2180e}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY OID : CHALET_BaseComponents.OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{03a267b4-fcfb-41d7-a710-de6291b525b7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OID := THIS^.fbFileSourceCtl.oidITcVnFileImageProvider;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RequestSpecificImageName" Id="{df2496d4-a101-411f-bd85-747c9b98464f}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Next trigger will load a specific image in the list by name. ('' = any image)
+PROPERTY RequestSpecificImageName : STRING]]></Declaration>
+      <Get Name="Get" Id="{2b67b4b8-faeb-468f-a395-d253d1a20915}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RequestSpecificImageName := sRequestSpecificImageName;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b89ed09c-6259-48f0-8cdf-e7c25adc3e2b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sRequestSpecificImageName := RequestSpecificImageName;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Reset" Id="{07804a52-baa6-4bc4-847b-f75209f294bb}">
+      <Declaration><![CDATA[METHOD Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bResetCommand := TRUE;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{6c529f7b-7542-4ff8-8498-4c95a5827d89}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{a90ad4b3-98f0-4d97-863b-df2d12d31a15}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State := THIS^.eState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{8d1478b6-6c9b-4478-81a0-002d72a7d13e}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	nTimeStamp : T_DCTIME64;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.Operational AND NOT THIS^.fbFeedback.Busy THEN	
+	
+	//Stor the requestet time internal
+	THIS^.nTimeNextTrigger := nTimeStamp;
+	
+	Trigger := S_OK;
+ELSE
+	Trigger := E_FAIL;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TryGetImage" Id="{898851e1-bf29-441f-940e-32494b22f4eb}">
+      <Declaration><![CDATA[METHOD TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stImageWithInfo) THEN
+	//Error, invalide input
+	TryGetImage := E_FAIL;
+	RETURN;
+END_IF
+
+
+(* Release the old image before overwriting it with the new one *)	
+IF stImageWithInfo.ipImage <> 0 THEN
+	FW_SafeRelease(ADR(stImageWithInfo.ipImage));
+END_IF
+
+(*  Lock the image to prevent multiple access *)
+(*	🔒 LOCKED FROM HERE --------------------------------------------- *)
+IF THIS^.fbCrititcalSection.Enter() THEN
+	
+	(* Get current image from camera *)
+	TryGetImage := fbFileSourceCtl.GetCurrentImageAndFileName(	ipImage := stImageWithInfo.ipImage, 
+																sFileName := sLastImageFileName, 
+																nMaxLen := SIZEOF(sLastImageFileName)/SIZEOF(STRING(1))
+																);
+
+	(* Get image info from received image *)
+	F_VN_GetImageInfo(	ipImage:=stImageWithInfo.ipImage, 
+						stImageInfo:=stImageWithInfo.stInfo, 
+						hrPrev:=TryGetImage );
+	
+	(* Not used for image from file *)					
+	//stImageWithInfo.stGvspInfo
+
+	(* Store file name *)
+	stImageWithInfo.sCurrentImageFileName := sLastImageFileName;			
+						
+	(*	🔓 LOCKED TO HERE ----------------------------------------------- *)
+	THIS^.fbCrititcalSection.Leave();
+END_IF
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{562464f4-b032-4581-af85-706321867e0e}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(* Get current source state *)					
+eState := fbFileSourceCtl.GetState();
+
+(* Source state machine *)
+CASE eState OF
+	TCVN_CS_INITIAL, TCVN_CS_INITIALIZING, TCVN_CS_INITIALIZED, TCVN_CS_OPENING, TCVN_CS_STARTACQUISITION, TCVN_CS_OPENED:	
+		fbFeedback.ActiveCommand := 'StartAcquisition';
+		fbFeedback.hr := fbFileSourceCtl.StartAcquisition();
+
+	TCVN_CS_STOPACQUISITION:
+		fbFeedback.ActiveCommand := 'StopAcquisition';
+		fbFeedback.hr := fbFileSourceCtl.StopAcquisition();
+		
+	TCVN_CS_ACQUIRING:
+		fbFeedback.ActiveCommand := 'TriggerImage';
+		IF (THIS^.nTimeNextTrigger = 0) THEN
+			fbFeedback.Done := TRUE; //wait for a trigger
+			
+		ELSIF (F_GetCurDcTaskTime64()  >=  THIS^.nTimeNextTrigger)  THEN
+			//Clear
+			THIS^.nTimeNextTrigger := 0;
+			
+			IF sRequestSpecificImageName <> '' THEN
+				//Trigger image by name
+				fbFeedback.hr := fbFileSourceCtl.TriggerImageByName(sRequestSpecificImageName);
+			ELSE
+				//Any image
+				fbFeedback.hr := fbFileSourceCtl.TriggerImage();
+			END_IF
+			
+		ELSIF (THIS^.nTimeNextTrigger <> 0) THEN
+			fbFeedback.Busy := TRUE; //wait until trigger moment starts
+		END_IF
+
+		
+	TCVN_CS_TRIGGERING:
+		fbFeedback.ActiveCommand := 'TriggerImage';
+		fbFeedback.hr := fbFileSourceCtl.TriggerImage();
+		
+	TCVN_CS_ERROR:
+		(* Reset if commanded *)
+		IF THIS^.bResetCommand THEN
+			fbFeedback.ActiveCommand := 'Reset';
+			fbFeedback.hr := THIS^.fbFileSourceCtl.Reset();			
+		END_IF		
+END_CASE
+
+(* Clear Alarm if not in Error-State *)
+IF eState <> TCVN_CS_ERROR THEN
+	THIS^.bResetCommand := FALSE;
+END_IF
+
+Update := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

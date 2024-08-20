@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_VIx2000_Mode" Id="{8b08a9aa-96cb-4724-92f3-1d449fe6e17d}">
+    <Declaration><![CDATA[INTERFACE I_VIx2000_Mode
+]]></Declaration>
+    <Method Name="Configure" Id="{60a74a70-9cb4-40fa-94af-7cc016628f29}">
+      <Declaration><![CDATA[METHOD Configure : HRESULT
+VAR_INPUT
+	nOrange 	: UINT(0..511);
+	nGreen 		: UINT(0..511);
+	nBlue 		: UINT(0..511);
+	nInfrared 	: UINT(0..511);
+	nDuration_1us : UDINT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Trigger" Id="{62e0f7ab-95b8-4437-9c1d-9ca42ef4b444}">
+      <Declaration><![CDATA[METHOD Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

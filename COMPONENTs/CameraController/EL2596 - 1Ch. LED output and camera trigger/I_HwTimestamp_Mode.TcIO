@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_HwTimestamp_Mode" Id="{94b0a5e6-77b2-4f2e-b5e0-efb47bca32c9}">
+    <Declaration><![CDATA[INTERFACE I_HwTimestamp_Mode EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="Duration_1us" Id="{5f15678e-69c1-42b4-b23c-be8c8395eefd}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Duration_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{3d7b3b9b-14b1-4625-a95f-241cc21c013e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{b2d1ebae-882f-4849-8a91-5b96e0219679}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="Trigger" Id="{a6220490-d492-41e0-904d-1812b526ed46}">
+      <Declaration><![CDATA[METHOD PUBLIC Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+
+]]></Declaration>
+    </Method>
+    <Property Name="TriggerDelay_1ns" Id="{2a522584-211a-4538-b0eb-5cdc7a741441}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// The given trigger time is delayed by this value. E.g. to wait for the maximum lighting value before taking a picture  [in 1ns]
+PROPERTY TriggerDelay_1ns : UDINT]]></Declaration>
+      <Get Name="Get" Id="{8575f761-4e07-4e9e-a343-c1e71b5ad62d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{7cff1531-0450-4255-91c5-c98514566c9d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

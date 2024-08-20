@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_VisionMode_Base" Id="{136fa636-10c6-437d-a552-fe2967e29317}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK ABSTRACT FB_VisionMode_Base EXTENDS FB_CH_Object IMPLEMENTS I_VisionMode_Base
+VAR
+	ipVisionSystem 				: I_VisionSystem;
+	ipCameraController 			: I_CameraController_Base;
+	ipImageProvider 			: I_ImageProvider_Base;	
+	ipIlluminationController1 	: I_IlluminationController_Base;
+	ipIlluminationController2 	: I_IlluminationController_Base;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="LinkComponents" Id="{a35d3dc9-18bf-45a6-8afe-42c4cccf0ace}">
+      <Declaration><![CDATA[METHOD LinkComponents : HRESULT
+VAR_INPUT
+	ipVisionSystem		: I_VisionSystem;
+	ipCameraController 		: I_CameraController_Base;
+	ipImageProvider 			: I_ImageProvider_Base;	
+	ipIlluminationController1 : I_IlluminationController_Base;
+	ipIlluminationController2 : I_IlluminationController_Base;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.ipVisionSystem 				:= ipVisionSystem;
+THIS^.ipCameraController 			:= ipCameraController;
+THIS^.ipImageProvider 				:= ipImageProvider;
+THIS^.ipIlluminationController1 	:= ipIlluminationController1;
+THIS^.ipIlluminationController2 	:= ipIlluminationController2;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Name" Id="{082e6caa-832c-472e-8bd9-96d703e58af0}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Name or description of this mode
+PROPERTY ABSTRACT Name : STRING]]></Declaration>
+      <Get Name="Get" Id="{6643b263-a104-4cb5-ae45-17131ab2a1c8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>
