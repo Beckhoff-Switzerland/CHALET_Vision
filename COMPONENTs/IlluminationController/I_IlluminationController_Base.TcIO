@@ -9,6 +9,13 @@ PROPERTY Busy : BOOL]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{fbe68201-3519-42fd-932d-5997a5579930}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{64995085-47d9-49ac-880a-713c61029100}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
     <Property Name="Operational" Id="{20353367-f0f9-4ca7-86ad-67474f91ae65}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 PROPERTY Operational : BOOL]]></Declaration>

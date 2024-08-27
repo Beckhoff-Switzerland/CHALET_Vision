@@ -5,7 +5,9 @@
 //Pulse - A trigger activates an image acquisition with simultaneous triggering of the lighting 
 FUNCTION_BLOCK FB_VisionMode_Pulse_combined EXTENDS FB_VisionMode_Base IMPLEMENTS I_VisionMode_Pulse_combined
 VAR
+	{attribute 'hide'}
 	bInitDone : BOOL;
+	{attribute 'hide'}
 	nLastTriggerTime : T_DCTIME64;
 	
 	(* Supported/requested interfaces. Minimum one must be supported per ImageProvider/CameraController/IlluminationController *)
@@ -41,7 +43,7 @@ VAR_INPUT
 	nGreen 		: UINT(0..511); //0-511
 	nBlue 		: UINT(0..511); //0-511
 	nInfrared 	: UINT(0..511); //0-511
-	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start
+//	nExposureDelay_100ns : UDINT;	//Camera start at triggertime, illumination starts this time earlier
 	nExposure_1us : UDINT;			//Camera 
 	nIlluminationDuration_1us: UDINT;
 	nIlluminationOverride : USINT(1..100); // 1-100
@@ -60,17 +62,17 @@ END_IF
 (* CameraController *)
 (* Decide here how the hardware is to be controlled based on the interface that was found *)
 IF ipHwTimestamp_Mode <> 0 THEN
-	ipHwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns;
-	ipHwTimestamp_Mode.Duration_1us := nExposure_1us + TO_UDINT(nExposureDelay_100ns/10); //exposure + warm up time
+//	ipHwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns; zzz clean up
+	ipHwTimestamp_Mode.Duration_1us := nExposure_1us;// + TO_UDINT(nExposureDelay_100ns/10); //exposure + warm up time
 END_IF
 
 IF ipSwTimestamp_Mode <> 0 THEN
-	ipSwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns;
+//	ipSwTimestamp_Mode.TriggerDelay_1ns := nExposureDelay_100ns;
 END_IF
 
 IF ipGigeSoftwaretrigger <> 0 THEN
 	ipGigeSoftwaretrigger.GigeCamera := ipGigeVision_Mode;
-	ipGigeSoftwaretrigger.TriggerDelay_1ns := nExposureDelay_100ns;
+//	ipGigeSoftwaretrigger.TriggerDelay_1ns := nExposureDelay_100ns;
 END_IF
  
 
@@ -182,26 +184,6 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[Name := 'Acquisition with simultaneous triggering of the lighting';]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="NextPossibleTriggerTime" Id="{d800bdc8-187c-4611-9cbe-adebbc057d26}">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
-      <Get Name="Get" Id="{2a9e459f-7caa-4706-8ad0-3cee9fea3aff}">
-        <Declaration><![CDATA[VAR
-	nEtherCatCycles 	: UINT;	
-END_VAR]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[//If attribute 'TcCallAfterOutputUpdate' is set, it takes 1 cycle more to send timestamp to hardware
-IF TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].InCallAfterOutputUpdate THEN
-	nEtherCatCycles := 3;
-ELSE
-	nEtherCatCycles := 2;
-END_IF
-
-
-NextPossibleTriggerTime := F_GetCurDcTaskTime64()(*1ns*) + (THIS^.ipVisionSystem.TaskCycleTimeNs(*1ns*) * nEtherCatCycles (*Cycles*)) + 300_000(*300us(determined by testing)*);]]></ST>
         </Implementation>
       </Get>
     </Property>

@@ -99,15 +99,10 @@ VAR_INPUT
 	//F_GetCurDcTickTime64()
 	nDCTimeStamp	: T_DCTIME64;
 END_VAR
-VAR
-	nEarliestPossibleDCTime : T_DCTIME64;
-END_VAR
-
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[(* Check if the trigger is minimum 3 EtherCat cycles in future *)
-nEarliestPossibleDCTime := F_GetCurDcTaskTime64()(*1ns*) + THIS^.ipVisionSystem.TaskCycleTimeNs * 3 (*Cycles*);
-IF nDCTimeStamp < nEarliestPossibleDCTime THEN
+IF nDCTimeStamp < THIS^.NextPossibleTriggerTime  THEN
 	Trigger := E_FAIL;
 	RETURN;
 END_IF

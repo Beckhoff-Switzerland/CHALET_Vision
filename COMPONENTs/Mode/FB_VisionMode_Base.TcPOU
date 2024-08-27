@@ -4,11 +4,17 @@
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 FUNCTION_BLOCK ABSTRACT FB_VisionMode_Base EXTENDS FB_CH_Object IMPLEMENTS I_VisionMode_Base
 VAR
+	{attribute 'hide'}
 	ipVisionSystem 				: I_VisionSystem;
+	{attribute 'hide'}
 	ipCameraController 			: I_CameraController_Base;
+	{attribute 'hide'}
 	ipImageProvider 			: I_ImageProvider_Base;	
+	{attribute 'hide'}
 	ipIlluminationController1 	: I_IlluminationController_Base;
+	{attribute 'hide'}
 	ipIlluminationController2 	: I_IlluminationController_Base;
+	{attribute 'hide'}
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -42,6 +48,45 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{305aa82e-ef1c-4115-a8b3-738f66ce9cb1}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{abf72e53-554e-4c35-a392-1609eae05f94}">
+        <Declaration><![CDATA[VAR
+	tNextPossibleTriggerTime : T_DCTIME64;
+END_VAR]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+tNextPossibleTriggerTime := F_GetCurDcTaskTime64()(*1ns*) + 1*THIS^.ipVisionSystem.TaskCycleTimeNs(*1ns*) ;
+
+
+
+(* CameraController *)
+IF ipCameraController <> 0 THEN
+	tNextPossibleTriggerTime := MAX(tNextPossibleTriggerTime, ipCameraController.NextPossibleTriggerTime);
+END_IF	
+	
+
+
+(* lluminationController1 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipIlluminationController1 <> 0 THEN
+	tNextPossibleTriggerTime := MAX(tNextPossibleTriggerTime, ipIlluminationController1.NextPossibleTriggerTime);
+END_IF
+
+
+
+(* lluminationController2 *)
+(* Decide here how the hardware is to be controlled based on the interface that was found *)
+IF ipIlluminationController2 <> 0 THEN
+	tNextPossibleTriggerTime := MAX(tNextPossibleTriggerTime, ipIlluminationController2.NextPossibleTriggerTime);
+END_IF
+
+
+NextPossibleTriggerTime := tNextPossibleTriggerTime;]]></ST>
         </Implementation>
       </Get>
     </Property>

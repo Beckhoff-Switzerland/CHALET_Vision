@@ -60,6 +60,26 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{45d94320-b864-4aff-93d6-412f96bd5a51}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{a4f08291-be5b-4bda-a7e1-fc87aaa477c7}">
+        <Declaration><![CDATA[VAR
+	nEtherCatCycles 	: UINT;	
+END_VAR]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//If attribute 'TcCallAfterOutputUpdate' is set, it takes 1 cycle more to send timestamp to hardware
+IF TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].InCallAfterOutputUpdate THEN
+	nEtherCatCycles := 3;
+ELSE
+	nEtherCatCycles := 2;
+END_IF
+
+
+NextPossibleTriggerTime := F_GetCurDcTaskTime64()(*1ns*) + (THIS^.ipVisionSystem.TaskCycleTimeNs(*1ns*) * nEtherCatCycles (*Cycles*)) + 300_000(*300us(determined by testing)*);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="Operational" Id="{f9be7c63-4fd6-4b11-bad8-d852a57c4fea}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 PROPERTY Operational : BOOL]]></Declaration>

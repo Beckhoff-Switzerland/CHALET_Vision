@@ -10,7 +10,7 @@ VAR_INPUT
 	nGreen 		: UINT(0..511); //0-511
 	nBlue 		: UINT(0..511); //0-511
 	nInfrared 	: UINT(0..511); //0-511
-	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start
+//	nExposureDelay_100ns : UDINT;	//Camera start delay after illumination start zzz
 	nExposure_1us : UDINT;			//Camera 
 	nIlluminationDuration_1us: UDINT;
 	nIlluminationOverride : USINT(1..100); // 1-100

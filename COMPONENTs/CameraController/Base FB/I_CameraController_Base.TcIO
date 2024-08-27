@@ -19,6 +19,13 @@ PROPERTY Feedback : I_CH_Feedback]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>
+    <Property Name="NextPossibleTriggerTime" Id="{b77027a0-17e1-4c32-97c0-b8408ead22c3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY NextPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{2f2f03a8-1794-4a64-bbd8-91f147790b56}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
     <Property Name="Operational" Id="{1143ef1b-0642-44cf-a0a3-e52203d8a2d3}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 PROPERTY Operational : BOOL]]></Declaration>

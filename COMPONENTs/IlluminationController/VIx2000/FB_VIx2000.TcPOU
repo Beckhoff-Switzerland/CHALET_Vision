@@ -197,7 +197,15 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF (THIS^.eState = E_VIx2000_Status.READY) THEN
+        <ST><![CDATA[(* Check if the trigger is minimum 3 EtherCat cycles in future *)
+IF nDCTimeStamp < THIS^.NextPossibleTriggerTime THEN
+	Trigger := E_FAIL;
+	RETURN;
+END_IF
+
+
+
+IF (THIS^.eState = E_VIx2000_Status.READY) THEN
 	THIS^.nSwitchOnCounterOnTrigger := THIS^.DeviceInputs.nSwitch_on_counter;
 	THIS^.Pulse_DC_Outputs.nTimestamp 	:= nDCTimeStamp;
 	THIS^.Pulse_DC_Outputs.nFlashDelay 	:= 0;
@@ -323,13 +331,14 @@ IF NOT VisionParameterlist.ILLUMINATION_WAIT_FOR_TRIGGER_FEEDBACK THEN
 	bNewCounterValue := nSwitchOnCounterLastCycle <> THIS^.DeviceInputs.nSwitch_on_counter;
 	nSwitchOnCounterLastCycle := THIS^.DeviceInputs.nSwitch_on_counter;
 	fbTimeOutNoReactionToTrigger.IN := NOT bNewCounterValue AND (nSwitchOnCounterShouldValue <> THIS^.DeviceInputs.nSwitch_on_counter);
-	fbTimeOutNoReactionToTrigger.PT := T#1S;
+	fbTimeOutNoReactionToTrigger.PT := T#5S;
 	fbTimeOutNoReactionToTrigger();
 	IF fbTimeOutNoReactionToTrigger.Q THEN
 		//Raise TC3-Eventlogger Alarm
 		IF NOT fbAlarmNoReactionToTrigger.bRaised THEN
 			fbAlarmNoReactionToTrigger.CreateEx(stEventEntry := TC_EVENTS.CHALET_Vision_Events.NoReactionToTheTrigger, bWithConfirmation := FALSE, ipSourceInfo := THIS^.fbSourceInfo);
 			fbAlarmNoReactionToTrigger.Raise(0);
+			nSwitchOnCounterShouldValue := THIS^.DeviceInputs.nSwitch_on_counter;
 		END_IF
 		
 		//Change in alarm state

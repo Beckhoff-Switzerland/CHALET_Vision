@@ -4,14 +4,22 @@
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 FUNCTION_BLOCK FB_VisionSystem EXTENDS FB_CH_Object IMPLEMENTS I_VisionSystem
 VAR
+	{attribute 'hide'}
 	ipImageProvider 			: I_ImageProvider_Base;
+	{attribute 'hide'}
 	ipCameraController 			: I_CameraController_Base;
+	{attribute 'hide'}
 	ipIlluminationController1 	: I_IlluminationController_Base;
+	{attribute 'hide'}
 	ipIlluminationController2 	: I_IlluminationController_Base;
+	{attribute 'hide'}
 	ipActiveVisionMode			: I_VisionMode_Base;
-		
+	
+	{attribute 'hide'}	
 	bInitDone 					: BOOL;
+	{attribute 'hide'}
 	bMethodeExecuteError		: BOOL;
+	{attribute 'hide'}
 	nPlcTaskCycleTime 			: UDINT; // In 100ns
 END_VAR
 ]]></Declaration>
