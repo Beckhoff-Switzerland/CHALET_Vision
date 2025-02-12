@@ -18,7 +18,7 @@
     <Company>Beckhoff CH</Company>
     <Released>false</Released>
     <Title>CHALET_Vision</Title>
-    <ProjectVersion>2.1.2</ProjectVersion>
+    <ProjectVersion>4.0.1</ProjectVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="LICENSE.md">
@@ -33,6 +33,20 @@
       <DefaultResolution>CHALET_BaseComponents, * (Beckhoff CH)</DefaultResolution>
       <Namespace>CHALET_BaseComponents</Namespace>
       <PublishSymbolsInContainer>true</PublishSymbolsInContainer>
+      <Parameters>
+        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
+          <Key>MAX_OBJECTS</Key>
+          <Value>150</Value>
+        </Parameter>
+        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
+          <Key>MAX_COE_READ</Key>
+          <Value>20</Value>
+        </Parameter>
+        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
+          <Key>MAX_COE_WRITE</Key>
+          <Value>20</Value>
+        </Parameter>
+      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_EtherCAT">
       <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
@@ -45,14 +59,72 @@
     <PlaceholderReference Include="Tc2_System">
       <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_System</Namespace>
+      <Parameters>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>TABLE_UPPER_BOUND</Key>
+          <Value>15</Value>
+        </Parameter>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>STRING_LENGTH_EXP</Key>
+          <Value>255</Value>
+        </Parameter>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>STRING_LENGTH_ADDRESS</Key>
+          <Value>20</Value>
+        </Parameter>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>STRING_LENGTH_COMMENT</Key>
+          <Value>255</Value>
+        </Parameter>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>STRING_LENGTH_OUTSTRING</Key>
+          <Value>255</Value>
+        </Parameter>
+        <Parameter ListName="PARAM" xmlns="">
+          <Key>TABLE_SHOW_VALID_ITEMS</Key>
+          <Value>FALSE</Value>
+        </Parameter>
+      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Utilities">
       <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_Utilities</Namespace>
+      <Parameters>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>NMAXLICENSES</Key>
+          <Value>50</Value>
+        </Parameter>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>NMAXLICENSEDEVICES</Key>
+          <Value>16</Value>
+        </Parameter>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>NMAXCPUCOUNT</Key>
+          <Value>64</Value>
+        </Parameter>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>CMAXCHARACTERS</Key>
+          <Value>16#FFFFFFF0</Value>
+        </Parameter>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>NMAXFILESONDONGLE</Key>
+          <Value>20</Value>
+        </Parameter>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>CMAXCSVFIELDVALUESIZE</Key>
+          <Value>255</Value>
+        </Parameter>
+      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_EventLogger">
       <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_EventLogger</Namespace>
+      <Parameters>
+        <Parameter ListName="PARAMETERLIST" xmlns="">
+          <Key>CSOURCENAMESIZE</Key>
+          <Value>256</Value>
+        </Parameter>
+      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_Module">
       <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
@@ -64,188 +136,52 @@
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="COMPONENTs\CameraController\Base FB\FB_CameraController_Base.TcPOU">
+    <Compile Include="COMPONENTs\BeckhoffHardware\FB_EtherCAT_Timestamp.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\Base FB\I_CameraController_Base.TcIO">
+    <Compile Include="COMPONENTs\BeckhoffHardware\FB_GigE_Standalone.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\Base FB\I_CameraController_StatusOnly.TcIO">
+    <Compile Include="COMPONENTs\BeckhoffHardware\I_EtherCat_Trigger.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\EL2258 - 8Ch. digital output timestamp\FB_EL2258_1Ch_TSO.TcPOU">
+    <Compile Include="COMPONENTs\BeckhoffHardware\I_GevCameraControl.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger\FB_EL2596.TcPOU">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\FB_GigE_Beckhoff_Register.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger\I_HwTimestamp_Mode.TcIO">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigeRegister.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger\FB_EtherCAT_Trigger.TcPOU">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Camera.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger\I_SwTimestamp_Mode.TcIO">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Lighting.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\GigE - Softwaretrigger\FB_GigeSoftwaretrigger.TcPOU">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_OpticControl.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\CameraController\GigE - Softwaretrigger\I_GigeSoftTrigger_Mode.TcIO">
+    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Standalone.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\EL2595 - 1Ch. LED output timestamp\FB_EL2595.TcPOU">
+    <Compile Include="COMPONENTs\RegisterObjects\Base\FB_VnRegister_Base.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\FB_IlluminationController_Base.TcPOU">
+    <Compile Include="COMPONENTs\RegisterObjects\Base\I_VnRegister.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\I_IlluminationController_Base.TcIO">
+    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_Memory.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\I_IlluminationController_StatusOnly.TcIO">
+    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_REAL.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\SingleOutput\FB_IlluminationSingleOutput.TcPOU">
+    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_UDINT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\SingleOutput\I_IlluminationSingleOutput_Mode.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\E_VIx2000_Status.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_Channel.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_InDevice.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_OutDevice.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\DUTs\ST_VIx2000_Pulse.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\FB_VIx2000.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\IlluminationController\VIx2000\I_VIx2000_Mode.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Base FB\FB_ImageProvider_Base.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Base FB\I_ImageProvider_Base.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Base FB\I_ImageProvider_StatusOnly.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\E_TriggerSource.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\FB_GigE_Vision.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\FB_GigE_Beckhoff.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\I_GigEVision_Mode.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\I_GigEVision_Register_Connection.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\Camera\ST_AlarmCodes.TcDUT">
-      <SubType>Code</SubType>
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\ImageFromFile\FB_ImageFromFile.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\ImageProvider\ImageFromFile\I_ImageFromFile_Mode.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\FB_VisionMode_Base.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\I_VisionMode_Base.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\I_VisionMode_StatusOnly.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\Combined illumination and camera triggers\FB_VisionMode_Pulse_combined.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\Combined illumination and camera triggers\I_VisionMode_Pulse_combined.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\Separate illumination and camera triggers\FB_VisionMode_Pulse_separate.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\Mode\Separate illumination and camera triggers\I_VisionMode_Pulse_separate.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_UDINT.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VisionSystem\FB_VisionSystem.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VisionSystem\I_VisionSystem.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_REAL.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_Memory.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\FB_VnRegister_ULINT.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\internal\FB_VnRegister_Base.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="COMPONENTs\VnRegister-Access\internal\I_VnRegister_Status.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToCameraController.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToHwTimestamp_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToGigeSoftTrigger_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToSwTimestamp_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToIlluminationSingleOutput_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToGigEVision_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToImageFromFile_Mode.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToImageProvider.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\TolluminationController.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToVisionMode_Pulse_combined.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToVisionMode_Pulse_separate.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FUNCTIONs\Casting\ToVIx2000_Mode.TcPOU">
+    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_ULINT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FUNCTIONs\Color\E_Color_ARGB.TcDUT">
@@ -257,7 +193,22 @@
     <Compile Include="FUNCTIONs\Sharpness\F_VND_Sharpness_SumModifiedLaplace_ULINT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TYPEs\E_StateTerminal.TcDUT">
+    <Compile Include="TYPEs\E_AcquisitionModeReg.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_CameraRegisters_Beckhoff.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_CameraType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_DeviceDefaultState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_TriggerMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\E_TriggerSource.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TYPEs\ST_ImageWithInfo.TcDUT">
@@ -269,39 +220,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="COMPONENTs" />
-    <Folder Include="COMPONENTs\CameraController" />
-    <Folder Include="COMPONENTs\CameraController\EL2258 - 8Ch. digital output timestamp">
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Folder>
-    <Folder Include="COMPONENTs\CameraController\EL2596 - 1Ch. LED output and camera trigger">
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Folder>
-    <Folder Include="COMPONENTs\CameraController\EtherCAT Timestamp trigger" />
-    <Folder Include="COMPONENTs\CameraController\GigE - Softwaretrigger">
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Folder>
-    <Folder Include="COMPONENTs\CameraController\Base FB" />
-    <Folder Include="COMPONENTs\IlluminationController" />
-    <Folder Include="COMPONENTs\IlluminationController\EL2595 - 1Ch. LED output timestamp">
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Folder>
-    <Folder Include="COMPONENTs\IlluminationController\SingleOutput">
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Folder>
-    <Folder Include="COMPONENTs\IlluminationController\VIx2000" />
-    <Folder Include="COMPONENTs\IlluminationController\VIx2000\DUTs" />
-    <Folder Include="COMPONENTs\ImageProvider" />
-    <Folder Include="COMPONENTs\ImageProvider\Camera" />
-    <Folder Include="COMPONENTs\ImageProvider\ImageFromFile" />
-    <Folder Include="COMPONENTs\ImageProvider\Base FB" />
-    <Folder Include="COMPONENTs\Mode" />
-    <Folder Include="COMPONENTs\Mode\Combined illumination and camera triggers" />
-    <Folder Include="COMPONENTs\Mode\Separate illumination and camera triggers" />
-    <Folder Include="COMPONENTs\VnRegister-Access" />
-    <Folder Include="COMPONENTs\VisionSystem" />
-    <Folder Include="COMPONENTs\VnRegister-Access\internal" />
+    <Folder Include="COMPONENTs\BeckhoffHardware" />
+    <Folder Include="COMPONENTs\RegisterBeckhoffDevice" />
+    <Folder Include="COMPONENTs\RegisterObjects" />
+    <Folder Include="COMPONENTs\RegisterObjects\Base" />
     <Folder Include="FUNCTIONs" />
-    <Folder Include="FUNCTIONs\Casting" />
     <Folder Include="FUNCTIONs\Color" />
     <Folder Include="FUNCTIONs\Sharpness" />
     <Folder Include="TYPEs" />
@@ -335,29 +258,6 @@
     <PlaceholderResolution Include="Tc3_Vision">
       <Resolution>Tc3_Vision, * (Beckhoff Automation GmbH)</Resolution>
     </PlaceholderResolution>
-  </ItemGroup>
-  <ItemGroup>
-    <SubObject Include="FB_CameraController_Base.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="FB_EL2258_1Ch_TSO.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="FB_EL2596.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="FB_EtherCAT_Trigger.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="FB_GigeSoftwaretrigger.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="I_CameraController_Base.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
-    <SubObject Include="I_CameraController_StatusOnly.Busy">
-      <ExcludeFromBuild>true</ExcludeFromBuild>
-    </SubObject>
   </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>
@@ -416,7 +316,7 @@
                   <d n="SubKeys" t="Hashtable" />
                   <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
                     <v>bActive</v>
-                    <v>False</v>
+                    <v>True</v>
                   </d>
                 </o>
                 <v>6</v>

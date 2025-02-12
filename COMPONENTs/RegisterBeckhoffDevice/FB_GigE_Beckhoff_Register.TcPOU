@@ -1,0 +1,657 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_GigE_Beckhoff_Register" Id="{15833fd6-b4b7-4828-a96b-9c644879be7b}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK FB_GigE_Beckhoff_Register EXTENDS FB_CH_Object IMPLEMENTS I_GigE_Beckhoff_Camera, I_GigeRegister
+VAR	
+	//Connection to camera
+	{attribute 'hide'}
+	ipCamera : I_GevCameraControl;	
+
+	//GigE-Camera-Register
+	//Read/Write
+	{attribute 'hide'}
+	fbRegAcquisitionMode 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pAcquisitionModeReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegTriggerMode	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pTriggerModeFrameStartReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegTriggerSource	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pTriggerSourceFrameStartReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegExposureTime	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pExposureTimeReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegDeviceDefaultState		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pDeviceDefaultStateReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegRegionModeOn			: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pRegionModeReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegRegionWidth			: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pRegion0WidthReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegRegionHeight			: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pRegion0HeightReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegRegionOffsetX			: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pRegion0OffsetXReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegRegionOffsetY			: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pRegion0OffsetYReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegGainAnalog				: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pGainBaseReg, nEndian := 0);
+	                                                                    
+	//Read only                                                         
+	{attribute 'hide'}                                                  
+	fbRegDeviceVendorName		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceVendorName, nLength := 32); //String	
+	{attribute 'hide'}                                                  
+	fbRegDeviceModelName	 	: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceModelName, nLength := 32); //String	
+	{attribute 'hide'}                                                  
+	fbRegDeviceVersion	 		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceVersion, nLength := 32); //String		
+	{attribute 'hide'}                                                  
+	fbRegSensorName		 		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.SensorName, nLength := 80); //String	
+	{attribute 'hide'}                                                  
+	fbRegDeviceSerialNumber	 	: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceSerialNumber, nLength := 16); //String	
+	{attribute 'hide'}                                                  
+	fbRegCurrentIPAddress	 	: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.BootStrap_IPAddress, nEndian := 0);  //T_IPv4AddrArr
+	{attribute 'hide'}                                                 
+	fbRegGevMACAddressHighWord	: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pGevMACAddressHighWordReg, nEndian := 0);
+	{attribute 'hide'}                                                 
+	fbRegGevMACAddressLowWord	: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pGevMACAddressLowWordReg, nEndian := 0);
+	{attribute 'hide'}                                                 
+	fbRegImgSensorWidth			: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pPhysicalWidthReg, nEndian := 0);
+	{attribute 'hide'}                                                 
+	fbRegImgSensorHeight		: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pPhysicalHeightReg, nEndian := 0);
+
+	//List
+	{attribute 'hide'}
+	fbVnRegisterList 			: FB_CH_List;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="RegisterParameter" Id="{d5fdb964-dfee-45e6-88b8-6565742baa0c}">
+      <Folder Name="Acquisition and Trigger" Id="{1055459e-2632-4ea9-81dc-8fbf38b8d1d8}" />
+      <Folder Name="Device" Id="{b871647f-d1a4-4c60-804c-3e3f63053cb5}" />
+      <Folder Name="Region" Id="{753991fa-0cbd-40c5-86ec-45d6c94e3ced}" />
+      <Folder Name="Sensor" Id="{52a7efd1-0bfd-4902-9b6a-5ed702219317}" />
+    </Folder>
+    <Property Name="AcquisitionMode" Id="{ef244aed-f1df-4463-8d79-7a3b36a831f6}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Number of frames captured in the acquisition. 
+//SingleFrame: One frame is captured. 
+//MultiFrame: The number of frames specified by AcquisitionFrameCount is captured. 
+//Continuous: Frames are captured continuously until stopped with the AcquisitionStop command.
+PROPERTY AcquisitionMode : E_AcquisitionModeReg]]></Declaration>
+      <Get Name="Get" Id="{9ad73c05-11a1-473e-bd5b-d01ba5e68f28}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[AcquisitionMode := THIS^.fbRegAcquisitionMode.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{616420e8-fc7a-4544-a8ab-822cd7fae41f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegAcquisitionMode.Value := AcquisitionMode;
+
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="AllReadDone" Id="{91c45d14-822a-40f7-abd4-7dcecfaf6f2a}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f61b7ae1-04fd-4013-a8b3-dafe52d2cb22}">
+        <Declaration><![CDATA[VAR
+	ipVnRegisterStatus : I_VnRegister;
+	bAllRead : BOOL := TRUE;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
+WHILE THIS^.fbVnRegisterList.HasNextObject() DO
+	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+		bAllRead := bAllRead AND ipVnRegisterStatus.ReadDone;
+	END_IF
+END_WHILE
+THIS^.fbVnRegisterList.RestoreIterator();
+		
+AllReadDone := bAllRead;		
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{65c509b9-6b77-475f-83f0-e73720e33772}">
+        <Declaration><![CDATA[VAR
+	ipRegObject : I_VnRegister;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF AllReadDone = FALSE THEN
+	THIS^.fbVnRegisterList.ResetIterator();
+	WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
+		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
+			ipRegObject.ReadDone := FALSE;
+		END_IF
+	END_WHILE
+	THIS^.fbVnRegisterList.RestoreIterator();
+END_IF
+
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="AllWriteDone" Id="{3ef6b466-38a3-44e5-99cc-88f719c98ae4}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllWriteDone : Bool]]></Declaration>
+      <Get Name="Get" Id="{44dae8b1-46a4-4942-b701-c96223612070}">
+        <Declaration><![CDATA[VAR
+	ipVnRegisterStatus : I_VnRegister;
+	bAllWritten : BOOL := TRUE;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
+WHILE THIS^.fbVnRegisterList.HasNextObject() DO
+	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+		bAllWritten := bAllWritten AND ipVnRegisterStatus.WriteDone;
+	END_IF
+END_WHILE
+THIS^.fbVnRegisterList.RestoreIterator();
+		
+AllWriteDone := bAllWritten;		
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1ce2c662-c182-4dfe-8b52-fa0e074612df}">
+        <Declaration><![CDATA[VAR
+	ipRegObject : I_VnRegister;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF AllWriteDone = FALSE THEN
+	THIS^.fbVnRegisterList.ResetIterator();
+	WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
+		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
+			ipRegObject.WriteDone := FALSE;
+		END_IF
+	END_WHILE
+	THIS^.fbVnRegisterList.RestoreIterator();
+END_IF
+
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="DeviceDefaultState" Id="{34afc0de-dcf7-4be5-86e8-f98969a9d7fd}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Controls whether most of the camera settings is controlled by GigE Vision or EtherCAT. 
+//A change from EtherCAT to GigE Vision requires a reboot.
+PROPERTY DeviceDefaultState : E_DeviceDefaultState]]></Declaration>
+      <Get Name="Get" Id="{7664beb5-88fa-4201-8791-0677c3cab887}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DeviceDefaultState := THIS^.fbRegDeviceDefaultState.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{91179343-bee6-4894-8b4c-cf2f619f06c9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegDeviceDefaultState.Value := DeviceDefaultState;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="DeviceModeNamel" Id="{eb5a59af-59ec-406c-9c15-0191f6b2dca8}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Displays the device model name.
+PROPERTY DeviceModeNamel : STRING(32)]]></Declaration>
+      <Get Name="Get" Id="{68e21193-31c7-42fb-b620-26202dfbee37}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceModelName.ReadData(ADR(DeviceModeNamel));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceSerialNumber" Id="{8413e07c-8274-4f81-8977-84a6e9751f51}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Device's serial number. This string is a unique identifier of the device.
+PROPERTY DeviceSerialNumber : STRING(16)]]></Declaration>
+      <Get Name="Get" Id="{0f5241e2-3d6a-4be1-8697-6427fb4e5d16}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceSerialNumber.ReadData(ADR(DeviceSerialNumber));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceVendorName" Id="{6d154ddb-c391-4438-aa39-d7c339e0c4ec}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY DeviceVendorName : STRING(32)]]></Declaration>
+      <Get Name="Get" Id="{f65126e3-c91d-427c-9705-d266dcc1e136}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceVendorName.ReadData(ADR(DeviceVendorName));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DeviceVersion" Id="{7f09e316-3f65-4f08-b1c4-fc08195a38f1}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Displays the device version which includes the firmware release and build.
+PROPERTY DeviceVersion : STRING(32)]]></Declaration>
+      <Get Name="Get" Id="{1c6fb4c2-c34b-47fb-ad3a-1d4199dac7a7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegDeviceVersion.ReadData(ADR(DeviceVersion));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Exposure_1us" Id="{9c41c965-62da-4a60-b8bd-a89a1fe1642d}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY Exposure_1us : UDINT]]></Declaration>
+      <Get Name="Get" Id="{b04c876e-18dc-43fb-908e-5629b46c781d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Exposure_1us := THIS^.fbRegExposureTime.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{617189e7-d42c-49c8-83d6-a03f6910b168}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegExposureTime.Value := Exposure_1us;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{07eb15c8-e3c3-4bc2-9e87-ad285d7e7049}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCamera : I_GevCameraControl;
+END_VAR
+VAR
+	ipVnRegisterStatus : I_VnRegister;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//Do the following code once during start up and not during onlinechange
+IF NOT bInCopyCode THEN 
+	
+	THIS^.ipCamera := ipCamera;
+
+	//Read/Write
+	fbVnRegisterList.AddObject(fbRegAcquisitionMode);
+	fbVnRegisterList.AddObject(fbRegTriggerMode);
+	fbVnRegisterList.AddObject(fbRegTriggerSource);
+	fbVnRegisterList.AddObject(fbRegExposureTime);
+	fbVnRegisterList.AddObject(fbRegDeviceDefaultState);
+	fbVnRegisterList.AddObject(fbRegRegionModeOn);
+	fbVnRegisterList.AddObject(fbRegRegionWidth);
+	fbVnRegisterList.AddObject(fbRegRegionHeight);
+	fbVnRegisterList.AddObject(fbRegRegionOffsetX);
+	fbVnRegisterList.AddObject(fbRegRegionOffsetY);
+	fbVnRegisterList.AddObject(fbRegGainAnalog);
+	
+	//Read only
+	fbVnRegisterList.AddObject(fbRegDeviceVendorName);
+	fbVnRegisterList.AddObject(fbRegDeviceModelName);
+	fbVnRegisterList.AddObject(fbRegSensorName);
+	fbVnRegisterList.AddObject(fbRegDeviceVersion);
+	fbVnRegisterList.AddObject(fbRegDeviceSerialNumber);
+	fbVnRegisterList.AddObject(fbRegCurrentIPAddress);
+	fbVnRegisterList.AddObject(fbRegGevMACAddressHighWord);
+	fbVnRegisterList.AddObject(fbRegGevMACAddressLowWord);
+	fbVnRegisterList.AddObject(fbRegImgSensorWidth);
+	fbVnRegisterList.AddObject(fbRegImgSensorHeight);
+	
+	
+	//Link to Camera to allow an parameter to switch the camera in open state
+	THIS^.fbVnRegisterList.ResetIterator();
+	WHILE THIS^.fbVnRegisterList.HasNextObject() DO
+		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+			ipVnRegisterStatus.LinkCamera(ipCamera);
+		END_IF
+	END_WHILE
+	THIS^.fbVnRegisterList.RestoreIterator();
+	
+	
+	//Prepare for EtherCat-TimeStamp-Trigger use
+	THIS^.TriggerSource 		:= E_TriggerSource.EtherCAT;
+	THIS^.AcquisitionMode		:= E_AcquisitionModeReg.Continous;
+	THIS^.TriggerMode			:= E_TriggerMode.On;
+	THIS^.DeviceDefaultState 	:= E_DeviceDefaultState.AutoDetect; 
+	THIS^.Exposure_1us 			:= 50;//[us]
+	
+	//Set some valide values
+	THIS^.RegionHeight			:= 500;
+	THIS^.RegionWidth			:= 500;
+
+		
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="GainAnalog" Id="{d3d2aebc-6313-46d0-947f-ed5d24d21bc8}" FolderPath="RegisterParameter\Sensor\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Analog gain in 0.1 dB steps
+PROPERTY GainAnalog : LREAL]]></Declaration>
+      <Get Name="Get" Id="{1a338836-888b-4c62-963e-9acc3399066f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[GainAnalog := 0.1 * TO_LREAL(THIS^.fbRegGainAnalog.Value);]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{cfa97108-54b6-44b4-86c1-54bc78db566b}">
+        <Declaration><![CDATA[VAR
+	nIncrements : UINT; //0.1db Steps 0-240Inc.
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nIncrements := TO_UINT(GainAnalog / 0.1);
+
+// >=0
+nIncrements := MAX(nIncrements, 0);
+	
+// <=240
+nIncrements := MIN(nIncrements, 240);	
+
+THIS^.fbRegGainAnalog.Value := nIncrements;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Initialize" Id="{c2d6eef4-6794-4c59-bc63-f2294ecf2a1a}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Reset all read and write flags 
+THIS^.fbVnRegisterList.Initialize();]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IPAddress" Id="{1fb51da5-1faf-4b4a-9843-e4da33f59764}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//IP-Adress as STRING(15)
+PROPERTY IPAddress : T_IPv4Addr ]]></Declaration>
+      <Get Name="Get" Id="{a5352a5c-7ce0-444c-b895-bae3a0215352}">
+        <Declaration><![CDATA[VAR
+	nValueTemp : UDINT;
+	stAdressByteArray   : T_IPv4AddrArr; // Byte-Array
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+IF SIZEOF(fbRegCurrentIPAddress.Value) <> (4*SIZEOF(BYTE)) THEN
+	//Error wrond Datatype, Return 0.0.0.0
+	IPAddress := F_CreateIPv4Addr(stAdressByteArray);
+	RETURN;
+END_IF
+
+
+
+//store in a temp variable
+nValueTemp := fbRegCurrentIPAddress.Value;
+
+
+//convert to struct(Array of byte)
+Tc2_System.MEMCPY(srcAddr:= ADR(nValueTemp)+3, destAddr:= ADR(stAdressByteArray)+0, n:= SIZEOF(BYTE));
+Tc2_System.MEMCPY(srcAddr:= ADR(nValueTemp)+2, destAddr:= ADR(stAdressByteArray)+1, n:= SIZEOF(BYTE));
+Tc2_System.MEMCPY(srcAddr:= ADR(nValueTemp)+1, destAddr:= ADR(stAdressByteArray)+2, n:= SIZEOF(BYTE));
+Tc2_System.MEMCPY(srcAddr:= ADR(nValueTemp)+0, destAddr:= ADR(stAdressByteArray)+3, n:= SIZEOF(BYTE));
+
+
+IPAddress := F_CreateIPv4Addr(stAdressByteArray); //Byte-Array to String]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MacAddress" Id="{e0a424d2-01ce-4866-bb40-a6c6f58823fc}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//MAC-Adress from camera
+PROPERTY MacAddress : STRING(12) ]]></Declaration>
+      <Get Name="Get" Id="{abb82e33-502f-4cf7-8efa-5b6ef1884c1d}">
+        <Declaration><![CDATA[VAR
+
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF NOT(fbRegGevMACAddressHighWord.ReadDone AND fbRegGevMACAddressLowWord.ReadDone) THEN
+	//Wait for first read
+	RETURN;
+END_IF
+
+MacAddress := Tc2_Standard.CONCAT(
+								//This function converts a decimal number into a hexadecimal string (base 16).
+								STR1:= Tc2_Utilities.DWORD_TO_HEXSTR(in:= fbRegGevMACAddressHighWord.Value, iPrecision:= 4, bLoCase:= TRUE ), 
+								STR2:= Tc2_Utilities.DWORD_TO_HEXSTR(in:= fbRegGevMACAddressLowWord.Value, iPrecision:= 8, bLoCase:= TRUE )
+								);
+
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RegionEnable" Id="{75431256-5337-4fbc-b9a9-db86ed8b01ca}" FolderPath="RegisterParameter\Region\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Controls if the selected Region of interest is active and streaming.
+PROPERTY RegionEnable : BOOL]]></Declaration>
+      <Get Name="Get" Id="{37dc7639-d0ba-4ed8-82c9-cb63e5c86b91}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RegionEnable := (THIS^.fbRegRegionModeOn.Value = 16#01);]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{634963f9-002e-4f2c-96a6-69c8a0f2b841}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF RegionEnable = TRUE THEN
+	THIS^.fbRegRegionModeOn.Value := 16#01;
+END_IF
+
+IF RegionEnable = FALSE THEN
+	THIS^.fbRegRegionModeOn.Value := 16#00;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RegionHeight" Id="{c13b9ead-d18d-4ad4-a238-8839251cc104}" FolderPath="RegisterParameter\Region\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Height of the image region of interest
+PROPERTY RegionHeight : UDINT]]></Declaration>
+      <Get Name="Get" Id="{bbc4a35a-2fb1-4f72-87a4-ae25115c43d7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RegionHeight := THIS^.fbRegRegionHeight.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4feea163-c59c-47aa-b683-c17e4cb21478}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegRegionHeight.Value := RegionHeight;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RegionOffsetX" Id="{de4cebd3-f65a-4941-8309-58cb4a38b9c9}" FolderPath="RegisterParameter\Region\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Horizontal offset from the origin to the region of interest (in pixels).
+PROPERTY RegionOffsetX : UDINT]]></Declaration>
+      <Get Name="Get" Id="{7ba345e1-0737-46d7-a9e6-f2599adaf25a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RegionOffsetX := THIS^.fbRegRegionOffsetX.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a1ffe563-44fd-4b0a-ab90-c3eaf8e7048f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegRegionOffsetX.Value := RegionOffsetX;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RegionOffsetY" Id="{b572822b-3d6c-4c28-96f4-44978139300c}" FolderPath="RegisterParameter\Region\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Vertical offset in lines of the uppermost pixel relative to the active sensor area.
+PROPERTY RegionOffsetY : UDINT]]></Declaration>
+      <Get Name="Get" Id="{43049e85-1cb4-4679-a77f-439e95fd4b03}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RegionOffsetY := THIS^.fbRegRegionOffsetY.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{95500b20-46be-4c7d-a7e1-172a10260b50}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegRegionOffsetY.Value := RegionOffsetY;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RegionWidth" Id="{2921d5c8-811d-4e97-820b-3d4b4801c0b8}" FolderPath="RegisterParameter\Region\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Width of the image region of interest (must be an even value)
+PROPERTY RegionWidth : UDINT]]></Declaration>
+      <Get Name="Get" Id="{2858e1c0-2c86-490d-a672-9487790ec8dd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[RegionWidth := THIS^.fbRegRegionWidth.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e27e8c70-05c3-4a7c-84a6-7152f13ab4ab}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.fbRegRegionWidth.Value := RegionWidth;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SensorHeight" Id="{06a328d9-01ea-4779-877c-5af943a17ed8}" FolderPath="RegisterParameter\Sensor\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The number of effective pixels in horizontal direction
+PROPERTY SensorHeight : UDINT]]></Declaration>
+      <Get Name="Get" Id="{bd1d3123-64c5-43de-9d4d-434bd1afaca8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SensorHeight := THIS^.fbRegImgSensorHeight.Value;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SensorName" Id="{f92008fd-e978-4eeb-9ebf-e424f613b3bb}" FolderPath="RegisterParameter\Sensor\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Displays the model of the sensor.
+PROPERTY SensorName : STRING]]></Declaration>
+      <Get Name="Get" Id="{38bc0f17-8d53-48ef-9140-58cd8635c3b9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegSensorName.ReadData(ADR(SensorName));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SensorWidth" Id="{0c3916c4-8033-405c-8fc7-32e3b86930bc}" FolderPath="RegisterParameter\Sensor\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The number of effective pixels in vertical direction
+PROPERTY SensorWidth : UDINT]]></Declaration>
+      <Get Name="Get" Id="{f6c54ede-a5af-4dfd-92c4-dca7045973e2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SensorWidth := THIS^.fbRegImgSensorWidth.Value;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TriggerMode" Id="{58ef174a-3f93-4197-939a-f22a2a707a5b}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Acquisition Trigger Mode On or Off
+PROPERTY TriggerMode : E_TriggerMode]]></Declaration>
+      <Get Name="Get" Id="{fad31867-d14c-4672-8241-37358c6a797e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerMode := THIS^.fbRegTriggerMode.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ba36022c-743a-4cbe-854e-d3ff4e23b137}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegTriggerMode.Value := TriggerMode;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="TriggerSource" Id="{5acf50c9-5d81-4bbd-a92f-0491a9da3908}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Select the external input or software signal for use as trigger source.s
+PROPERTY TriggerSource : E_TriggerSource]]></Declaration>
+      <Get Name="Get" Id="{2d778395-14df-4dea-9c2e-8d16e2631787}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerSource := THIS^.fbRegTriggerSource.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c8ce26c7-85b0-43d3-ab07-cbae2bd0012f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbRegTriggerSource.Value := TriggerSource;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Update" Id="{dfcd320b-b25c-4f86-9d05-5d54c5d20c1f}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//If the connection to vision is in state "Opene" try to read or write parameters
+IF (THIS^.ipCamera <> 0) AND_THEN THIS^.ipCamera.GevCameraControl.GetState() = TCVN_CS_OPENED THEN
+	THIS^.fbVnRegisterList.Update();
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_EtherCAT_Timestamp" Id="{9d20c851-b748-444b-bf44-9b7c6f6eded6}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_EtherCAT_Timestamp EXTENDS FB_CH_Object IMPLEMENTS  I_EtherCat_Trigger
+VAR
+	nTimestamp 				AT %Q*	: T_DCTIME64;			// Trigger time stamp
+	{attribute 'hide'}	
+	bInitDone 				: BOOL;
+	{attribute 'hide'}	
+	nTimeStampArrayTodo 	: ARRAY[0..(VisionParameterlist.TRIGGER_BUFFER_SIZE-1)] OF T_DCTIME64;	
+	{attribute 'hide'}	
+	nIdxNextEmptyTimestamp 	: UINT;
+	{attribute 'hide'}  						
+	fbFeedback 				: FB_CH_Feedback(THIS^.fbSourceInfo);
+	{attribute 'hide'}  						
+	nTaskCycleTimeNs 		: UDINT;//[ns]
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="EarliestPossibleTriggerTime" Id="{bb46e498-77eb-45c8-976b-5aeb1050a687}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//[ns]
+PROPERTY EarliestPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{331eb13e-7165-415a-af8f-0463d67e1c4a}">
+        <Declaration><![CDATA[VAR
+	nEtherCatCycles 	: UINT;	
+	nLastStoredTrigger 	: T_DCTIME64;
+	nTimeReferenceNs 	: T_DCTIME64;
+END_VAR]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//If attribute 'TcCallAfterOutputUpdate' is set, it takes 1 cycle more to send timestamp to hardware
+IF TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].InCallAfterOutputUpdate THEN
+	nEtherCatCycles := 3;
+ELSE
+	nEtherCatCycles := 2;
+END_IF
+
+
+IF nIdxNextEmptyTimestamp = 0 THEN
+	//No timestamp stored	
+	nLastStoredTrigger := 0;
+ELSE
+	nLastStoredTrigger := nTimeStampArrayTodo[nIdxNextEmptyTimestamp-1];
+END_IF
+
+ 
+//Either the current time or the last trigger is selected as the reference, depending on which is later
+nTimeReferenceNs := MAX(F_GetCurDcTaskTime64(), nLastStoredTrigger);
+
+//TODO: test if possible to reduca 1 ethercat cycle if not first trigger in array
+
+EarliestPossibleTriggerTime := nTimeReferenceNs + VisionParameterlist.CAMERA_TRIGGER_RESPONSE_TIME_ns + TO_ULINT(THIS^.nTaskCycleTimeNs * nEtherCatCycles (*Cycles*));]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="EmptySpaceInBuffer" Id="{5a06c732-750d-4c85-9747-2c4996520fdb}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//This FB can buffer several trigger time stamps. This property shows whether another trigger can be stored.
+PROPERTY EmptySpaceInBuffer : BOOL]]></Declaration>
+      <Get Name="Get" Id="{db8bef80-6bac-42c0-ac17-203e487033b8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EmptySpaceInBuffer := THIS^.nIdxNextEmptyTimestamp < VisionParameterlist.TRIGGER_BUFFER_SIZE;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Feedback" Id="{50dc5c73-ebf7-430b-af98-2f4d21ddd674}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{2f3f367c-bb71-441a-83e2-f49bb2417788}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Feedback := THIS^.fbFeedback;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{b9e423a7-d43f-4dc9-836a-e5d07a26943a}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR
+	stVarInfo : __SYSTEM.VAR_INFO;
+END_VAR
+VAR_INST
+	//This error cannot be reset. Requires a reset cold
+	{attribute 'hide'}	
+	fbInitError : FB_TcAlarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// Check if link is mapped
+IF NOT THIS^.Mapped THEN
+	IF NOT fbInitError.bRaised THEN 
+		//This error cannot be reset. Requires a reset cold
+		fbInitError.CreateEx(	stEventEntry	:=TC_EVENTS.CHALET_Base_Events.VariableLinkMissing,
+								ipSourceInfo 	:= THIS^.fbSourceInfo, 
+								bWithConfirmation := FALSE);
+		stVarInfo := __VARINFO(THIS^.nTimestamp);
+		fbInitError.ipArguments.AddString(stVarInfo.Symbol);
+		fbInitError.Raise(0);
+	END_IF
+	Initialize := E_FAIL;
+	RETURN;
+END_IF
+
+
+THIS^.nTaskCycleTimeNs := TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].CycleTime * 100;
+
+
+IF Initialize = S_OK THEN
+	THIS^.bInitDone := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{48dfdf75-8b02-422c-8ef7-35b7a581f21d}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e40089b0-6b11-4b41-a9a4-30e7a8ad4071}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := THIS^.bInitDone;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="LastTriggerTime" Id="{416fc55d-bbe2-47c2-91c4-95d4ffe5bd1a}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//[ns]
+PROPERTY LastTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{a3664b43-5eb0-4bb6-8716-58f62c95a93f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastTriggerTime := THIS^.nTimestamp;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Mapped" Id="{02391377-8e10-49c8-a321-74437ce50de4}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+//FB is mapped to hardware
+PROPERTY Mapped : BOOL 
+]]></Declaration>
+      <Get Name="Get" Id="{1a3ecc8c-f867-4b21-af5f-0bfa48218338}">
+        <Declaration><![CDATA[VAR
+	bNotMapped 	: BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bNotMapped := F_GetMappingStatus(ADR(THIS^.nTimestamp), SIZEOF(THIS^.nTimestamp)) <> EPlcMappingStatus.MS_Mapped;
+
+Mapped := NOT bNotMapped;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{089f04a5-021f-4dc9-b658-62ba3f404518}">
+      <Declaration><![CDATA[METHOD PUBLIC Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbFeedback.ActiveCommand := 'Trigger';
+
+// Check if the trigger is minimum 3 EtherCat cycles in future
+IF (nDCTimeStamp) < THIS^.EarliestPossibleTriggerTime THEN
+	//Todo error
+	fbFeedback.HR := E_FAIL;
+	Trigger := E_FAIL;
+	RETURN;
+END_IF
+
+
+//Check that the trigger is not too far in the future - by mistake
+IF nDCTimeStamp > (F_GetCurDcTickTime64() + TO_ULINT(VisionParameterlist.MAX_NEXT_TRIGGER_IN_FUTURE_ms) * 1_000_000(*ms in ns*)) THEN
+	//Todo error
+	fbFeedback.HR := E_FAIL;
+	Trigger := E_FAIL;
+	RETURN;
+END_IF
+
+
+//Check list of next array is not full
+IF nIdxNextEmptyTimestamp = VisionParameterlist.TRIGGER_BUFFER_SIZE THEN
+	//Todo error
+	fbFeedback.HR := E_FAIL;
+	Trigger := E_FAIL;
+	RETURN;	
+END_IF
+
+
+//Store next triggertime in an array
+nTimeStampArrayTodo[nIdxNextEmptyTimestamp] := nDCTimeStamp;
+nIdxNextEmptyTimestamp := nIdxNextEmptyTimestamp +1;
+fbFeedback.Busy := TRUE;
+
+
+Trigger := S_OK;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{0c78618f-8388-4857-b673-92c282b99b49}">
+      <Declaration><![CDATA[METHOD PUBLIC Update : HRESULT
+VAR
+	nIdx : UDINT;
+	nNbElementsToMove : UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Force to initialize first
+IF NOT THIS^.Initialized THEN
+	THIS^.Initialize();
+END_IF
+
+
+//Set next earlierst time to output
+IF nTimeStampArrayTodo[0] <> 0 THEN
+	THIS^.nTimestamp := nTimeStampArrayTodo[0];
+END_IF
+
+
+//Check list and remove timestampe who are done(in the past)
+FOR nIdx := 0 TO (VisionParameterlist.TRIGGER_BUFFER_SIZE - 1) DO
+	IF (nTimeStampArrayTodo[nIdx] <= F_GetCurDcTaskTime64()) AND (nTimeStampArrayTodo[nIdx] <> 0) THEN
+		
+		//Found, remove from list by shift 1 position - if not at end of list
+		nNbElementsToMove := (VisionParameterlist.TRIGGER_BUFFER_SIZE - nIdx - 1);
+		IF nNbElementsToMove > 0 THEN
+			Tc2_System.MEMMOVE(	destAddr	:= ADR(nTimeStampArrayTodo[nIdx]), 
+					srcAddr		:= ADR(nTimeStampArrayTodo[nIdx+1]),
+					n			:= SIZEOF(nTimeStampArrayTodo[nIdx]* nNbElementsToMove));
+			nIdx := nIdx - 1;
+		END_IF
+		
+		//Adjust index to new position					
+		nIdxNextEmptyTimestamp := nIdxNextEmptyTimestamp - 1;
+		
+		//Clear empty position
+		nTimeStampArrayTodo[nIdxNextEmptyTimestamp] := 0;
+	END_IF
+END_FOR
+
+
+
+//Set feedback to done if list of trigger is empty
+IF nTimeStampArrayTodo[0] = 0 THEN
+	THIS^.fbFeedback.Done := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

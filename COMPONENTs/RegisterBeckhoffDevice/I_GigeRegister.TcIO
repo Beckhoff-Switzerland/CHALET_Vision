@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_GigeRegister" Id="{13381513-d2a4-43fb-a7f9-ac173fc14f06}">
+    <Declaration><![CDATA[INTERFACE I_GigeRegister EXTENDS I_CH_Object
+]]></Declaration>
+    <Property Name="AllReadDone" Id="{3a6158c4-5a5b-437c-8363-ea2d9270c4bb}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{811dab00-6e17-445b-a49f-3eaa60deb4e2}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{b0c2be25-0e5c-4b36-9a56-94eaa8df3ba8}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="AllWriteDone" Id="{13dd2b53-7af7-402e-898a-7c60b6866d76}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllWriteDone : Bool]]></Declaration>
+      <Get Name="Get" Id="{b1b7b5c5-944d-4b72-b665-3b2af42e129f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{45b58d8c-606c-4c98-9163-360c2c0e1a99}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

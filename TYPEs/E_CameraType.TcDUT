@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <DUT Name="E_CameraType" Id="{637099a2-f74f-4339-baaf-9ba5e44f4594}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE E_CameraType :
+(
+	Beckhoff_VCS2xxx,
+	ThirdParty
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

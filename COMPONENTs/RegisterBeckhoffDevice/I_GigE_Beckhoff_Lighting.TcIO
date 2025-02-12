@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_GigE_Beckhoff_Lighting" Id="{691951c0-ea04-4d8d-83a6-4b264fec853c}">
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Lighting EXTENDS I_GigeRegister
+]]></Declaration>
+    <Property Name="AllReadDone" Id="{c4ae7a6a-5a0f-478a-9b52-82ec85ee4894}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{ac4149d1-df78-4567-8641-8ef45c1cd4ac}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{6fe08956-8f6f-4597-86b6-70bcab8d93f5}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="AllWriteDone" Id="{aa722f5a-2474-4658-939f-c94876d5d82a}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY AllWriteDone : Bool]]></Declaration>
+      <Get Name="Get" Id="{868dc061-100f-4f6f-8c8d-e40b96756589}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{d78acce2-5709-4e58-8d5f-73c84aa488fa}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

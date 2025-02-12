@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_GevCameraControl" Id="{7f00a947-cfa5-4422-b85f-0910fae75f85}">
+    <Declaration><![CDATA[INTERFACE I_GevCameraControl EXTENDS I_CH_Object
+]]></Declaration>
+    <Property Name="GevCameraControl" Id="{9e0cfc43-99e1-4b16-acd1-30b93120b83b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// This FB provides the basic functionality to control a GigE Vision camera and access its calibration data.
+PROPERTY GevCameraControl : REFERENCE TO FB_VN_GevCameraControl]]></Declaration>
+      <Get Name="Get" Id="{ae2382a2-4a32-43ed-b68f-2ec669517dcf}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

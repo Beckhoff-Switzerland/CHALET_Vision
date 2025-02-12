@@ -1,0 +1,448 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <POU Name="FB_GigE_Standalone" Id="{e8c292d8-c8f1-47c5-8349-a7443f582da7}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_GigE_Standalone EXTENDS FB_CH_Object IMPLEMENTS I_GevCameraControl, I_GigE_Beckhoff_Standalone
+VAR
+	// This FB provides the basic functionality to control a GigE Vision camera and access its calibration data.
+	fbCamera 						: FB_VN_GevCameraControl;	
+	fbTriggerEtherCat				: FB_EtherCAT_Timestamp;
+	
+	{attribute 'hide'}	
+	eCameraType						: E_CameraType := E_CameraType.Beckhoff_VCS2xxx; 	
+	{attribute 'hide'}
+	fbGigeBeckhoffRegister 			: FB_GigE_Beckhoff_Register(ipCamera := THIS^);
+	{attribute 'hide'}	
+	ipRegister 						: I_GigeRegister;
+		
+	{attribute 'hide'}	
+	bInitDone 			: BOOL;
+	{attribute 'hide'}
+	bResetCommand		: BOOL;
+	{attribute 'hide'}  						
+	fbFeedback 			: FB_CH_Feedback(THIS^.fbSourceInfo); 
+	{attribute 'hide'}
+	fbAlarmOidNotSet 	: FB_TcAlarm;									// Alarm due to source state	
+END_VAR
+
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="CameraType" Id="{7fb62898-c1ef-473f-8fa5-37fc744dfaeb}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY CameraType : E_CameraType]]></Declaration>
+      <Get Name="Get" Id="{6fbdc49f-5dec-49b6-b3b2-6ecf421f6204}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CameraType := THIS^.eCameraType;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f1d50843-b071-4042-b7c8-71452311f410}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//if a new type is selectet, init the last one to reset all errors
+IF (THIS^.CameraType <> THIS^.eCameraType) AND (THIS^.ipRegister <> 0) THEN
+	THIS^.ipRegister.Initialize();
+END_IF
+
+//store new type
+THIS^.eCameraType := CameraType;
+
+//write new object to nterface
+CASE THIS^.eCameraType OF	
+	E_CameraType.Beckhoff_VCS2xxx:
+		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegister;
+	
+	E_CameraType.ThirdParty:
+		THIS^.ipRegister := 0;
+	
+	ELSE
+		THIS^.ipRegister := 0;
+END_CASE]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{6d48896f-0163-44cc-930b-b0132ca2b6f1}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+VAR
+	fbGetCurTaskIdx  : GETCURTASKINDEX;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInCopyCode THEN
+	//Set the init enum value as start value
+	THIS^.CameraType := THIS^.eCameraType;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Feedback" Id="{25a83ed1-35db-403a-8b79-b1707e7b3bf5}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{05de5582-afd6-49ee-8b6a-a404cc9a5153}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Feedback := THIS^.fbFeedback;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="GevCameraControl" Id="{a6a5ff40-e698-4eb9-a4af-7e7b956de53b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// This FB provides the basic functionality to control a GigE Vision camera and access its calibration data.
+PROPERTY GevCameraControl : REFERENCE TO FB_VN_GevCameraControl]]></Declaration>
+      <Get Name="Get" Id="{4dbcaeb3-d198-410e-97c9-10d4ba383e48}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[GevCameraControl REF= THIS^.fbCamera;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{bc3ff501-3767-4510-b98a-2583f7f1bf51}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR 
+	fbTaskInfo			: PlcTaskSystemInfo;
+	hr					: HRESULT;
+END_VAR
+VAR_INST
+	//This error cannot be reset. Requires a reset cold
+	{attribute 'hide'}	
+	fbInitError : FB_TcAlarm;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[hr := SUPER^.Initialize();
+
+
+// Object id of ImagePoovider is not set
+IF THIS^.fbCamera.oidITcVnGevImageProvider = 0 THEN
+	IF NOT fbInitError.bRaised THEN 
+		//This error cannot be reset. Requires a reset cold
+		fbInitError.CreateEx(stEventEntry:=TC_EVENTS.CHALET_Vision_Events.ObjectIdNotSet, ipSourceInfo := THIS^.fbSourceInfo, bWithConfirmation := FALSE);
+		fbInitError.Raise(0);
+	END_IF
+	Initialize := E_FAIL;
+	RETURN;
+END_IF
+
+
+//Subelement
+hr := GetMostSignificant(hr, fbTriggerEtherCat.Initialize());
+IF THIS^.ipRegister <> 0 THEN
+	hr := GetMostSignificant(hr, THIS^.ipRegister.Initialize());
+END_IF
+
+
+Initialize := hr;
+
+IF Initialize = S_OK THEN
+	THIS^.bInitDone := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{178783fa-217d-4798-9b8e-d70049fcf541}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{56ce6899-32d2-404f-b92a-ec207c58a345}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := THIS^.bInitDone;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="OID" Id="{d45d7cb9-9db9-405f-b0dc-b7829281ff91}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Returns the OTCID OF the camera object.
+PROPERTY OID : CHALET_BaseComponents.OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{56913cf9-4381-4276-9512-01359e1a5425}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OID := THIS^.fbCamera.oidITcVnGevImageProvider;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{9b1561a2-3115-4016-a31a-87faf9e28f65}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Module started successfully and entered aquiring mode
+PROPERTY PUBLIC Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6d77fdf6-f25e-4c00-846a-cd2fdd7d4509}">
+        <Declaration><![CDATA[VAR
+	eState : ETcVnCameraState;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[eState := THIS^.State;
+Operational := (eState = TCVN_CS_ACQUIRING) OR (eState = TCVN_CS_TRIGGERING);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RegisterCamera" Id="{7006d77f-1177-4d8f-8d2e-4799aa5ef962}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Interface to the parameters, can be 0(=invalid interface) depending on the hardware
+PROPERTY RegisterCamera : I_GigE_Beckhoff_Camera]]></Declaration>
+      <Get Name="Get" Id="{56e40d86-31f2-4a86-b952-e35c1b162e6c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Convert in requestet interface
+__QUERYINTERFACE(THIS^.ipRegister, RegisterCamera);
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RegisterLighting" Id="{3bc93099-1af4-4df9-a214-2075b055cd4e}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Interface to the parameters, can be 0(=invalid interface) depending on the hardware
+PROPERTY RegisterLighting : I_GigE_Beckhoff_Lighting]]></Declaration>
+      <Get Name="Get" Id="{85ef6c0e-3835-4f12-b3d4-c1e462184f60}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Convert in requestet interface
+__QUERYINTERFACE(THIS^.ipRegister, RegisterLighting);
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RegisterOpticControl" Id="{480374a2-f3ac-43eb-951f-9329e1d1b209}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Interface to the parameters, can be 0(=invalid interface) depending on the hardware
+PROPERTY RegisterOpticControl : I_GigE_Beckhoff_OpticControl
+]]></Declaration>
+      <Get Name="Get" Id="{4c574dc9-5086-42a5-9522-7829f29520e1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Convert in requestet interface
+__QUERYINTERFACE(THIS^.ipRegister, RegisterOpticControl);
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{3060e3a3-a4a0-40c3-95ce-133e9b21bdc7}">
+      <Declaration><![CDATA[//Try to reset the camera connection
+METHOD Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.bResetCommand := TRUE;
+
+fbFeedback.ActiveCommand := 'Reset';
+fbFeedback.hr := THIS^.fbCamera.Reset();	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{50e80ae9-2935-4fb3-9258-b3bc964b950f}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Gets the current state of the internal camera control state machine.
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{403fa147-7caa-45cc-b95d-19e7e59994e7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State := THIS^.fbCamera.GetState();]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TriggerEtherCat" Id="{d56cc878-4ab2-4eaf-906d-a4f6451fdf4c}">
+      <Declaration><![CDATA[PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
+      <Get Name="Get" Id="{5511c542-b995-4328-b8d3-a625ef59ee40}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TriggerEtherCat := THIS^.fbTriggerEtherCat;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="TriggerSoftware" Id="{eebc06d9-4bb8-48c3-8885-1edcdf59cd74}">
+      <Declaration><![CDATA[//Send the 'SoftwareTriggerCommands' defined in the TcVnGevImageProvider TcCOM module to the camera.
+METHOD PUBLIC TriggerSoftware : HRESULT
+VAR
+	eState : ETcVnCameraState;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[eState := THIS^.State;
+
+(* Check if not in wrong state *)
+IF NOT ((eState = ETcVnCameraState.TCVN_CS_ACQUIRING) OR (eState = ETcVnCameraState.TCVN_CS_OPENED)) THEN
+	TriggerSoftware := E_FAIL;
+	RETURN;
+END_IF
+
+// Trigger image
+TriggerSoftware := fbCamera.TriggerImage();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="TryGetImage" Id="{a7872ab3-e0b7-44ca-a9ad-ab28324c5ff8}">
+      <Declaration><![CDATA[//Gets the current available image (first in receive queue) and its corresponding GVSP info
+METHOD  TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+VAR_INST
+	{attribute 'hide'}							
+    fbCrititcalSection : FB_IecCriticalSection;    						// Internal lock for test & set function    
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(stImageWithInfo) THEN
+	//Error, invalide input
+	TryGetImage := E_FAIL;
+	RETURN;
+END_IF
+
+
+(* Release the old image before overwriting it with the new one *)	
+IF stImageWithInfo.ipImage <> 0 THEN
+	FW_SafeRelease(ADR(stImageWithInfo.ipImage));
+END_IF
+
+
+(*  Lock the image to prevent multiple access *)
+(*	🔒 LOCKED FROM HERE --------------------------------------------- *)
+IF fbCrititcalSection.Enter() THEN
+	
+	(* Get current image from camera *)
+	TryGetImage := fbCamera.GetCurrentImageWithGvspInfo(
+						ipImage := stImageWithInfo.ipImage,
+						stGvspInfo := stImageWithInfo.stGvspInfo
+						);
+
+	(* Get image info from received image *)
+	F_VN_GetImageInfo(	ipImage:=stImageWithInfo.ipImage, 
+						stImageInfo:=stImageWithInfo.stInfo, 
+						hrPrev:=TryGetImage );
+	
+	(* for a camera a fictitious name *)
+	stImageWithInfo.sCurrentImageFileName := TO_STRING(stImageWithInfo.stGvspInfo.BlockId);			
+
+	(*	🔓 LOCKED TO HERE ----------------------------------------------- *)
+	fbCrititcalSection.Leave();
+END_IF
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{f47126a0-8dd0-475c-9002-45ef62606169}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	ipVnRegisterStatus : I_VnRegister;
+	bAllReadDone : BOOL := TRUE;
+	bAllWriteDone : BOOL := TRUE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Force to initialize first
+IF NOT THIS^.Initialized THEN
+	THIS^.Initialize();
+END_IF
+
+
+
+(* Source state machine *)
+CASE THIS^.State OF
+	TCVN_CS_INITIAL, TCVN_CS_INITIALIZING:
+		fbFeedback.ActiveCommand := 'InitializeCamera';
+		fbFeedback.hr := fbCamera.InitializeCamera();
+
+	TCVN_CS_INITIALIZED,  TCVN_CS_OPENING:	
+		IF THIS^.ipRegister <> 0 THEN
+			//Redo a read or write for each parameter
+			THIS^.ipRegister.Initialize();
+		END_IF
+		fbFeedback.ActiveCommand := 'OpenCamera';
+		fbFeedback.hr := fbCamera.OpenCamera();
+		
+	TCVN_CS_OPENED:
+		IF THIS^.ipRegister = 0 THEN
+			fbFeedback.ActiveCommand := 'StartAcquisition';
+			fbFeedback.hr := fbCamera.StartAcquisition();
+		ELSIF THIS^.ipRegister.AllReadDone AND THIS^.ipRegister.AllWriteDone THEN
+			fbFeedback.ActiveCommand := 'StartAcquisition';
+			fbFeedback.hr := fbCamera.StartAcquisition();
+		ELSE	
+			//Read and write all camera parameter in this OPENED-State 
+			fbFeedback.ActiveCommand := 'ReadWrite camera parameters';
+			fbFeedback.Busy	:= TRUE;
+		END_IF
+	
+		
+	TCVN_CS_STARTACQUISITION:
+		fbFeedback.ActiveCommand := 'StartAcquisition';
+		fbFeedback.hr := fbCamera.StartAcquisition();
+		
+		
+	TCVN_CS_STOPACQUISITION:
+		fbFeedback.ActiveCommand := 'StopAcquisition';
+		fbFeedback.hr := fbCamera.StopAcquisition();
+		
+	TCVN_CS_ACQUIRING:
+		//wait for trigger
+		;
+		//Check if a chage in opened state is required to read/write parameter
+		IF THIS^.ipRegister <> 0 AND_THEN (NOT THIS^.ipRegister.AllReadDone OR NOT THIS^.ipRegister.AllWriteDone) THEN
+			fbFeedback.ActiveCommand := 'StopAcquisition';
+			fbCamera.StopAcquisition();
+		END_IF
+		
+	TCVN_CS_TRIGGERING:
+		(* Execute the triggering until done *)
+		fbFeedback.ActiveCommand := 'TriggerImage';
+		fbFeedback.hr := fbCamera.TriggerImage();
+		
+	TCVN_CS_ERROR:	
+		(* Reset if commanded *)
+		IF THIS^.bResetCommand THEN
+			fbFeedback.ActiveCommand := 'Reset';
+			fbFeedback.hr := THIS^.fbCamera.Reset();			
+		END_IF
+		
+END_CASE
+
+(* Clear Alarm if not in Error-State *)
+IF THIS^.State <> TCVN_CS_ERROR THEN
+	THIS^.bResetCommand := FALSE;
+END_IF
+
+
+//Subelement
+fbTriggerEtherCat.Update();
+IF THIS^.ipRegister <> 0 THEN
+	//Redo a read or write for each parameter
+	THIS^.ipRegister.Update();
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

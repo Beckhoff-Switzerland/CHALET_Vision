@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_EtherCat_Trigger" Id="{6c7ffa27-bf73-4cbc-805a-c95929c9c841}">
+    <Declaration><![CDATA[INTERFACE I_EtherCat_Trigger EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Property Name="EarliestPossibleTriggerTime" Id="{ec6ec32e-0eaa-4b93-a2f5-41ed549c0b9c}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY EarliestPossibleTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{f0b40fda-59ce-4a3e-8995-f5d3a4956b98}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="EmptySpaceInBuffer" Id="{456e14f4-14d1-4440-afb5-0c1db44db662}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//This FB can buffer several trigger time stamps. This property shows whether another trigger can be stored.
+PROPERTY EmptySpaceInBuffer : BOOL]]></Declaration>
+      <Get Name="Get" Id="{81337c30-b401-4cde-a058-31d59a7abfe6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="LastTriggerTime" Id="{07516f6f-6749-48c3-a812-591c20b0e247}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY LastTriggerTime : T_DCTIME64]]></Declaration>
+      <Get Name="Get" Id="{fdbe1390-8f98-4e8f-88d8-21ad43bfd8be}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Mapped" Id="{c798e684-c432-43f6-badb-ff463ebc0557}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+//FB is mapped to hardware
+PROPERTY Mapped : BOOL 
+]]></Declaration>
+      <Get Name="Get" Id="{87003794-38f4-4ec4-b91a-ef7acb050f46}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{573598d9-95fd-4436-ad63-d90e0210b32c}">
+      <Declaration><![CDATA[METHOD PUBLIC Trigger : HRESULT
+VAR_INPUT
+	//The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+	//The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+	//F_GetCurDcTickTime64()
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

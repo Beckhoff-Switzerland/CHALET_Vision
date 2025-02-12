@@ -2,7 +2,7 @@
 <TcModuleClass>
 	<DataTypes>
 		<DataType>
-			<Name GUID="{A3BB26DC-66C3-46AE-8A26-D3056A24E572}">CHALET_Vision_Events</Name>
+			<Name GUID="{CD0B0CCD-7E34-4473-A13D-8071BBC2E85C}">CHALET_Vision_Events</Name>
 			<DisplayName TxtId=""><![CDATA[CHALET_Vision]]></DisplayName>
 			<EventId>
 				<Name Id="1">ObjectIdNotSet</Name>
@@ -24,6 +24,16 @@
 				<Comment TxtId=""><![CDATA[nSwitch_on_counter should have been increased]]></Comment>
 				<Severity>Error</Severity>
 			</EventId>
+			<EventId>
+				<Name Id="4">RegReadError</Name>
+				<DisplayName TxtId=""><![CDATA[Reading the parameter failed]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="5">RegWriteError</Name>
+				<DisplayName TxtId=""><![CDATA[Write the parameter failed]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
 			<Hides>
 				<Hide GUID="{CDAD6064-7CA1-46D4-9C9E-9EAD1F13906E}"/>
 				<Hide GUID="{E87C1C60-257C-4AA5-9001-25EE5F4E2501}"/>
@@ -35,6 +45,9 @@
 				<Hide GUID="{11EA6718-1DFC-48EB-A41C-72F90C56CCAC}"/>
 				<Hide GUID="{BCC4DE9E-04D7-4916-808E-AFF951D73B69}"/>
 				<Hide GUID="{F2664310-AFE4-42C4-8BF7-02F37F2A35EA}"/>
+				<Hide GUID="{A3BB26DC-66C3-46AE-8A26-D3056A24E572}"/>
+				<Hide GUID="{67515B00-1D6B-4180-BD65-9229571F191E}"/>
+				<Hide GUID="{FB57C9E9-D277-43A3-81CF-9F4B4B658960}"/>
 			</Hides>
 		</DataType>
 	</DataTypes>

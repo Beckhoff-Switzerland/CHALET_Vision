@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <DUT Name="E_AcquisitionModeReg" Id="{b9881737-c85e-4649-9d5b-9d89ed3db9ba}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'to_string'}
+TYPE E_AcquisitionModeReg :
+(
+	Continous		 	:= 0,
+	SingleFrame	 		:= 1,
+	MultiFrame			:= 2
+)UDINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

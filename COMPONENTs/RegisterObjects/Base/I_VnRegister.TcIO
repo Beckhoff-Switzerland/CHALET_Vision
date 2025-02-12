@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_VnRegister" Id="{4abec9b2-99ef-4920-b246-1713bdec0650}">
+    <Declaration><![CDATA[INTERFACE I_VnRegister
+]]></Declaration>
+    <Property Name="Error" Id="{11f102be-7735-47fe-864a-f509591e33f6}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Error : BOOL]]></Declaration>
+      <Get Name="Get" Id="{83c668bb-4717-4e7b-953d-c62013240150}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="LinkCamera" Id="{46f8be53-1237-4619-8450-dc0621ed3782}">
+      <Declaration><![CDATA[//Linkt one the interface to camera. Normaly during FB_init
+METHOD LinkCamera : BOOL
+VAR_INPUT
+	ipCamera : I_GevCameraControl;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="ReadDone" Id="{a64668fc-38ec-496e-ad44-5b8d3187cae1}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY ReadDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{41bdfc70-33a8-46f8-9ae8-9b1ac717054a}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{0b9d61c1-6499-4c7c-b1d7-c9576dac9349}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="WriteDone" Id="{bc1db8c3-9212-4ae5-8894-d3f35f3f6930}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY WriteDone : BOOL]]></Declaration>
+      <Get Name="Get" Id="{978f1658-50be-4939-a2a1-d07157bebb1d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{84518e5f-cfbe-4064-8d17-371cd5b03bde}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

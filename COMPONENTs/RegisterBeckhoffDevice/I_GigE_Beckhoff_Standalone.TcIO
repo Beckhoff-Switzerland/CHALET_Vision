@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <Itf Name="I_GigE_Beckhoff_Standalone" Id="{301f8d50-f844-46d8-acee-5403b7c5789e}">
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Standalone EXTENDS I_CH_Object
+]]></Declaration>
+    <Property Name="Feedback" Id="{b3ca84da-92c4-4316-a191-ae66039d5871}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{5e631ae1-32a0-46b7-840f-fe30e4baf376}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="GevCameraControl" Id="{72ce5fa9-3c41-4e9a-98d6-b398aea64f89}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// This FB provides the basic functionality to control a GigE Vision camera and access its calibration data.
+PROPERTY GevCameraControl : REFERENCE TO FB_VN_GevCameraControl]]></Declaration>
+      <Get Name="Get" Id="{5db97d64-7ba9-4908-b9b9-df81b00b5608}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Initialized" Id="{510605cf-1363-4724-81e9-edbef0b2bed9}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e2c733c4-d4b7-492b-8a16-f28bb88f3f0f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="OID" Id="{b0ec1141-069a-4d96-980f-38bfb8cb1216}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Returns the OTCID OF the camera object.
+PROPERTY OID : CHALET_BaseComponents.OTCID
+]]></Declaration>
+      <Get Name="Get" Id="{2a1f8c62-9780-4300-ad2a-7d1aaae472b6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Operational" Id="{98e01237-c214-49a7-9bd7-c052120a8b10}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// Module started successfully and entered aquiring mode
+PROPERTY PUBLIC Operational : BOOL]]></Declaration>
+      <Get Name="Get" Id="{fd419079-3704-4451-8038-62afa02a58e6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RegisterCamera" Id="{d4f9830b-2e22-4733-97da-6cdba44971ec}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY RegisterCamera : I_GigE_Beckhoff_Camera]]></Declaration>
+      <Get Name="Get" Id="{451c5cda-a160-4923-b3ec-bc6ff60080c7}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Reset" Id="{f74fd830-8bc8-4b0b-9ff9-f4e53d5cac49}">
+      <Declaration><![CDATA[//Try to reset the camera connection
+METHOD Reset : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="State" Id="{f0e69f7a-0b77-4ccf-a6d3-68f6d000bd73}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Gets the current state of the internal camera control state machine.
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{eed68582-d6eb-4dae-beeb-f68b48719d1e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TriggerEtherCat" Id="{c8548ce9-e4cb-4910-8166-5fef96508dc1}">
+      <Declaration><![CDATA[PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
+      <Get Name="Get" Id="{17073d4f-1b20-4c8e-9bd7-8e126dbe3c01}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TriggerSoftware" Id="{8c13361c-9f7a-4e19-a819-42660f5ec412}">
+      <Declaration><![CDATA[//Send the 'SoftwareTriggerCommands' defined in the TcVnGevImageProvider TcCOM module to the camera.
+METHOD PUBLIC TriggerSoftware : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="TryGetImage" Id="{ea8365af-9751-4055-a018-af5b8fdd6333}">
+      <Declaration><![CDATA[//Gets the current available image (first in receive queue) and its corresponding GVSP info
+METHOD  TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

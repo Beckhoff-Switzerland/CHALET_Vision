@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <DUT Name="E_DeviceDefaultState" Id="{c7ce942f-c92a-42a3-934f-4e8cd9ed16a5}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'to_string'}
+TYPE E_DeviceDefaultState :
+(
+	AutoDetect		 	:= 0,
+	GigE_Vision	 		:= 1,
+	EtherCAT_IO			:= 2,
+	EtherCAT_Full		:= 3
+)UDINT := AutoDetect;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
