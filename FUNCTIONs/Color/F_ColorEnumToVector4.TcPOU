@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
   <POU Name="F_ColorEnumToVector4" Id="{9f561f6e-aa56-469d-8135-019cf19dc4c6}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION F_ColorEnumToVector4 : TcVnVector4_LREAL
 VAR_INPUT
@@ -10,7 +10,11 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//R
+      <ST><![CDATA[//A
+nValue := SHR((eColor AND 16#FF000000), 6*4);
+F_ColorEnumToVector4[3] := DWORD_TO_LREAL(nValue);
+
+//R
 nValue := SHR((eColor AND 16#00FF0000), 4*4);
 F_ColorEnumToVector4[0] := DWORD_TO_LREAL(nValue);
 
@@ -21,10 +25,6 @@ F_ColorEnumToVector4[1] := DWORD_TO_LREAL(nValue);
 //B
 nValue := SHR((eColor AND 16#000000FF), 0*4);
 F_ColorEnumToVector4[2] := DWORD_TO_LREAL(nValue);
-
-//A
-nValue := SHR((eColor AND 16#FF000000), 6*4);
-F_ColorEnumToVector4[3] := DWORD_TO_LREAL(nValue);
 ]]></ST>
     </Implementation>
   </POU>

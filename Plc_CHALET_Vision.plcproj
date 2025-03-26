@@ -18,7 +18,7 @@
     <Company>Beckhoff CH</Company>
     <Released>false</Released>
     <Title>CHALET_Vision</Title>
-    <ProjectVersion>4.0.1</ProjectVersion>
+    <ProjectVersion>4.1.4</ProjectVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="LICENSE.md">
@@ -33,20 +33,6 @@
       <DefaultResolution>CHALET_BaseComponents, * (Beckhoff CH)</DefaultResolution>
       <Namespace>CHALET_BaseComponents</Namespace>
       <PublishSymbolsInContainer>true</PublishSymbolsInContainer>
-      <Parameters>
-        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
-          <Key>MAX_OBJECTS</Key>
-          <Value>150</Value>
-        </Parameter>
-        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
-          <Key>MAX_COE_READ</Key>
-          <Value>20</Value>
-        </Parameter>
-        <Parameter ListName="BASEPARAMETERLIST" xmlns="">
-          <Key>MAX_COE_WRITE</Key>
-          <Value>20</Value>
-        </Parameter>
-      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_EtherCAT">
       <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
@@ -59,72 +45,14 @@
     <PlaceholderReference Include="Tc2_System">
       <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_System</Namespace>
-      <Parameters>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>TABLE_UPPER_BOUND</Key>
-          <Value>15</Value>
-        </Parameter>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>STRING_LENGTH_EXP</Key>
-          <Value>255</Value>
-        </Parameter>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>STRING_LENGTH_ADDRESS</Key>
-          <Value>20</Value>
-        </Parameter>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>STRING_LENGTH_COMMENT</Key>
-          <Value>255</Value>
-        </Parameter>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>STRING_LENGTH_OUTSTRING</Key>
-          <Value>255</Value>
-        </Parameter>
-        <Parameter ListName="PARAM" xmlns="">
-          <Key>TABLE_SHOW_VALID_ITEMS</Key>
-          <Value>FALSE</Value>
-        </Parameter>
-      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Utilities">
       <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_Utilities</Namespace>
-      <Parameters>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>NMAXLICENSES</Key>
-          <Value>50</Value>
-        </Parameter>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>NMAXLICENSEDEVICES</Key>
-          <Value>16</Value>
-        </Parameter>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>NMAXCPUCOUNT</Key>
-          <Value>64</Value>
-        </Parameter>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>CMAXCHARACTERS</Key>
-          <Value>16#FFFFFFF0</Value>
-        </Parameter>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>NMAXFILESONDONGLE</Key>
-          <Value>20</Value>
-        </Parameter>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>CMAXCSVFIELDVALUESIZE</Key>
-          <Value>255</Value>
-        </Parameter>
-      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_EventLogger">
       <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_EventLogger</Namespace>
-      <Parameters>
-        <Parameter ListName="PARAMETERLIST" xmlns="">
-          <Key>CSOURCENAMESIZE</Key>
-          <Value>256</Value>
-        </Parameter>
-      </Parameters>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_Module">
       <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
@@ -136,53 +64,60 @@
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="COMPONENTs\BeckhoffHardware\FB_EtherCAT_Timestamp.TcPOU">
+    <Compile Include="COMPONENTs\Main FB\FB_Filesource.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\BeckhoffHardware\FB_GigE_Standalone.TcPOU">
+    <Compile Include="COMPONENTs\Optional\FB_EtherCAT_Timestamp.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\BeckhoffHardware\I_EtherCat_Trigger.TcIO">
+    <Compile Include="COMPONENTs\Optional\I_EtherCat_Trigger.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\BeckhoffHardware\I_GevCameraControl.TcIO">
+    <Compile Include="COMPONENTs\Optional\I_GevCameraControl.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\FB_GigE_Beckhoff_Register.TcPOU">
+    <Compile Include="COMPONENTs\Main FB\FB_GigE_Standalone.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigeRegister.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\FB_GigE_Beckhoff_Register.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Camera.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigeRegister.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Lighting.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_Camera.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_OpticControl.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_Lighting.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterBeckhoffDevice\I_GigE_Beckhoff_Standalone.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_OpticControl.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\Base\FB_VnRegister_Base.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_Standalone.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\Base\I_VnRegister.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\Base\FB_VnRegister_Base.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_Memory.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\Base\I_VnRegister.TcIO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_REAL.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\FB_VnRegister_Memory.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_UDINT.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\FB_VnRegister_REAL.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\RegisterObjects\FB_VnRegister_ULINT.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\FB_VnRegister_UDINT.TcPOU">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\RegisterObjects\FB_VnRegister_ULINT.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FUNCTIONs\Color\ColorVector4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="FUNCTIONs\Color\E_Color_ARGB.TcDUT">
       <SubType>Code</SubType>
@@ -214,16 +149,23 @@
     <Compile Include="TYPEs\ST_ImageWithInfo.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TYPEs\ST_IpStackDiag.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TYPEs\ST_IpStackDiagSub.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="VisionParameterlist.TcGVL">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="COMPONENTs" />
-    <Folder Include="COMPONENTs\BeckhoffHardware" />
-    <Folder Include="COMPONENTs\RegisterBeckhoffDevice" />
-    <Folder Include="COMPONENTs\RegisterObjects" />
-    <Folder Include="COMPONENTs\RegisterObjects\Base" />
+    <Folder Include="COMPONENTs\Optional" />
+    <Folder Include="COMPONENTs\Main FB" />
+    <Folder Include="COMPONENTs\Optional\RegisterBeckhoffDevice" />
+    <Folder Include="COMPONENTs\Optional\RegisterObjects" />
+    <Folder Include="COMPONENTs\Optional\RegisterObjects\Base" />
     <Folder Include="FUNCTIONs" />
     <Folder Include="FUNCTIONs\Color" />
     <Folder Include="FUNCTIONs\Sharpness" />

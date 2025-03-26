@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <POU Name="FB_GigE_Standalone" Id="{e8c292d8-c8f1-47c5-8349-a7443f582da7}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 FUNCTION_BLOCK FB_GigE_Standalone EXTENDS FB_CH_Object IMPLEMENTS I_GevCameraControl, I_GigE_Beckhoff_Standalone
@@ -8,6 +8,8 @@ VAR
 	fbCamera 						: FB_VN_GevCameraControl;	
 	fbTriggerEtherCat				: FB_EtherCAT_Timestamp;
 	
+	{attribute 'hide'}	
+	bInSimulation 					: BOOL;
 	{attribute 'hide'}	
 	eCameraType						: E_CameraType := E_CameraType.Beckhoff_VCS2xxx; 	
 	{attribute 'hide'}
@@ -22,7 +24,17 @@ VAR
 	{attribute 'hide'}  						
 	fbFeedback 			: FB_CH_Feedback(THIS^.fbSourceInfo); 
 	{attribute 'hide'}
-	fbAlarmOidNotSet 	: FB_TcAlarm;									// Alarm due to source state	
+	fbAlarmOidNotSet 	: FB_TcAlarm;									// Alarm due to source state
+	{attribute 'hide'}
+	fbEthernetLinkDown 	: FB_TcAlarm;									// Camera is not connectode or has no power
+	
+	//TcCom object Camera
+	{attribute 'hide'}
+	ipGevImageProviderComObject 		: ITComObject;	
+	{attribute 'hide'}
+	ipGevImageAcquisitionComObject 		: ITComObject;	
+	{attribute 'hide'}
+	ipIpStackComObject 					: ITComObject;			
 END_VAR
 
 
@@ -55,7 +67,7 @@ END_IF
 //store new type
 THIS^.eCameraType := CameraType;
 
-//write new object to nterface
+//write new object to interface
 CASE THIS^.eCameraType OF	
 	E_CameraType.Beckhoff_VCS2xxx:
 		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegister;
@@ -69,6 +81,26 @@ END_CASE]]></ST>
         </Implementation>
       </Set>
     </Property>
+    <Method Name="FB_exit" Id="{22a0fd36-0f2b-40fc-a0b7-e0a470e76283}">
+      <Declaration><![CDATA[METHOD FB_exit : BOOL
+VAR_INPUT
+	bInCopyCode : BOOL; // if TRUE, the exit method is called for exiting an instance that is copied afterwards (online change).
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Not on onlinechange
+IF NOT bInCopyCode THEN
+	IF THIS^.ipGevImageProviderComObject <> 0 THEN
+		FW_SafeRelease(ADR(ipGevImageProviderComObject));
+		FW_SafeRelease(ADR(ipGevImageAcquisitionComObject));
+		FW_SafeRelease(ADR(ipIpStackComObject));
+	END_IF	
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="FB_init" Id="{6d48896f-0163-44cc-930b-b0132ca2b6f1}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
@@ -114,12 +146,19 @@ END_VAR
       <Declaration><![CDATA[METHOD Initialize : HRESULT
 VAR 
 	fbTaskInfo			: PlcTaskSystemInfo;
-	hr					: HRESULT;
+	nOid : OTCID;	
+	nParaSize : UDINT;
+	pParaData : PVOID;
+	hr : HRESULT;
 END_VAR
 VAR_INST
 	//This error cannot be reset. Requires a reset cold
 	{attribute 'hide'}	
 	fbInitError : FB_TcAlarm;
+END_VAR
+VAR CONSTANT
+	N_IDX_OFFSET_GevImageAcquisition 	: UDINT := 16#00000001; // Parameter(online) in Planar Track object
+	N_IDX_OFFSET_IP_STACK 			: UDINT := 16#00000013; // Parameter(online) in Planar Track object
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[hr := SUPER^.Initialize();
@@ -134,6 +173,35 @@ IF THIS^.fbCamera.oidITcVnGevImageProvider = 0 THEN
 	END_IF
 	Initialize := E_FAIL;
 	RETURN;
+END_IF
+
+
+//Read information from TcCom object
+//Get interface to ComObject
+hr := FW_ObjMgr_GetObjectInstance(oid:= THIS^.OID, iid:= TC_GLOBAL_IID_LIST.IID_ITComObject, pipUnk:= ADR(THIS^.ipGevImageProviderComObject));
+IF THIS^.ipGevImageProviderComObject <> 0 THEN
+	//Read object id of TcCom GevImageAcquisitionComObject
+	nOid := 0;
+	nParaSize := SIZEOF(nOid);	pParaData := ADR(nOid);
+	hr := ipGevImageProviderComObject.TcGetObjPara(pid:=N_IDX_OFFSET_GevImageAcquisition , nData:= nParaSize, pData:= pParaData, pgp:=0 );
+	
+	//Get interface of GevImageAcquisition
+	hr := FW_ObjMgr_GetObjectInstance(oid:= nOid, iid:= TC_GLOBAL_IID_LIST.IID_ITComObject, pipUnk:= ADR(THIS^.ipGevImageAcquisitionComObject));
+	IF THIS^.ipGevImageAcquisitionComObject <> 0 THEN
+		//Read object id of TcCom 
+		nOid := 0;
+		nParaSize := SIZEOF(nOid);	pParaData := ADR(nOid);
+		hr := ipGevImageAcquisitionComObject.TcGetObjPara(pid:=N_IDX_OFFSET_IP_STACK , nData:= nParaSize, pData:= pParaData, pgp:=0 );
+		// If IP-Stack was not found in GevImageAcquisitionComObject then camera is in simulation mode
+		IF hr = S_OK THEN
+			//get interface to ipstack
+			hr := FW_ObjMgr_GetObjectInstance(oid:= nOid, iid:= TC_GLOBAL_IID_LIST.IID_ITComObject, pipUnk:= ADR(THIS^.ipIpStackComObject));
+		ELSE
+			bInSimulation := TRUE;
+			hr := S_OK;
+		END_IF
+
+	END_IF
 END_IF
 
 
@@ -253,6 +321,19 @@ fbFeedback.hr := THIS^.fbCamera.Reset();
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="Simulation" Id="{f5897538-8906-4a6c-a04c-f5219ee092c3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Simulation mode is active
+PROPERTY Simulation : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e545d061-2cf2-4952-931a-feba73b0f494}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Simulation := bInSimulation;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="State" Id="{50e80ae9-2935-4fb3-9258-b3bc964b950f}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Gets the current state of the internal camera control state machine.
@@ -267,7 +348,8 @@ END_VAR
       </Get>
     </Property>
     <Property Name="TriggerEtherCat" Id="{d56cc878-4ab2-4eaf-906d-a4f6451fdf4c}">
-      <Declaration><![CDATA[PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
       <Get Name="Get" Id="{5511c542-b995-4328-b8d3-a625ef59ee40}">
         <Declaration><![CDATA[VAR
 END_VAR
@@ -288,13 +370,15 @@ END_VAR
         <ST><![CDATA[eState := THIS^.State;
 
 (* Check if not in wrong state *)
-IF NOT ((eState = ETcVnCameraState.TCVN_CS_ACQUIRING) OR (eState = ETcVnCameraState.TCVN_CS_OPENED)) THEN
+IF NOT ((eState = ETcVnCameraState.TCVN_CS_ACQUIRING) OR (eState = ETcVnCameraState.TCVN_CS_OPENED) OR THIS^.Simulation) THEN
 	TriggerSoftware := E_FAIL;
 	RETURN;
 END_IF
 
 // Trigger image
-TriggerSoftware := fbCamera.TriggerImage();
+fbFeedback.ActiveCommand := 'TriggerImage';
+fbFeedback.hr := fbCamera.TriggerImage();
+TriggerSoftware := fbFeedback.hr;
 ]]></ST>
       </Implementation>
     </Method>
@@ -308,7 +392,10 @@ VAR_INST
 	{attribute 'hide'}							
     fbCrititcalSection : FB_IecCriticalSection;    						// Internal lock for test & set function    
 END_VAR
-]]></Declaration>
+VAR
+	ipImageTemp   : ITcVnImage;
+	stGvspInfoTemp : GVSP_IMAGE_INFO;
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT __ISVALIDREF(stImageWithInfo) THEN
 	//Error, invalide input
@@ -317,38 +404,43 @@ END_VAR
 END_IF
 
 
-(* Release the old image before overwriting it with the new one *)	
-IF stImageWithInfo.ipImage <> 0 THEN
-	FW_SafeRelease(ADR(stImageWithInfo.ipImage));
-END_IF
-
-
 (*  Lock the image to prevent multiple access *)
 (*	🔒 LOCKED FROM HERE --------------------------------------------- *)
 IF fbCrititcalSection.Enter() THEN
 	
-	(* Get current image from camera *)
+	(* Get current image from camera and store result in temp variable*)
 	TryGetImage := fbCamera.GetCurrentImageWithGvspInfo(
-						ipImage := stImageWithInfo.ipImage,
-						stGvspInfo := stImageWithInfo.stGvspInfo
+						ipImage := ipImageTemp,
+						stGvspInfo := stGvspInfoTemp
 						);
-
-	(* Get image info from received image *)
-	F_VN_GetImageInfo(	ipImage:=stImageWithInfo.ipImage, 
-						stImageInfo:=stImageWithInfo.stInfo, 
-						hrPrev:=TryGetImage );
+					
+	(* If new image found *)				
+	IF TryGetImage = S_OK THEN
+		
+		(* Release the old image before overwriting it with the new one *)	
+		IF stImageWithInfo.ipImage <> 0 THEN
+			FW_SafeRelease(ADR(stImageWithInfo.ipImage));
+		END_IF		
 	
-	(* for a camera a fictitious name *)
-	stImageWithInfo.sCurrentImageFileName := TO_STRING(stImageWithInfo.stGvspInfo.BlockId);			
+		//Handover new data
+		stImageWithInfo.ipImage 		:= ipImageTemp;
+		stImageWithInfo.stGvspInfo 		:= stGvspInfoTemp;
+
+		(*For a camera a fictitious name *)
+		stImageWithInfo.sCurrentImageFileName := TO_STRING(stImageWithInfo.stGvspInfo.BlockId);		
+
+		
+		(* Get image info from received image *)
+		F_VN_GetImageInfo(	ipImage:=stImageWithInfo.ipImage, 
+							stImageInfo:=stImageWithInfo.stInfo, 
+							hrPrev:=TryGetImage );	
+	END_IF
+
+
 
 	(*	🔓 LOCKED TO HERE ----------------------------------------------- *)
 	fbCrititcalSection.Leave();
 END_IF
-
-
-
-
-
 
 ]]></ST>
       </Implementation>
@@ -359,14 +451,21 @@ VAR
 	ipVnRegisterStatus : I_VnRegister;
 	bAllReadDone : BOOL := TRUE;
 	bAllWriteDone : BOOL := TRUE;
+	nParaSize : UDINT;
+	pParaData : PVOID;
+	hr : HRESULT;
+	stIpStackData : ST_IpStackDiag;
+	bLinkDetected : BOOL;
+	bParaReadSuccessful : BOOL;
 END_VAR
-]]></Declaration>
+VAR CONSTANT
+	N_IDX_OFFSET_IP_STACK 	: UDINT := 16#03011108; // Parameter(online) in Planar Track object
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Force to initialize first
 IF NOT THIS^.Initialized THEN
 	THIS^.Initialize();
 END_IF
-
 
 
 (* Source state machine *)
@@ -378,18 +477,23 @@ CASE THIS^.State OF
 	TCVN_CS_INITIALIZED,  TCVN_CS_OPENING:	
 		IF THIS^.ipRegister <> 0 THEN
 			//Redo a read or write for each parameter
-			THIS^.ipRegister.Initialize();
+			THIS^.ipRegister.RewriteParameters();
 		END_IF
 		fbFeedback.ActiveCommand := 'OpenCamera';
 		fbFeedback.hr := fbCamera.OpenCamera();
 		
 	TCVN_CS_OPENED:
-		IF THIS^.ipRegister = 0 THEN
+		IF THIS^.Simulation THEN
+			; //Stay in this state in Simulationmode	
+		
+		ELSIF THIS^.ipRegister = 0 THEN
 			fbFeedback.ActiveCommand := 'StartAcquisition';
 			fbFeedback.hr := fbCamera.StartAcquisition();
+			
 		ELSIF THIS^.ipRegister.AllReadDone AND THIS^.ipRegister.AllWriteDone THEN
 			fbFeedback.ActiveCommand := 'StartAcquisition';
 			fbFeedback.hr := fbCamera.StartAcquisition();
+			
 		ELSE	
 			//Read and write all camera parameter in this OPENED-State 
 			fbFeedback.ActiveCommand := 'ReadWrite camera parameters';
@@ -435,9 +539,42 @@ IF THIS^.State <> TCVN_CS_ERROR THEN
 END_IF
 
 
-//Subelement
+// --- Write diagnostic information to eventloger
+IF THIS^.State = TCVN_CS_ERROR THEN
+	//check IP-Stack an check if camera is conected	
+	IF THIS^.ipIpStackComObject <> 0 THEN
+		//Read object id of ipStack TcCom 
+		nParaSize := SIZEOF(stIpStackData);	pParaData := ADR(stIpStackData);
+		hr := ipIpStackComObject.TcGetObjPara(	pid		:=N_IDX_OFFSET_IP_STACK , 
+												nData	:= nParaSize, 
+												pData	:= pParaData, 
+												pgp		:=0 );
+		
+		 // Link is active on uneven cts of linkchanges
+		bLinkDetected := (stIpStackData.nLinkStatusChangedCnt MOD 2) = 1;
+		bParaReadSuccessful := hr = S_OK;
+		IF NOT THIS^.Simulation AND bParaReadSuccessful AND NOT bLinkDetected AND NOT fbEthernetLinkDown.bRaised THEN
+			fbEthernetLinkDown.CreateEx(stEventEntry 		:= TC_EVENTS.CHALET_Vision_Events.EthernetLinkDown,
+										ipSourceInfo 		:= THIS^.fbSourceInfo,
+										bWithConfirmation 	:= FALSE);
+			fbEthernetLinkDown.Raise(0);			
+	
+		ELSIF fbEthernetLinkDown.bRaised AND (THIS^.Simulation AND NOT bParaReadSuccessful OR bLinkDetected) THEN
+			fbEthernetLinkDown.Clear(0,0);		
+			
+		ELSE
+			; //nothing
+		END_IF
+	END_IF
+END_IF
+
+
+
+
+
+//Subelement - if not in simulation
 fbTriggerEtherCat.Update();
-IF THIS^.ipRegister <> 0 THEN
+IF THIS^.ipRegister <> 0 AND NOT THIS^.bInSimulation THEN
 	//Redo a read or write for each parameter
 	THIS^.ipRegister.Update();
 END_IF

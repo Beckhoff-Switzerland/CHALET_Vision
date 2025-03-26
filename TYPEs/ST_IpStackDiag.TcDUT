@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+  <DUT Name="ST_IpStackDiag" Id="{92316251-5475-43ad-8b30-b5b1e0260ac9}">
+    <Declaration><![CDATA[TYPE ST_IpStackDiag : 
+	STRUCT
+		ip : ST_IpStackDiagSub;
+		arpRequest : ST_IpStackDiagSub;
+		arpReply : ST_IpStackDiagSub;
+		pingRequest : ST_IpStackDiagSub;
+		pingReply : ST_IpStackDiagSub;
+		nLinkStatusChangedCnt : UDINT;
+		nAllocFailCnt : UDINT;
+		nArpTimeoutFrames : UDINT;
+		nDroppedFrames : UDINT;
+	END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

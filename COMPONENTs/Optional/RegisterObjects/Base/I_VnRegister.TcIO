@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Itf Name="I_VnRegister" Id="{4abec9b2-99ef-4920-b246-1713bdec0650}">
     <Declaration><![CDATA[INTERFACE I_VnRegister
 ]]></Declaration>
@@ -28,6 +28,13 @@ PROPERTY ReadDone : BOOL]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Set>
     </Property>
+    <Method Name="RewriteParameters" Id="{f5c3e2db-2d18-45c9-b2b0-bb213c0d4082}">
+      <Declaration><![CDATA[//Rewrite parameters if necessary, e.g. after a connection interruption
+METHOD RewriteParameters : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
     <Property Name="WriteDone" Id="{bc1db8c3-9212-4ae5-8894-d3f35f3f6930}">
       <Declaration><![CDATA[{attribute 'monitoring':='call'}
 PROPERTY WriteDone : BOOL]]></Declaration>

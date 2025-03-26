@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <POU Name="FB_VnRegister_Base" Id="{39ac05e2-6434-4ca1-a1e0-088b534daa74}" SpecialFunc="None">
     <Declaration><![CDATA[(* This FB is abstract and is the base class  *)
 FUNCTION_BLOCK ABSTRACT FB_VnRegister_Base EXTENDS FB_CH_Object IMPLEMENTS I_VnRegister
@@ -7,7 +7,12 @@ VAR
 	{attribute 'hide'}
 	//this parameter has affect to this camera
 	ipCamera : I_GevCameraControl;
-	
+		
+	{attribute 'hide'}
+	//In the event of a connection interruption to the device, either a read or write command is repeated
+	//If the parameter has never been written from the PLC, then a read is made; if it is written once from the PLC, a read is made when the camera is reconnected.
+	eCommandToRepeadAfterReconnect : (READ, WRITE) := READ; //Todo parameter?
+
 	
 	{attribute 'hide'}
 	bErrorInvalideInterface : BOOL;
@@ -23,10 +28,6 @@ VAR
 	//The endianness of the register. 0 = Big, 1 = Little. Default: 0
     nEndian  : UINT;
 	
-	{attribute 'hide'}
-	//In the event of a connection interruption to the device, either a read under write command is repeated
-	eCommandToRepeadAfterReconnect : (READ, WRITE) := WRITE; //Todo parameter?
-
 	//Read/write 
 	{attribute 'hide'}
 	bReadDone : BOOL;
@@ -42,8 +43,6 @@ VAR
 	bReadBusy : BOOL;
 	{attribute 'hide'}
 	nErrorId : UDINT;
-	
-	
 	{attribute 'hide'}
 	bWriteDone : BOOL := TRUE;
 	{attribute 'hide'}
@@ -58,8 +57,7 @@ VAR
 	{attribute 'hide'}
 	fbDelayOnError : TON := ( PT:= T#500MS);
 
-	
-	
+	{attribute 'hide'}	
 	fbFeedback : FB_CH_Feedback(THIS^.fbSourceInfo);
 END_VAR
 VAR_STAT
@@ -91,9 +89,7 @@ VAR_INPUT
 	bReadOnly : BOOL;
     nAddress : GVCP_REGISTER_ADDRESS;
 END_VAR
-VAR
-	eCameraRegister : E_CameraRegisters_Beckhoff;
-END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//Do the following code once during start up and not during onlinechange
@@ -109,28 +105,18 @@ END_IF
       <Declaration><![CDATA[METHOD Initialize : HRESULT
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF THIS^.ipCamera = 0 THEN
+        <ST><![CDATA[THIS^.fbFeedback.ActiveCommand := 'Initialize';
+
+
+IF THIS^.ipCamera = 0 THEN
 	//Error. Missing interface
+	THIS^.fbFeedback.HR := Tc2_System.E_HRESULTAdsErr.NOINTERFACE;
 	bErrorInvalideInterface := TRUE;
 	RETURN;
 END_IF
-	
 
 
-IF eCommandToRepeadAfterReconnect = READ OR THIS^.bReadOnly THEN
-	//the reading of the parameter should be restarted again
-	THIS^.bReadDone := FALSE;
-	
-ELSIF eCommandToRepeadAfterReconnect = WRITE THEN
-	//the writing of the parameter should be restarted again
-	THIS^.bReadDone := FALSE;
-	THIS^.bWriteDone := FALSE;
-END_IF
-
-//Reset errors.
-THIS^.fbFeedback.ActiveCommand := 'Initialize';
 THIS^.fbFeedback.Done := TRUE;
-
 Initialize := S_OK;]]></ST>
       </Implementation>
     </Method>
@@ -180,6 +166,25 @@ END_IF]]></ST>
         </Implementation>
       </Set>
     </Property>
+    <Method Name="RewriteParameters" Id="{4a057e57-6da7-4b5b-a463-1ed27cbae075}">
+      <Declaration><![CDATA[//Rewrite parameters if necessary, e.g. after a connection interruption
+METHOD RewriteParameters : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF eCommandToRepeadAfterReconnect = READ OR THIS^.bReadOnly THEN
+	//the reading of the parameter should be restarted again
+	THIS^.bReadDone := FALSE;
+
+ELSIF eCommandToRepeadAfterReconnect = WRITE THEN
+	//the writing of the parameter should be restarted again
+	//first the open parameter is written and then read to make sure that it matches
+	THIS^.bReadDone := FALSE;
+	THIS^.bWriteDone := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Update" Id="{aec45a8f-6052-413d-86b9-1d2194f37d40}">
       <Declaration><![CDATA[METHOD Update : HRESULT
 
@@ -195,7 +200,7 @@ END_IF
 bExecuteRead := FALSE;
 CASE nSeqRead OF
 	0: //Start/Restart if required
-		IF NOT bReadDone  AND bWriteDone(* Write has higher priority*) AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqWrite = 0) THEN
+		IF NOT bReadDone AND bWriteDone(* Write has higher priority*) AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqWrite = 0) THEN
 			bExecuteRead := TRUE; // Rising edge	
 			nCtsReadWriteActive := nCtsReadWriteActive +1;	
 			nSeqRead := 1;
@@ -226,21 +231,6 @@ CASE nSeqRead OF
 END_CASE
 
 fbRTrigReadDone(CLK := THIS^.bReadDone);
-
-
-
-//IF bReadError AND NOT THIS^.fbRegReadError.bActive THEN
-//	//Rais create and alarm
-//	THIS^.fbRegReadError.CreateEx(stEventEntry := TC_EVENTS.CHALET_Vision_Events.RegReadError, bWithConfirmation := FALSE, ipSourceInfo := THIS^.fbSourceInfo);
-//	THIS^.fbRegReadError.Raise(0);
-//	
-//ELSIF bReadDone AND THIS^.fbRegReadError.bActive THEN
-//	//Clear after successfull read
-//	THIS^.fbRegReadError.Clear(0,0);
-//END_IF
-
-
-
 
 
 
@@ -279,8 +269,6 @@ CASE nSeqWrite OF
 
 END_CASE
 
-
-
 IF bReadError THEN
 	fbFeedback.ActiveCommand := 'Read';
 	fbFeedback.ErrorId := THIS^.nErrorId;
@@ -292,7 +280,6 @@ ELSIF bWriteError THEN
 ELSIF NOT bWriteBusy AND NOT bReadBusy THEN
 	fbFeedback.Done := TRUE;
 END_IF
-
 
 
 //Update
@@ -317,8 +304,13 @@ VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[//Only allow set to FALSE - and not Readonly
-IF NOT WriteDone AND NOT THIS^.bReadOnly THEN
+          <ST><![CDATA[IF THIS^.bReadOnly THEN
+	RETURN; //Do nothing;
+END_IF
+
+
+//Only allow set to FALSE
+IF NOT WriteDone THEN
 	bWriteDone := FALSE;
 	
 	//in the event of a connection interruption to the device, either a read under write command is repeated

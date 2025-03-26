@@ -1,8 +1,21 @@
 <?xml version="1.0"?>
 <TcModuleClass>
+	<Translations>
+		<Text TxtId="CHALET_Vision"/>
+		<Text TxtId="ObjectID is not set in PLC_Instance"/>
+		<Text TxtId="ObjectID is not set"/>
+		<Text TxtId="enter a valid value in the PLC_Instance in the &quot;Symbol Initilization&quot; tab, e.g. for the image provider"/>
+		<Text TxtId="Timeout in state {0}"/>
+		<Text TxtId="The component did not react to the trigger."/>
+		<Text TxtId="nSwitch_on_counter should have been increased"/>
+		<Text TxtId="Reading the parameter failed"/>
+		<Text TxtId="Write the parameter failed"/>
+		<Text TxtId="Ethernet link to the camera is down"/>
+		<Text TxtId="Ethernet cable is not connected or camera has no power"/>
+	</Translations>
 	<DataTypes>
 		<DataType>
-			<Name GUID="{CD0B0CCD-7E34-4473-A13D-8071BBC2E85C}">CHALET_Vision_Events</Name>
+			<Name GUID="{52E35DF4-A053-4128-B32E-ED010E7F71B3}">CHALET_Vision_Events</Name>
 			<DisplayName TxtId=""><![CDATA[CHALET_Vision]]></DisplayName>
 			<EventId>
 				<Name Id="1">ObjectIdNotSet</Name>
@@ -34,6 +47,14 @@
 				<DisplayName TxtId=""><![CDATA[Write the parameter failed]]></DisplayName>
 				<Severity>Error</Severity>
 			</EventId>
+			<EventId>
+				<Name Id="6">EthernetLinkDown</Name>
+				<DisplayName TxtId=""><![CDATA[Ethernet link to the camera is down]]></DisplayName>
+				<Severity>Error</Severity>
+				<CauseRemedy Idx="1">
+					<Cause TxtId=""><![CDATA[Ethernet cable is not connected or camera has no power]]></Cause>
+				</CauseRemedy>
+			</EventId>
 			<Hides>
 				<Hide GUID="{CDAD6064-7CA1-46D4-9C9E-9EAD1F13906E}"/>
 				<Hide GUID="{E87C1C60-257C-4AA5-9001-25EE5F4E2501}"/>
@@ -48,6 +69,9 @@
 				<Hide GUID="{A3BB26DC-66C3-46AE-8A26-D3056A24E572}"/>
 				<Hide GUID="{67515B00-1D6B-4180-BD65-9229571F191E}"/>
 				<Hide GUID="{FB57C9E9-D277-43A3-81CF-9F4B4B658960}"/>
+				<Hide GUID="{CD0B0CCD-7E34-4473-A13D-8071BBC2E85C}"/>
+				<Hide GUID="{8B02821B-564E-4EA6-8ED0-493CCBCA23E9}"/>
+				<Hide GUID="{ED44B319-59EF-4754-B9EA-9D0D787CB3FA}"/>
 			</Hides>
 		</DataType>
 	</DataTypes>

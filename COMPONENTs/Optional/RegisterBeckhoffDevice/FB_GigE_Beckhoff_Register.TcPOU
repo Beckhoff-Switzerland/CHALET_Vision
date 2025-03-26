@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <POU Name="FB_GigE_Beckhoff_Register" Id="{15833fd6-b4b7-4828-a96b-9c644879be7b}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 {attribute 'enable_dynamic_creation'}
@@ -334,12 +334,13 @@ IF NOT bInCopyCode THEN
 	THIS^.AcquisitionMode		:= E_AcquisitionModeReg.Continous;
 	THIS^.TriggerMode			:= E_TriggerMode.On;
 	THIS^.DeviceDefaultState 	:= E_DeviceDefaultState.AutoDetect; 
-	THIS^.Exposure_1us 			:= 50;//[us]
+	THIS^.Exposure_1us 			:= 100;//[us]
 	
-	//Set some valide values
-	THIS^.RegionHeight			:= 500;
-	THIS^.RegionWidth			:= 500;
-
+//	//Set some valide values
+//	THIS^.RegionHeight			:= 400;
+//	THIS^.RegionWidth			:= 400;
+//	THIS^.RegionOffsetX			:= 0;
+//	THIS^.RegionOffsetY			:= 0;
 		
 END_IF]]></ST>
       </Implementation>
@@ -380,7 +381,7 @@ THIS^.fbRegGainAnalog.Value := nIncrements;
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// Reset all read and write flags 
-THIS^.fbVnRegisterList.Initialize();]]></ST>
+Initialize := THIS^.fbVnRegisterList.Initialize();]]></ST>
       </Implementation>
     </Method>
     <Property Name="IPAddress" Id="{1fb51da5-1faf-4b4a-9843-e4da33f59764}" FolderPath="RegisterParameter\Device\">
@@ -559,6 +560,26 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
+    <Method Name="RewriteParameters" Id="{e13639d8-ac38-45c5-863f-42914df63fd2}">
+      <Declaration><![CDATA[//Rewrite parameters if necessary, e.g. after a connection interruption
+METHOD RewriteParameters : HRESULT
+VAR
+	ipRegObject : I_VnRegister;
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
+WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
+	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
+		hr := GetMostSignificant(hr, ipRegObject.RewriteParameters());
+	END_IF
+END_WHILE
+THIS^.fbVnRegisterList.RestoreIterator();
+
+RewriteParameters := hr;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="SensorHeight" Id="{06a328d9-01ea-4779-877c-5af943a17ed8}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //The number of effective pixels in horizontal direction
