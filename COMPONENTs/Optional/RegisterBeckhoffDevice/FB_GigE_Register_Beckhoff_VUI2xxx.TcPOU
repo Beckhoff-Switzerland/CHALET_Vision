@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_GigE_Register_Beckhoff_VUI2xxx" Id="{f8c751ef-a351-43ae-94aa-1f4df5d7c1a3}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK FB_GigE_Register_Beckhoff_VUI2xxx EXTENDS FB_GigE_Register_Beckhoff_VCS2xxx IMPLEMENTS I_GigE_Beckhoff_Lighting, I_GigE_Beckhoff_OpticControl
+VAR	
+
+	//GigE-Camera-Register
+	//Read/Write Light
+	{attribute 'hide'}
+	fbRegBrightnessInfrared 	: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pLightController0ChannelBrightnessBaseReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegBrightnessGreen 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pLightController0Channel2BrightnessReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegBrightnessOrange 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pLightController0Channel3BrightnessReg, nEndian := 0);
+	{attribute 'hide'}                                                  
+	fbRegBrightnessBlue 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pLightController0Channel4BrightnessReg, nEndian := 0);
+	//Read/Write Optic control
+	{attribute 'hide'}                                                  
+	fbRegObjectSensorDistance		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pObjectSensorDistanceReg, nEndian := 0);	                                                                    
+ 
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="RegisterParameter" Id="{6ea3800c-7f67-45d3-a497-b1fa692a39a7}">
+      <Folder Name="Acquisition and Trigger" Id="{48d5e1de-8288-4a77-bca0-240b7ca6d166}" />
+      <Folder Name="Device" Id="{e9278f02-5d8d-442c-8602-d9f854936257}" />
+      <Folder Name="Lighting" Id="{374f5361-aa16-4a5f-8d33-9083fb85d0b2}" />
+      <Folder Name="Optic Control" Id="{32d1e4f2-7ba5-4a39-beea-fc3a3ce93fde}" />
+      <Folder Name="Region" Id="{099c3978-b8cf-4b36-8717-51f3894a230a}" />
+      <Folder Name="Sensor" Id="{32e64f9a-0c03-4cf0-9f5a-965c97150431}" />
+    </Folder>
+    <Property Name="BrightnessBlue" Id="{0cbe5b54-ddce-49db-ba18-01d8c611ad67}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel blue.0-4095
+PROPERTY BrightnessBlue : UDINT]]></Declaration>
+      <Get Name="Get" Id="{74bafdf9-155b-4be7-ac56-dbc2fe4ff4a9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessBlue := THIS^.fbRegBrightnessBlue.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{469cc03d-a557-4b50-8ae8-a77de25dc4c0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//0-4095
+THIS^.fbRegBrightnessBlue.Value := MIN(BrightnessBlue, 4095);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessGreen" Id="{2734a831-b7ca-4f35-946c-623597feb15c}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel green.0-4095
+PROPERTY BrightnessGreen : UDINT]]></Declaration>
+      <Get Name="Get" Id="{91ee5d84-e361-48f6-af6f-996ddbdc63b1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessGreen := THIS^.fbRegBrightnessGreen.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e9fdde8b-de2f-45b4-8f97-2f2fa6afa45b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//0-4095
+THIS^.fbRegBrightnessGreen.Value := MIN(BrightnessGreen, 4095);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessInfrared" Id="{575b5c51-ff8a-4716-8655-72073b19625f}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel infrared.0-4095
+PROPERTY BrightnessInfrared : UDINT]]></Declaration>
+      <Get Name="Get" Id="{1e4849ee-1125-416a-9a88-5bf999db2052}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessInfrared := THIS^.fbRegBrightnessInfrared.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1d68d5a0-989e-4ce5-9768-bcd17392799f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//0-4095
+THIS^.fbRegBrightnessInfrared.Value := MIN(BrightnessInfrared, 4095);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessOrange" Id="{6f66be20-6a0e-4a2c-bafa-2f887ae552f4}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel orange.0-4095
+PROPERTY BrightnessOrange : UDINT]]></Declaration>
+      <Get Name="Get" Id="{12871479-ffed-4fd7-95a2-b57ffe515095}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessOrange := THIS^.fbRegBrightnessOrange.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{3fe7da89-558d-4192-8a42-4418cd81aec0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//0-4095
+THIS^.fbRegBrightnessOrange.Value := MIN(BrightnessOrange, 4095);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{ee3dea31-af3d-46b2-b216-205cdf7483a6}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCamera : I_GigE_Beckhoff_Standalone;
+END_VAR
+VAR
+	ipVnRegisterStatus : I_VnRegister;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bInCopyCode THEN 
+
+	//Add this registerparameter to the allready existing list off the VCS2xxx parent
+
+	//GigE-Camera-Register
+	//Read/Write Light
+	SUPER^.fbVnRegisterList.AddObject(fbRegBrightnessInfrared);
+	SUPER^.fbVnRegisterList.AddObject(fbRegBrightnessGreen);
+	SUPER^.fbVnRegisterList.AddObject(fbRegBrightnessOrange);
+	SUPER^.fbVnRegisterList.AddObject(fbRegBrightnessBlue);
+	//Read/Write Optic control
+	SUPER^.fbVnRegisterList.AddObject(fbRegObjectSensorDistance);                                                         
+
+
+	
+	//Link to Camera to allow an parameter to switch the camera in open state
+	SUPER^.fbVnRegisterList.ResetIterator();
+	WHILE SUPER^.fbVnRegisterList.HasNextObject() DO
+		IF __QUERYINTERFACE(SUPER^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+			ipVnRegisterStatus.LinkCamera(ipCamera);
+		END_IF
+	END_WHILE
+	SUPER^.fbVnRegisterList.RestoreIterator();
+	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="SensorDistance" Id="{4fa1218a-a395-4aad-ad39-9e2abdff8fa7}" FolderPath="RegisterParameter\Optic Control\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Distance from the image sensor surface to the object in millimeters (mm).
+//40mm - 1024mm
+PROPERTY SensorDistance : UDINT]]></Declaration>
+      <Get Name="Get" Id="{2ddcbb9c-8780-447a-bfcb-46c75ec462e0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SensorDistance := THIS^.fbRegObjectSensorDistance.Value;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{23eba23f-1625-4413-b77d-51b559c0f298}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//40-1024mm
+THIS^.fbRegObjectSensorDistance.Value := MIN(MAX(40, SensorDistance), 1024);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

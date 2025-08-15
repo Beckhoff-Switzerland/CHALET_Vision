@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
-  <Itf Name="I_GigeRegister" Id="{13381513-d2a4-43fb-a7f9-ac173fc14f06}">
-    <Declaration><![CDATA[INTERFACE I_GigeRegister EXTENDS I_CH_Object]]></Declaration>
+  <Itf Name="I_GigeRegisterBase" Id="{13381513-d2a4-43fb-a7f9-ac173fc14f06}">
+    <Declaration><![CDATA[INTERFACE I_GigeRegisterBase EXTENDS I_CH_Object]]></Declaration>
     <Property Name="AllReadDone" Id="{3a6158c4-5a5b-437c-8363-ea2d9270c4bb}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 PROPERTY AllReadDone : BOOL]]></Declaration>

@@ -67,7 +67,6 @@ fbVnReadRegister_ULINT(
 	nAddress:= SUPER^.nAddress, 
 	nEndian:= SUPER^.nEndian, 
 	bRead:= SUPER^.bExecuteRead, 
-	nValue=> nValue, 
 	bBusy=> SUPER^.bReadBusy, 
 	bError=> SUPER^.bReadError
 	);

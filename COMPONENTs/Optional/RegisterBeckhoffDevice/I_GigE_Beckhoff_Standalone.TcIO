@@ -1,8 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Itf Name="I_GigE_Beckhoff_Standalone" Id="{301f8d50-f844-46d8-acee-5403b7c5789e}">
-    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Standalone EXTENDS I_CH_Object
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Standalone EXTENDS I_CH_Object, I_GevCameraControl
 ]]></Declaration>
+    <Property Name="CameraType" Id="{5dd70667-4d22-481d-ace8-d084030ce490}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+PROPERTY CameraType : E_CameraType]]></Declaration>
+      <Get Name="Get" Id="{2043b06a-69ce-49d8-bd40-6696960dc8fd}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{b2961153-3a62-4345-b620-77ae649f8b53}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="ControlChannelOpen" Id="{c04d7ec5-29d4-46bd-b64b-f97ecbfbe590}">
+      <Declaration><![CDATA[//	The connection to the camera has been established. Gige-Vision parameters can now be read or written
+{attribute 'monitoring' := 'call'}
+PROPERTY ControlChannelOpen : BOOL]]></Declaration>
+      <Get Name="Get" Id="{35bacf5f-3a0d-4ea7-9338-140495e87162}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
     <Property Name="Feedback" Id="{b3ca84da-92c4-4316-a191-ae66039d5871}">
       <Declaration><![CDATA[{attribute 'monitoring':='call'}
 PROPERTY Feedback : I_CH_Feedback]]></Declaration>
@@ -42,10 +60,36 @@ PROPERTY PUBLIC Operational : BOOL]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>
-    <Property Name="RegisterCamera" Id="{d4f9830b-2e22-4733-97da-6cdba44971ec}">
+    <Property Name="RegisterAnyCamera" Id="{3e989fd0-9aa2-4946-bf90-ad89047493c2}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY RegisterCamera : I_GigE_Beckhoff_Camera]]></Declaration>
+//Access to the important parameters marked as standard in Gige-Vision
+PROPERTY RegisterAnyCamera : I_GigE_Any_Camera]]></Declaration>
+      <Get Name="Get" Id="{2a401858-59f0-4558-8b4b-55c31295c975}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RegisterBeckhoffCamera" Id="{d4f9830b-2e22-4733-97da-6cdba44971ec}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The most important registers of a Beckhoff camera can be read here.
+PROPERTY RegisterBeckhoffCamera : I_GigE_Beckhoff_Camera]]></Declaration>
       <Get Name="Get" Id="{451c5cda-a160-4923-b3ec-bc6ff60080c7}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RegisterLighting" Id="{97e83ee9-b21e-4ecd-bba9-5747ec7895fb}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Interface to the parameters, can be 0(=invalid interface) depending on the hardware
+PROPERTY RegisterLighting : I_GigE_Beckhoff_Lighting]]></Declaration>
+      <Get Name="Get" Id="{7e0080aa-1730-47f1-a203-ac1c9b971d32}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="RegisterOpticControl" Id="{3d2d09f6-4429-4fce-8f1a-d670bdda91ce}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Interface to the parameters, can be 0(=invalid interface) depending on the hardware
+PROPERTY RegisterOpticControl : I_GigE_Beckhoff_OpticControl
+]]></Declaration>
+      <Get Name="Get" Id="{92ad93f7-d9c0-4458-83a5-860bec74bd9f}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>
@@ -56,6 +100,14 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Property Name="Simulation" Id="{01b8c5bc-d122-4dc6-adff-20f04de95769}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Simulation mode is active
+PROPERTY Simulation : BOOL]]></Declaration>
+      <Get Name="Get" Id="{7410e3a9-7017-47f4-939e-878d1f614c03}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
     <Property Name="State" Id="{f0e69f7a-0b77-4ccf-a6d3-68f6d000bd73}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Gets the current state of the internal camera control state machine.
@@ -65,7 +117,9 @@ PROPERTY State : ETcVnCameraState]]></Declaration>
       </Get>
     </Property>
     <Property Name="TriggerEtherCat" Id="{c8548ce9-e4cb-4910-8166-5fef96508dc1}">
-      <Declaration><![CDATA[PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Access to the interface to control the EtherCAT timestamp trigger
+PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
       <Get Name="Get" Id="{17073d4f-1b20-4c8e-9bd7-8e126dbe3c01}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>

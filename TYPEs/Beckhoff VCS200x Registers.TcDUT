@@ -1,7 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
-  <DUT Name="E_CameraRegisters_Beckhoff" Id="{00151fb9-177c-4e6d-8b94-c0cdf5773027}">
-    <Declaration><![CDATA[TYPE E_CameraRegisters_Beckhoff :
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.7"><DUT Name="E_CameraRegisters" Id="{00151fb9-177c-4e6d-8b94-c0cdf5773027}"><Declaration><!-- --><![CDATA[TYPE E_CameraRegisters :
 (
 BootStrap_VersionMajor_BootStrap_VersionMinor := 16#00000000, // GigE Vision Minor Version
 BootStrap_DeviceEndianess_BootStrap_CharacterSet := 16#00000004, // BootStrap CharacterSet
@@ -411,6 +408,4 @@ pDeviceLink1ConnectionCountReg := 16#3DF90000, // None
 pDeviceLink1HeartbeatModeReg   := 16#3EF90000, // None
 pDeviceLink1HeartbeatTimeoutReg := 16#3FF90000 // None
 ) UDINT;
-END_TYPE]]></Declaration>
-  </DUT>
-</TcPlcObject>
+END_TYPE]]><!-- --></Declaration></DUT></TcPlcObject>

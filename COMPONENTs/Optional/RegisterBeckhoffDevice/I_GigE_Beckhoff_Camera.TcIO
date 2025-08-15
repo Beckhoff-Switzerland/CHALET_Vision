@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Itf Name="I_GigE_Beckhoff_Camera" Id="{c63c5df4-6db6-46df-a8cc-7be0188710a9}">
-    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Camera EXTENDS I_GigeRegister
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Camera EXTENDS I_GigeRegisterBase
 ]]></Declaration>
     <Folder Name="RegisterParameter" Id="{3fa5ca44-d8ac-467e-9e2a-00a52edb10de}">
       <Folder Name="Acquisition and Trigger" Id="{4ddd2149-75f8-42cc-a63e-52d45b5f6c69}" />
@@ -23,26 +23,6 @@ PROPERTY AcquisitionMode : E_AcquisitionModeReg]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Set>
     </Property>
-    <Property Name="AllReadDone" Id="{662afa1a-287a-4351-9c46-24835eac0005}">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllReadDone : BOOL]]></Declaration>
-      <Get Name="Get" Id="{979db666-2362-4a9e-b2fb-f33794eda8dc}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Get>
-      <Set Name="Set" Id="{1320c57c-c0c1-4eb9-a33d-aac9b04d7765}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Set>
-    </Property>
-    <Property Name="AllWriteDone" Id="{0aa75c98-f4f2-440d-8bcc-598b56224cb0}">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllWriteDone : Bool]]></Declaration>
-      <Get Name="Get" Id="{70d828a5-6adf-4722-afaf-61255cd0c3df}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Get>
-      <Set Name="Set" Id="{34fd54d2-d91a-4a5e-872e-8b368fcdd152}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Set>
-    </Property>
     <Property Name="DeviceDefaultState" Id="{4a6b9171-b146-4a3e-95cd-87d6959c2798}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Controls whether most of the camera settings is controlled by GigE Vision or EtherCAT. 
@@ -55,26 +35,11 @@ PROPERTY DeviceDefaultState : E_DeviceDefaultState]]></Declaration>
         <Declaration><![CDATA[]]></Declaration>
       </Set>
     </Property>
-    <Property Name="DeviceModeNamel" Id="{9e465e95-e6e4-4174-8720-9d129ebed211}" FolderPath="RegisterParameter\Device\">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-//Displays the device model name.
-PROPERTY DeviceModeNamel : STRING(32)]]></Declaration>
-      <Get Name="Get" Id="{dcb0af5d-8cfb-47e3-9d6b-a0c70adf10d0}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Get>
-    </Property>
     <Property Name="DeviceSerialNumber" Id="{8987cea7-6e5d-4c72-b572-18e3db9a6194}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Device's serial number. This string is a unique identifier of the device.
 PROPERTY DeviceSerialNumber : STRING(16)]]></Declaration>
       <Get Name="Get" Id="{653e6ab9-eb5d-46b6-aa0e-9450d10012fe}">
-        <Declaration><![CDATA[]]></Declaration>
-      </Get>
-    </Property>
-    <Property Name="DeviceVendorName" Id="{f20b64da-c84c-4a59-8b02-ff7da3dbbb1f}" FolderPath="RegisterParameter\Device\">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY DeviceVendorName : STRING(32)]]></Declaration>
-      <Get Name="Get" Id="{34382b3b-003b-4ec4-b6d0-dd9996d51c3c}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>

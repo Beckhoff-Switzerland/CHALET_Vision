@@ -11,11 +11,15 @@ VAR
 	{attribute 'hide'}	
 	bInSimulation 					: BOOL;
 	{attribute 'hide'}	
-	eCameraType						: E_CameraType := E_CameraType.Beckhoff_VCS2xxx; 	
+	eCameraType						: E_CameraType; 	
 	{attribute 'hide'}
-	fbGigeBeckhoffRegister 			: FB_GigE_Beckhoff_Register(ipCamera := THIS^);
+	fbGigeAnyRegister			 			: FB_GigE_Register_Any(ipCamera := THIS^);
+	{attribute 'hide'}
+	fbGigeBeckhoffRegisterVCS2xxx 			: FB_GigE_Register_Beckhoff_VCS2xxx(ipCamera := THIS^);
+	{attribute 'hide'}
+	fbGigeBeckhoffRegisterVUI2xxx 			: FB_GigE_Register_Beckhoff_VUI2xxx(ipCamera := THIS^);
 	{attribute 'hide'}	
-	ipRegister 						: I_GigeRegister;
+	ipRegister 								: I_GigeRegisterBase := fbGigeAnyRegister;
 		
 	{attribute 'hide'}	
 	bInitDone 			: BOOL;
@@ -45,6 +49,7 @@ END_VAR
     </Implementation>
     <Property Name="CameraType" Id="{7fb62898-c1ef-473f-8fa5-37fc744dfaeb}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Once as a Beckhoff camera is detected at startup, the corresponding type is loaded automatically. 
 PROPERTY CameraType : E_CameraType]]></Declaration>
       <Get Name="Get" Id="{6fbdc49f-5dec-49b6-b3b2-6ecf421f6204}">
         <Declaration><![CDATA[VAR
@@ -70,16 +75,40 @@ THIS^.eCameraType := CameraType;
 //write new object to interface
 CASE THIS^.eCameraType OF	
 	E_CameraType.Beckhoff_VCS2xxx:
-		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegister;
-	
-	E_CameraType.ThirdParty:
-		THIS^.ipRegister := 0;
+		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegisterVCS2xxx;
+		
+	E_CameraType.Beckhoff_VUI2xxx:
+		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegisterVUI2xxx;
 	
 	ELSE
-		THIS^.ipRegister := 0;
+		THIS^.ipRegister := THIS^.fbGigeAnyRegister;;
 END_CASE]]></ST>
         </Implementation>
       </Set>
+    </Property>
+    <Property Name="ControlChannelOpen" Id="{9ac1a404-f3db-4ca1-8cf3-21dcc8494d47}">
+      <Declaration><![CDATA[//	The connection to the camera has been established. Gige-Vision parameters can now be read or written
+{attribute 'monitoring' := 'call'}
+PROPERTY ControlChannelOpen : BOOL]]></Declaration>
+      <Get Name="Get" Id="{18acef6b-5a92-4cac-8fe9-f38fe5906b7c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CASE THIS^.State OF
+	TCVN_CS_ERROR, TCVN_CS_INITIAL, TCVN_CS_INITIALIZING, TCVN_CS_INITIALIZED,TCVN_CS_OPENING,TCVN_CS_CLOSING:
+		ControlChannelOpen := FALSE;
+	
+	TCVN_CS_OPENED, TCVN_CS_STARTACQUISITION,  TCVN_CS_ACQUIRING, TCVN_CS_STOPACQUISITION, TCVN_CS_RESETTINGFEATURES, TCVN_CS_TRIGGERING:
+		ControlChannelOpen := TRUE;
+
+	ELSE
+		;//Unknown
+END_CASE
+
+]]></ST>
+        </Implementation>
+      </Get>
     </Property>
     <Method Name="FB_exit" Id="{22a0fd36-0f2b-40fc-a0b7-e0a470e76283}">
       <Declaration><![CDATA[METHOD FB_exit : BOOL
@@ -112,8 +141,9 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF NOT bInCopyCode THEN
-	//Set the init enum value as start value
-	THIS^.CameraType := THIS^.eCameraType;
+	//Start with an unknown camera. 
+	//Once as a Beckhoff camera is detected, the corresponding type is loaded automatically. 
+	THIS^.CameraType := E_CameraType.Unknown;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -157,8 +187,8 @@ VAR_INST
 	fbInitError : FB_TcAlarm;
 END_VAR
 VAR CONSTANT
-	N_IDX_OFFSET_GevImageAcquisition 	: UDINT := 16#00000001; // Parameter(online) in Planar Track object
-	N_IDX_OFFSET_IP_STACK 			: UDINT := 16#00000013; // Parameter(online) in Planar Track object
+	N_IDX_OFFSET_GevImageAcquisition 	: UDINT := 16#00000001;
+	N_IDX_OFFSET_IP_STACK 				: UDINT := 16#00000013;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[hr := SUPER^.Initialize();
@@ -200,7 +230,6 @@ IF THIS^.ipGevImageProviderComObject <> 0 THEN
 			bInSimulation := TRUE;
 			hr := S_OK;
 		END_IF
-
 	END_IF
 END_IF
 
@@ -261,17 +290,32 @@ Operational := (eState = TCVN_CS_ACQUIRING) OR (eState = TCVN_CS_TRIGGERING);]]>
         </Implementation>
       </Get>
     </Property>
-    <Property Name="RegisterCamera" Id="{7006d77f-1177-4d8f-8d2e-4799aa5ef962}">
+    <Property Name="RegisterAnyCamera" Id="{8d567bcb-298b-442f-a2ee-91a6c021730c}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Access to the important parameters marked as standard in Gige-Vision
+PROPERTY RegisterAnyCamera : I_GigE_Any_Camera]]></Declaration>
+      <Get Name="Get" Id="{0420c097-062d-482b-8cb1-5ce6c81ddc73}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//Convert in requestet interface
+__QUERYINTERFACE(THIS^.ipRegister, RegisterAnyCamera);
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="RegisterBeckhoffCamera" Id="{7006d77f-1177-4d8f-8d2e-4799aa5ef962}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Interface to the parameters, can be 0(=invalid interface) depending on the hardware
-PROPERTY RegisterCamera : I_GigE_Beckhoff_Camera]]></Declaration>
+PROPERTY RegisterBeckhoffCamera : I_GigE_Beckhoff_Camera]]></Declaration>
       <Get Name="Get" Id="{56e40d86-31f2-4a86-b952-e35c1b162e6c}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[//Convert in requestet interface
-__QUERYINTERFACE(THIS^.ipRegister, RegisterCamera);
+__QUERYINTERFACE(THIS^.ipRegister, RegisterBeckhoffCamera);
 ]]></ST>
         </Implementation>
       </Get>
@@ -317,6 +361,7 @@ END_VAR
         <ST><![CDATA[THIS^.bResetCommand := TRUE;
 
 fbFeedback.ActiveCommand := 'Reset';
+fbFeedback.LastCommandAccepted	:= TRUE;
 fbFeedback.hr := THIS^.fbCamera.Reset();	
 ]]></ST>
       </Implementation>
@@ -349,6 +394,7 @@ END_VAR
     </Property>
     <Property Name="TriggerEtherCat" Id="{d56cc878-4ab2-4eaf-906d-a4f6451fdf4c}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Access to the interface to control the EtherCAT timestamp trigger
 PROPERTY TriggerEtherCat : I_EtherCat_Trigger]]></Declaration>
       <Get Name="Get" Id="{5511c542-b995-4328-b8d3-a625ef59ee40}">
         <Declaration><![CDATA[VAR
@@ -377,6 +423,7 @@ END_IF
 
 // Trigger image
 fbFeedback.ActiveCommand := 'TriggerImage';
+fbFeedback.LastCommandAccepted	:= TRUE;
 fbFeedback.hr := fbCamera.TriggerImage();
 TriggerSoftware := fbFeedback.hr;
 ]]></ST>
@@ -465,6 +512,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[//Force to initialize first
 IF NOT THIS^.Initialized THEN
 	THIS^.Initialize();
+	RETURN;
 END_IF
 
 
@@ -483,6 +531,17 @@ CASE THIS^.State OF
 		fbFeedback.hr := fbCamera.OpenCamera();
 		
 	TCVN_CS_OPENED:
+		(* Detect camera model once *)
+		IF THIS^.CameraType = E_CameraType.Unknown AND THIS^.RegisterAnyCamera <> 0 AND THIS^.ipRegister.AllReadDone THEN
+			IF FIND(THIS^.RegisterAnyCamera.DeviceModeNamel, 'VCS2') <> 0 THEN
+				THIS^.CameraType := E_CameraType.Beckhoff_VCS2xxx;
+			ELSIF FIND(THIS^.RegisterAnyCamera.DeviceModeNamel, 'VUI2') <> 0 THEN
+				THIS^.CameraType := E_CameraType.Beckhoff_VUI2xxx;
+			ELSE
+				THIS^.CameraType := E_CameraType.ThirdParty;
+			END_IF
+		END_IF
+		
 		IF THIS^.Simulation THEN
 			; //Stay in this state in Simulationmode	
 		
@@ -493,7 +552,7 @@ CASE THIS^.State OF
 		ELSIF THIS^.ipRegister.AllReadDone AND THIS^.ipRegister.AllWriteDone THEN
 			fbFeedback.ActiveCommand := 'StartAcquisition';
 			fbFeedback.hr := fbCamera.StartAcquisition();
-			
+
 		ELSE	
 			//Read and write all camera parameter in this OPENED-State 
 			fbFeedback.ActiveCommand := 'ReadWrite camera parameters';
@@ -511,10 +570,10 @@ CASE THIS^.State OF
 		fbFeedback.hr := fbCamera.StopAcquisition();
 		
 	TCVN_CS_ACQUIRING:
-		//wait for trigger
-		;
+		;//wait for trigger
+		
 		//Check if a chage in opened state is required to read/write parameter
-		IF THIS^.ipRegister <> 0 AND_THEN (NOT THIS^.ipRegister.AllReadDone OR NOT THIS^.ipRegister.AllWriteDone) THEN
+		IF VisionParameterlist.B_LEAVE_AQUIRRING_STATE_TO_WRITE_PARAMETER AND THIS^.ipRegister <> 0 AND_THEN NOT THIS^.ipRegister.AllWriteDone THEN
 			fbFeedback.ActiveCommand := 'StopAcquisition';
 			fbCamera.StopAcquisition();
 		END_IF
@@ -533,14 +592,16 @@ CASE THIS^.State OF
 		
 END_CASE
 
-(* Clear Alarm if not in Error-State *)
+(* Clear reset request if not in Error-State *)
 IF THIS^.State <> TCVN_CS_ERROR THEN
 	THIS^.bResetCommand := FALSE;
 END_IF
 
 
+
+
 // --- Write diagnostic information to eventloger
-IF THIS^.State = TCVN_CS_ERROR THEN
+IF THIS^.State = TCVN_CS_ERROR AND VisionParameterlist.B_ALARM_IF_LINK_TO_CAMERA_IS_DOWN THEN
 	//check IP-Stack an check if camera is conected	
 	IF THIS^.ipIpStackComObject <> 0 THEN
 		//Read object id of ipStack TcCom 
@@ -569,12 +630,10 @@ IF THIS^.State = TCVN_CS_ERROR THEN
 END_IF
 
 
-
-
-
 //Subelement - if not in simulation
 fbTriggerEtherCat.Update();
-IF THIS^.ipRegister <> 0 AND NOT THIS^.bInSimulation THEN
+
+IF THIS^.ipRegister <> 0 THEN
 	//Redo a read or write for each parameter
 	THIS^.ipRegister.Update();
 END_IF

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Itf Name="I_EtherCat_Trigger" Id="{6c7ffa27-bf73-4cbc-805a-c95929c9c841}">
     <Declaration><![CDATA[INTERFACE I_EtherCat_Trigger EXTENDS __SYSTEM.IQueryInterface
 
@@ -32,6 +32,13 @@ PROPERTY LastTriggerTime : T_DCTIME64]]></Declaration>
 PROPERTY Mapped : BOOL 
 ]]></Declaration>
       <Get Name="Get" Id="{87003794-38f4-4ec4-b91a-ef7acb050f46}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="TaskCycleTime" Id="{69d9d18c-0975-41b0-a2ff-e54d2b7f9f83}">
+      <Declaration><![CDATA[//Cycle time in ns. This can be helpful for calculating the next trigger.
+PROPERTY TaskCycleTime : UDINT]]></Declaration>
+      <Get Name="Get" Id="{fbd31843-4247-4e97-83aa-1c8fc4221be2}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
     </Property>

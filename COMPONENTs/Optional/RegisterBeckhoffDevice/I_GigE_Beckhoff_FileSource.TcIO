@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Itf Name="I_GigE_Beckhoff_FileSource" Id="{cc026968-9f6d-4546-bc2d-1c7e82f2363a}">
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_FileSource
+]]></Declaration>
+    <Property Name="FileSourceControl" Id="{e3b9266d-4f11-40a1-877c-6ad8ae1f8305}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+// This FB provides access to the images send by a File Source instance.
+PROPERTY FileSourceControl : REFERENCE TO FB_VN_FileSourceControl]]></Declaration>
+      <Get Name="Get" Id="{b0c8e54a-933c-45e2-b935-04d27c7f19ac}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Initialized" Id="{70ccabd4-6b6c-4dea-b190-98b07ed66645}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a4be81d4-c7db-4a7a-8d1a-07ee647b3112}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="State" Id="{b80229f2-4307-47b2-84ca-76ee6a3d90a3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Gets the current state of the internal camera control state machine.
+PROPERTY State : ETcVnCameraState]]></Declaration>
+      <Get Name="Get" Id="{388cbaa5-7779-46aa-8f5b-9304c5f379dc}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="TriggerImage" Id="{3c95bf52-6f2e-4e95-8364-3123a725a37e}">
+      <Declaration><![CDATA[//If in trigger mode, this function triggers the next image in the list.
+METHOD TriggerImage : HRESULT
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerImageByName" Id="{54d9b3c8-8e78-4905-800b-f6cef53e8e7c}">
+      <Declaration><![CDATA[//If in trigger mode, this function triggers a specific image in the list by name.
+METHOD TriggerImageByName : HRESULT
+VAR_INPUT
+	//Name of the image to trigger
+	sImageName : STRING;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TriggerImageExp" Id="{f96bc3c8-21c6-4bb9-b36f-505c92304db9}">
+      <Declaration><![CDATA[//If in trigger mode, this function triggers a specific image in the list.
+METHOD TriggerImageExp : HRESULT
+VAR_INPUT
+	//Amount of images to skip, relative to current
+	nSkipImages : DINT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="TryGetImage" Id="{fa4dd77f-1582-4435-9514-a789b874aa73}">
+      <Declaration><![CDATA[//Gets the current available image (first in receive queue) and its corresponding GVSP info
+METHOD  TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

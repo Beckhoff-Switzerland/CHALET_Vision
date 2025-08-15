@@ -9,11 +9,17 @@ VAR_GLOBAL CONSTANT
 	(*Maximum how much the next trigger may be in the future*)
 	MAX_NEXT_TRIGGER_IN_FUTURE_ms 		: UDINT := 30_000;
 	
-	(*This is how much earlier the trigger must be present in the camera in order to take a picture in time*)
-	CAMERA_TRIGGER_RESPONSE_TIME_ns 	: ULINT := 3_000_000;	
+	(*This is how much earlier the trigger must be present in the camera in order to take a picture in time. Since V1.2.0 <1ms is posible*)
+	CAMERA_TRIGGER_RESPONSE_TIME_ns 	: ULINT := 10;	
 	
 	(*Number of next triggers that are saved and processed.  1..n*)
 	TRIGGER_BUFFER_SIZE 				: UDINT := 1;	
+	
+	(*For Gige Read/Write leave aquiring state and change to opened state*)
+	B_LEAVE_AQUIRRING_STATE_TO_WRITE_PARAMETER : BOOL := TRUE;
+	
+	(*In the camera's error state, a alarm is generated in the event logger if there is no connection.*)
+	B_ALARM_IF_LINK_TO_CAMERA_IS_DOWN : BOOL := TRUE;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

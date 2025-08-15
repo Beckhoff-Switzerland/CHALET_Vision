@@ -143,6 +143,17 @@ IF ipCamera <> 0 THEN
 END_IF]]></ST>
       </Implementation>
     </Method>
+    <Property Name="OID" Id="{7f0ca254-af53-45c4-b38d-d9afdbb451b8}">
+      <Declaration><![CDATA[PROPERTY OID : OTCID]]></Declaration>
+      <Get Name="Get" Id="{5879ba5e-0a11-4908-a92d-11c7e195d9b9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[OID := OidCamera;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="ReadDone" Id="{94be5db8-7ed4-473a-9cbe-691efefef7b2}">
       <Declaration><![CDATA[{attribute 'monitoring':='call'}
 PROPERTY ReadDone : BOOL]]></Declaration>
@@ -187,6 +198,10 @@ END_IF]]></ST>
     </Method>
     <Method Name="Update" Id="{aec45a8f-6052-413d-86b9-1d2194f37d40}">
       <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	bCameraStateWriteAllowed : BOOL;
+	bCameraStateReadAllowed : BOOL;
+END_VAR
 
 ]]></Declaration>
       <Implementation>
@@ -196,11 +211,18 @@ END_IF]]></ST>
 END_IF
 
 
+bCameraStateWriteAllowed := (VisionParameterlist.B_LEAVE_AQUIRRING_STATE_TO_WRITE_PARAMETER AND ipCamera.GevCameraControl.GetState() = ETcVnCameraState.TCVN_CS_OPENED) 
+							OR (NOT VisionParameterlist.B_LEAVE_AQUIRRING_STATE_TO_WRITE_PARAMETER AND ipCamera.GevCameraControl.GetState() >= ETcVnCameraState.TCVN_CS_OPENED);
+							
+
+bCameraStateReadAllowed := (ipCamera.GevCameraControl.GetState() >= ETcVnCameraState.TCVN_CS_OPENED);
+														
+
 (*--- Read ---*)
 bExecuteRead := FALSE;
 CASE nSeqRead OF
 	0: //Start/Restart if required
-		IF NOT bReadDone AND bWriteDone(* Write has higher priority*) AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqWrite = 0) THEN
+		IF bCameraStateReadAllowed AND NOT bReadDone AND bWriteDone(* Write has higher priority*) AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqWrite = 0) THEN
 			bExecuteRead := TRUE; // Rising edge	
 			nCtsReadWriteActive := nCtsReadWriteActive +1;	
 			nSeqRead := 1;
@@ -238,7 +260,7 @@ fbRTrigReadDone(CLK := THIS^.bReadDone);
 bExecuteWrite := FALSE;
 CASE nSeqWrite OF
 	0: //Start/Restart if required
-		IF NOT bWriteDone AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqRead = 0) THEN
+		IF bCameraStateWriteAllowed AND NOT bWriteDone AND (nCtsReadWriteActive < VisionParameterlist.MAX_VN_REGISTER_READ_WRITE) AND (nSeqRead = 0) THEN
 			bExecuteWrite := TRUE; // Rising edge	
 			nCtsReadWriteActive := nCtsReadWriteActive +1;	
 			nSeqWrite := 1;

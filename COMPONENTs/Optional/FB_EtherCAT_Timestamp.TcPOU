@@ -15,7 +15,6 @@ VAR
 	fbFeedback 				: FB_CH_Feedback(THIS^.fbSourceInfo);
 	{attribute 'hide'}  						
 	nTaskCycleTimeNs 		: UDINT;//[ns]
-
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -84,30 +83,9 @@ END_VAR
     </Property>
     <Method Name="Initialize" Id="{b9e423a7-d43f-4dc9-836a-e5d07a26943a}">
       <Declaration><![CDATA[METHOD Initialize : HRESULT
-VAR
-	stVarInfo : __SYSTEM.VAR_INFO;
-END_VAR
-VAR_INST
-	//This error cannot be reset. Requires a reset cold
-	{attribute 'hide'}	
-	fbInitError : FB_TcAlarm;
-END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// Check if link is mapped
-IF NOT THIS^.Mapped THEN
-	IF NOT fbInitError.bRaised THEN 
-		//This error cannot be reset. Requires a reset cold
-		fbInitError.CreateEx(	stEventEntry	:=TC_EVENTS.CHALET_Base_Events.VariableLinkMissing,
-								ipSourceInfo 	:= THIS^.fbSourceInfo, 
-								bWithConfirmation := FALSE);
-		stVarInfo := __VARINFO(nTimestamp);
-		fbInitError.ipArguments.AddString(stVarInfo.Symbol);
-		fbInitError.Raise(0);
-	END_IF
-	Initialize := E_FAIL;
-	RETURN;
-END_IF
+        <ST><![CDATA[Initialize := SUPER^.Initialize();
 
 
 THIS^.nTaskCycleTimeNs := TwinCAT_SystemInfoVarList._TaskInfo[THIS^.TaskIndex].CycleTime * 100;
@@ -160,6 +138,18 @@ Mapped := NOT bNotMapped;]]></ST>
         </Implementation>
       </Get>
     </Property>
+    <Property Name="TaskCycleTime" Id="{5a592ae7-ba3f-44f8-b4df-becb8e4d593f}">
+      <Declaration><![CDATA[//Cycle time in ns. This can be helpful for calculating the next trigger.
+PROPERTY TaskCycleTime : UDINT]]></Declaration>
+      <Get Name="Get" Id="{7c7e9b1e-e630-4d97-8a38-ee150d3ed8da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TaskCycleTime := THIS^.nTaskCycleTimeNs;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="Trigger" Id="{089f04a5-021f-4dc9-b658-62ba3f404518}">
       <Declaration><![CDATA[METHOD PUBLIC Trigger : HRESULT
 VAR_INPUT
@@ -168,10 +158,32 @@ VAR_INPUT
 	//F_GetCurDcTickTime64()
 	nDCTimeStamp	: T_DCTIME64;
 END_VAR
-
+VAR_INST
+	//This error cannot be reset. Requires a reset cold or mapping of var+download
+	{attribute 'hide'}	
+	fbNotMapped : FB_TcAlarm;
+END_VAR
+VAR
+	stVarInfo : __SYSTEM.VAR_INFO;
+END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[fbFeedback.ActiveCommand := 'Trigger';
+
+// Check if link is mapped
+IF NOT THIS^.Mapped THEN
+	IF NOT fbNotMapped.bRaised THEN 
+		//This error cannot be reset. Requires a reset cold
+		fbNotMapped.CreateEx(	stEventEntry	:=TC_EVENTS.CHALET_Base_Events.VariableLinkMissing,
+								ipSourceInfo 	:= THIS^.fbSourceInfo, 
+								bWithConfirmation := FALSE);
+		stVarInfo := __VARINFO(nTimestamp);
+		fbNotMapped.ipArguments.AddString(stVarInfo.Symbol);
+		fbNotMapped.Raise(0);
+	END_IF
+	RETURN;
+END_IF
+
 
 // Check if the trigger is minimum 3 EtherCat cycles in future
 IF (nDCTimeStamp) < THIS^.EarliestPossibleTriggerTime THEN

@@ -67,7 +67,6 @@ fbVnReadRegister_REAL(
 	nAddress:= SUPER^.nAddress, 
 	nEndian:= SUPER^.nEndian, 
 	bRead:= SUPER^.bExecuteRead, 
-	fValue=> fValue, 
 	bBusy=> SUPER^.bReadBusy, 
 	bError=> SUPER^.bReadError
 	);

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Itf Name="I_GigE_Any_Camera" Id="{53b5a10e-f82a-4775-a919-c73e728d0d52}">
+    <Declaration><![CDATA[INTERFACE I_GigE_Any_Camera EXTENDS I_GigeRegisterBase
+]]></Declaration>
+    <Folder Name="RegisterParameter" Id="{160b5a1d-bf85-48e1-89c9-60c09cbd7795}">
+      <Folder Name="Acquisition and Trigger" Id="{641af96c-3103-48a9-8a48-8fc4afc99b76}" />
+      <Folder Name="Device" Id="{f1a43abc-0baa-41a2-ae7b-44a9a44f61fb}" />
+      <Folder Name="Region" Id="{4c7827df-e376-42a8-9ec6-7a29f8f5d58d}" />
+      <Folder Name="Sensor" Id="{e4e7b6e5-b6b0-48ad-810c-a7403ad54aa0}" />
+    </Folder>
+    <Property Name="DeviceModeNamel" Id="{aa532f84-3dbb-4bd9-97e5-c27966052b3b}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Displays the device model name.
+PROPERTY DeviceModeNamel : STRING(32)]]></Declaration>
+      <Get Name="Get" Id="{1be1106c-8f69-487e-a2c7-746c8ec17308}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="DeviceVendorName" Id="{a1f5fe08-911f-47d0-b19c-c412712b3d99}" FolderPath="RegisterParameter\Device\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Provides the name of the manufacturer of the device.
+PROPERTY DeviceVendorName : STRING(32)]]></Declaration>
+      <Get Name="Get" Id="{7ee11693-d12d-40ec-beb2-59550f048ece}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

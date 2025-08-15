@@ -1,14 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
-  <POU Name="FB_GigE_Beckhoff_Register" Id="{15833fd6-b4b7-4828-a96b-9c644879be7b}" SpecialFunc="None">
+  <POU Name="FB_GigE_Register_Beckhoff_VCS2xxx" Id="{15833fd6-b4b7-4828-a96b-9c644879be7b}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 {attribute 'enable_dynamic_creation'}
-FUNCTION_BLOCK FB_GigE_Beckhoff_Register EXTENDS FB_CH_Object IMPLEMENTS I_GigE_Beckhoff_Camera, I_GigeRegister
+FUNCTION_BLOCK FB_GigE_Register_Beckhoff_VCS2xxx EXTENDS FB_GigE_Register_Any IMPLEMENTS I_GigE_Beckhoff_Camera, I_GigeRegisterBase
 VAR	
-	//Connection to camera
-	{attribute 'hide'}
-	ipCamera : I_GevCameraControl;	
-
 	//GigE-Camera-Register
 	//Read/Write
 	{attribute 'hide'}
@@ -36,10 +32,6 @@ VAR
 	                                                                    
 	//Read only                                                         
 	{attribute 'hide'}                                                  
-	fbRegDeviceVendorName		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceVendorName, nLength := 32); //String	
-	{attribute 'hide'}                                                  
-	fbRegDeviceModelName	 	: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceModelName, nLength := 32); //String	
-	{attribute 'hide'}                                                  
 	fbRegDeviceVersion	 		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.DeviceVersion, nLength := 32); //String		
 	{attribute 'hide'}                                                  
 	fbRegSensorName		 		: FB_VnRegister_Memory(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.SensorName, nLength := 80); //String	
@@ -55,10 +47,6 @@ VAR
 	fbRegImgSensorWidth			: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pPhysicalWidthReg, nEndian := 0);
 	{attribute 'hide'}                                                 
 	fbRegImgSensorHeight		: FB_VnRegister_UDINT(bReadOnly := TRUE, nAddress := E_CameraRegisters_Beckhoff.pPhysicalHeightReg, nEndian := 0);
-
-	//List
-	{attribute 'hide'}
-	fbVnRegisterList 			: FB_CH_List;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
@@ -95,90 +83,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="AllReadDone" Id="{91c45d14-822a-40f7-abd4-7dcecfaf6f2a}">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllReadDone : BOOL]]></Declaration>
-      <Get Name="Get" Id="{f61b7ae1-04fd-4013-a8b3-dafe52d2cb22}">
-        <Declaration><![CDATA[VAR
-	ipVnRegisterStatus : I_VnRegister;
-	bAllRead : BOOL := TRUE;
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
-WHILE THIS^.fbVnRegisterList.HasNextObject() DO
-	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
-		bAllRead := bAllRead AND ipVnRegisterStatus.ReadDone;
-	END_IF
-END_WHILE
-THIS^.fbVnRegisterList.RestoreIterator();
-		
-AllReadDone := bAllRead;		
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{65c509b9-6b77-475f-83f0-e73720e33772}">
-        <Declaration><![CDATA[VAR
-	ipRegObject : I_VnRegister;
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[IF AllReadDone = FALSE THEN
-	THIS^.fbVnRegisterList.ResetIterator();
-	WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
-		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
-			ipRegObject.ReadDone := FALSE;
-		END_IF
-	END_WHILE
-	THIS^.fbVnRegisterList.RestoreIterator();
-END_IF
-
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
-    <Property Name="AllWriteDone" Id="{3ef6b466-38a3-44e5-99cc-88f719c98ae4}">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllWriteDone : Bool]]></Declaration>
-      <Get Name="Get" Id="{44dae8b1-46a4-4942-b701-c96223612070}">
-        <Declaration><![CDATA[VAR
-	ipVnRegisterStatus : I_VnRegister;
-	bAllWritten : BOOL := TRUE;
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
-WHILE THIS^.fbVnRegisterList.HasNextObject() DO
-	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
-		bAllWritten := bAllWritten AND ipVnRegisterStatus.WriteDone;
-	END_IF
-END_WHILE
-THIS^.fbVnRegisterList.RestoreIterator();
-		
-AllWriteDone := bAllWritten;		
-]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{1ce2c662-c182-4dfe-8b52-fa0e074612df}">
-        <Declaration><![CDATA[VAR
-	ipRegObject : I_VnRegister;
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[IF AllWriteDone = FALSE THEN
-	THIS^.fbVnRegisterList.ResetIterator();
-	WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
-		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
-			ipRegObject.WriteDone := FALSE;
-		END_IF
-	END_WHILE
-	THIS^.fbVnRegisterList.RestoreIterator();
-END_IF
-
-]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
     <Property Name="DeviceDefaultState" Id="{34afc0de-dcf7-4be5-86e8-f98969a9d7fd}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Controls whether most of the camera settings is controlled by GigE Vision or EtherCAT. 
@@ -202,19 +106,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="DeviceModeNamel" Id="{eb5a59af-59ec-406c-9c15-0191f6b2dca8}" FolderPath="RegisterParameter\Device\">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-//Displays the device model name.
-PROPERTY DeviceModeNamel : STRING(32)]]></Declaration>
-      <Get Name="Get" Id="{68e21193-31c7-42fb-b620-26202dfbee37}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[fbRegDeviceModelName.ReadData(ADR(DeviceModeNamel));]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Property Name="DeviceSerialNumber" Id="{8413e07c-8274-4f81-8977-84a6e9751f51}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Device's serial number. This string is a unique identifier of the device.
@@ -225,18 +116,6 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[fbRegDeviceSerialNumber.ReadData(ADR(DeviceSerialNumber));]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="DeviceVendorName" Id="{6d154ddb-c391-4438-aa39-d7c339e0c4ec}" FolderPath="RegisterParameter\Device\">
-      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY DeviceVendorName : STRING(32)]]></Declaration>
-      <Get Name="Get" Id="{f65126e3-c91d-427c-9705-d266dcc1e136}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[fbRegDeviceVendorName.ReadData(ADR(DeviceVendorName));]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -280,53 +159,48 @@ VAR_INPUT
 	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
 	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
 	
-	ipCamera : I_GevCameraControl;
+	ipCamera : I_GigE_Beckhoff_Standalone;
 END_VAR
 VAR
 	ipVnRegisterStatus : I_VnRegister;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
-//Do the following code once during start up and not during onlinechange
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
 IF NOT bInCopyCode THEN 
-	
-	THIS^.ipCamera := ipCamera;
+
+	//Add this registerparameter to the allready existing list off the "Any" parent
 
 	//Read/Write
-	fbVnRegisterList.AddObject(fbRegAcquisitionMode);
-	fbVnRegisterList.AddObject(fbRegTriggerMode);
-	fbVnRegisterList.AddObject(fbRegTriggerSource);
-	fbVnRegisterList.AddObject(fbRegExposureTime);
-	fbVnRegisterList.AddObject(fbRegDeviceDefaultState);
-	fbVnRegisterList.AddObject(fbRegRegionModeOn);
-	fbVnRegisterList.AddObject(fbRegRegionWidth);
-	fbVnRegisterList.AddObject(fbRegRegionHeight);
-	fbVnRegisterList.AddObject(fbRegRegionOffsetX);
-	fbVnRegisterList.AddObject(fbRegRegionOffsetY);
-	fbVnRegisterList.AddObject(fbRegGainAnalog);
+	SUPER^.fbVnRegisterList.AddObject(fbRegAcquisitionMode);
+	SUPER^.fbVnRegisterList.AddObject(fbRegTriggerMode);
+	SUPER^.fbVnRegisterList.AddObject(fbRegTriggerSource);
+	SUPER^.fbVnRegisterList.AddObject(fbRegExposureTime);
+	SUPER^.fbVnRegisterList.AddObject(fbRegDeviceDefaultState);
+	SUPER^.fbVnRegisterList.AddObject(fbRegRegionModeOn);
+	SUPER^.fbVnRegisterList.AddObject(fbRegRegionWidth);
+	SUPER^.fbVnRegisterList.AddObject(fbRegRegionHeight);
+	SUPER^.fbVnRegisterList.AddObject(fbRegRegionOffsetX);
+	SUPER^.fbVnRegisterList.AddObject(fbRegRegionOffsetY);
+	SUPER^.fbVnRegisterList.AddObject(fbRegGainAnalog);
 	
 	//Read only
-	fbVnRegisterList.AddObject(fbRegDeviceVendorName);
-	fbVnRegisterList.AddObject(fbRegDeviceModelName);
-	fbVnRegisterList.AddObject(fbRegSensorName);
-	fbVnRegisterList.AddObject(fbRegDeviceVersion);
-	fbVnRegisterList.AddObject(fbRegDeviceSerialNumber);
-	fbVnRegisterList.AddObject(fbRegCurrentIPAddress);
-	fbVnRegisterList.AddObject(fbRegGevMACAddressHighWord);
-	fbVnRegisterList.AddObject(fbRegGevMACAddressLowWord);
-	fbVnRegisterList.AddObject(fbRegImgSensorWidth);
-	fbVnRegisterList.AddObject(fbRegImgSensorHeight);
-	
+	SUPER^.fbVnRegisterList.AddObject(fbRegDeviceSerialNumber);
+	SUPER^.fbVnRegisterList.AddObject(fbRegCurrentIPAddress);
+	SUPER^.fbVnRegisterList.AddObject(fbRegGevMACAddressHighWord);
+	SUPER^.fbVnRegisterList.AddObject(fbRegGevMACAddressLowWord);
+	SUPER^.fbVnRegisterList.AddObject(fbRegImgSensorWidth);
+	SUPER^.fbVnRegisterList.AddObject(fbRegImgSensorHeight);
+
 	
 	//Link to Camera to allow an parameter to switch the camera in open state
-	THIS^.fbVnRegisterList.ResetIterator();
-	WHILE THIS^.fbVnRegisterList.HasNextObject() DO
-		IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+	SUPER^.fbVnRegisterList.ResetIterator();
+	WHILE SUPER^.fbVnRegisterList.HasNextObject() DO
+		IF __QUERYINTERFACE(SUPER^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
 			ipVnRegisterStatus.LinkCamera(ipCamera);
 		END_IF
 	END_WHILE
-	THIS^.fbVnRegisterList.RestoreIterator();
+	SUPER^.fbVnRegisterList.RestoreIterator();
 	
 	
 	//Prepare for EtherCat-TimeStamp-Trigger use
@@ -335,13 +209,6 @@ IF NOT bInCopyCode THEN
 	THIS^.TriggerMode			:= E_TriggerMode.On;
 	THIS^.DeviceDefaultState 	:= E_DeviceDefaultState.AutoDetect; 
 	THIS^.Exposure_1us 			:= 100;//[us]
-	
-//	//Set some valide values
-//	THIS^.RegionHeight			:= 400;
-//	THIS^.RegionWidth			:= 400;
-//	THIS^.RegionOffsetX			:= 0;
-//	THIS^.RegionOffsetY			:= 0;
-		
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -376,14 +243,6 @@ THIS^.fbRegGainAnalog.Value := nIncrements;
         </Implementation>
       </Set>
     </Property>
-    <Method Name="Initialize" Id="{c2d6eef4-6794-4c59-bc63-f2294ecf2a1a}">
-      <Declaration><![CDATA[METHOD Initialize : HRESULT
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// Reset all read and write flags 
-Initialize := THIS^.fbVnRegisterList.Initialize();]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="IPAddress" Id="{1fb51da5-1faf-4b4a-9843-e4da33f59764}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //IP-Adress as STRING(15)
@@ -560,26 +419,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="RewriteParameters" Id="{e13639d8-ac38-45c5-863f-42914df63fd2}">
-      <Declaration><![CDATA[//Rewrite parameters if necessary, e.g. after a connection interruption
-METHOD RewriteParameters : HRESULT
-VAR
-	ipRegObject : I_VnRegister;
-	hr : HRESULT;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[THIS^.fbVnRegisterList.ResetIterator();
-WHILE(THIS^.fbVnRegisterList.HasNextObject()) DO
-	IF __QUERYINTERFACE(THIS^.fbVnRegisterList.GetNextObject(), ipRegObject) THEN
-		hr := GetMostSignificant(hr, ipRegObject.RewriteParameters());
-	END_IF
-END_WHILE
-THIS^.fbVnRegisterList.RestoreIterator();
-
-RewriteParameters := hr;]]></ST>
-      </Implementation>
-    </Method>
     <Property Name="SensorHeight" Id="{06a328d9-01ea-4779-877c-5af943a17ed8}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //The number of effective pixels in horizontal direction
@@ -661,18 +500,5 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="Update" Id="{dfcd320b-b25c-4f86-9d05-5d54c5d20c1f}">
-      <Declaration><![CDATA[METHOD Update : HRESULT
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//If the connection to vision is in state "Opene" try to read or write parameters
-IF (THIS^.ipCamera <> 0) AND_THEN THIS^.ipCamera.GevCameraControl.GetState() = TCVN_CS_OPENED THEN
-	THIS^.fbVnRegisterList.Update();
-END_IF
-]]></ST>
-      </Implementation>
-    </Method>
   </POU>
 </TcPlcObject>

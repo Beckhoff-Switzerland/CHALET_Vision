@@ -1,25 +1,52 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <Itf Name="I_GigE_Beckhoff_Lighting" Id="{691951c0-ea04-4d8d-83a6-4b264fec853c}">
-    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Lighting EXTENDS I_GigeRegister
+    <Declaration><![CDATA[INTERFACE I_GigE_Beckhoff_Lighting EXTENDS I_GigeRegisterBase
 ]]></Declaration>
-    <Property Name="AllReadDone" Id="{c4ae7a6a-5a0f-478a-9b52-82ec85ee4894}">
+    <Folder Name="RegisterParameter" Id="{af2a6273-c62d-467b-82d8-2efa645137f3}">
+      <Folder Name="Lighting" Id="{7064a5df-f5bf-4a21-b7fe-2a999a963b92}" />
+    </Folder>
+    <Property Name="BrightnessBlue" Id="{2a574934-b62c-412b-8ab9-b6eaaf1304d0}" FolderPath="RegisterParameter\Lighting\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllReadDone : BOOL]]></Declaration>
-      <Get Name="Get" Id="{ac4149d1-df78-4567-8641-8ef45c1cd4ac}">
+//The brightness of the channel blue.
+PROPERTY BrightnessBlue : UDINT]]></Declaration>
+      <Get Name="Get" Id="{0a244b04-5849-4879-8423-ce771084bef5}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
-      <Set Name="Set" Id="{6fe08956-8f6f-4597-86b6-70bcab8d93f5}">
+      <Set Name="Set" Id="{9dcdd1eb-19df-406b-9fd2-b1f70d018a78}">
         <Declaration><![CDATA[]]></Declaration>
       </Set>
     </Property>
-    <Property Name="AllWriteDone" Id="{aa722f5a-2474-4658-939f-c94876d5d82a}">
+    <Property Name="BrightnessGreen" Id="{d0657202-2502-4f1e-9749-ea8c7f1a5e8f}" FolderPath="RegisterParameter\Lighting\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-PROPERTY AllWriteDone : Bool]]></Declaration>
-      <Get Name="Get" Id="{868dc061-100f-4f6f-8c8d-e40b96756589}">
+//The brightness of the channel green.
+PROPERTY BrightnessGreen : UDINT]]></Declaration>
+      <Get Name="Get" Id="{08047d33-9ec2-4ae7-ad88-f9424af4060b}">
         <Declaration><![CDATA[]]></Declaration>
       </Get>
-      <Set Name="Set" Id="{d78acce2-5709-4e58-8d5f-73c84aa488fa}">
+      <Set Name="Set" Id="{58b69745-f6b8-4e90-b638-88c63910cdc6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="BrightnessInfrared" Id="{44f20a48-8ef0-4615-8b21-d961e0a3d3f2}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel infrared.
+PROPERTY BrightnessInfrared : UDINT]]></Declaration>
+      <Get Name="Get" Id="{09d1c3a7-a984-4a14-835c-b06afe6504df}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{11677d77-7b39-41ea-adeb-a0eb185a0a62}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Property Name="BrightnessOrange" Id="{ae7f5888-7348-4e33-84e9-441341575b34}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel orange.
+PROPERTY BrightnessOrange : UDINT]]></Declaration>
+      <Get Name="Get" Id="{ded755ef-1731-417e-a7cb-9f97fc60de9f}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{23fe3039-ad57-4355-841b-3f7391df36b3}">
         <Declaration><![CDATA[]]></Declaration>
       </Set>
     </Property>

@@ -18,7 +18,17 @@
     <Company>Beckhoff CH</Company>
     <Released>false</Released>
     <Title>CHALET_Vision</Title>
-    <ProjectVersion>4.1.4</ProjectVersion>
+    <ProjectVersion>4.2.0</ProjectVersion>
+    <LibraryCategories>
+      <LibraryCategory xmlns="">
+        <Id>{cbf89c28-b790-4701-8e32-e9e980280c19}</Id>
+        <Version>1.0.0.0</Version>
+        <DefaultName>CHALET</DefaultName>
+      </LibraryCategory>
+    </LibraryCategories>
+    <SelectedLibraryCategories>
+      <Id>{cbf89c28-b790-4701-8e32-e9e980280c19}</Id>
+    </SelectedLibraryCategories>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="LICENSE.md">
@@ -79,13 +89,25 @@
     <Compile Include="COMPONENTs\Main FB\FB_GigE_Standalone.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\FB_GigE_Beckhoff_Register.TcPOU">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\FB_GigE_Register_Beckhoff_VCS2xxx.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigeRegister.TcIO">
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\FB_GigE_Register_Any.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\FB_GigE_Register_Beckhoff_VUI2xxx.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigeRegisterBase.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_Camera.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Any_Camera.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_FileSource.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="COMPONENTs\Optional\RegisterBeckhoffDevice\I_GigE_Beckhoff_Lighting.TcIO">
