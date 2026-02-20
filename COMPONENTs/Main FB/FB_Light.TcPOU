@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="FB_Light" Id="{fe151b6c-320b-4024-800a-5be09b9b1c6d}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+FUNCTION_BLOCK FB_Light EXTENDS FB_CH_Object IMPLEMENTS I_EtherCat_Trigger
+VAR
+	{attribute 'hide'}	
+	bInitDone 						: BOOL;
+	{attribute 'hide'}	
+	fbTriggerEtherCat				: FB_EtherCAT_Timestamp;	
+	{attribute 'hide'}  						
+	fbFeedback 			: FB_CH_Feedback(THIS^.fbSourceInfo); 
+
+	bReady					AT %I* 	: BOOL; 
+	nBrightnessBlue			AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessGreen		AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessOrange		AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessInfrared		AT %Q*	: UINT := 0; //[0-1000‰]
+	nDurationImpuls 		AT %Q*	: UDINT := 10_000;//[ns]
+	nTimestamp 				AT %Q*	: T_DCTIME64;			// Trigger time stamp start
+END_VAR
+VAR CONSTANT
+	{attribute 'hide'}	
+	N_MAX_BRIGTHNESS 				: UINT := 1000; //[0-1000‰]
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="BrightnessBluePermille" Id="{7c7bd60d-d34c-4ba9-babc-c317cfe3f169}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel blue. [0-1000‰]
+PROPERTY BrightnessBluePermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{d9338410-2ab4-4589-91b8-686d5737973f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessBluePermille := nBrightnessBlue;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{04f34b19-14aa-4d93-9c08-7d6d494faf15}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+ nBrightnessBlue := LIMIT(0, BrightnessBluePermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessGreenPermille" Id="{7b25c6e5-ceda-4a8d-aae3-ee373350303a}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel green. [0-1000‰]
+PROPERTY BrightnessGreenPermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{60d48e99-f686-4a07-abac-a834f9f58717}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessGreenPermille := nBrightnessGreen;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{cc3db4b2-20ef-494b-bac9-037f43d434db}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+ nBrightnessGreen := LIMIT(0, BrightnessGreenPermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessInfraredPermille" Id="{f83a3a0e-3016-461e-8bc0-6141fbba57fc}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel infrared.[0-1000‰]
+PROPERTY BrightnessInfraredPermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{349f5c56-42d4-479b-97b3-b425845161f0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessInfraredPermille := nBrightnessInfrared;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a6c2602a-96a2-4210-99ae-a28f936f251f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+ nBrightnessInfrared := LIMIT(0, BrightnessInfraredPermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessOrangePermille" Id="{73317178-3fa6-4a0c-a6f8-46876b352291}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel orange.[0-1000‰]
+PROPERTY BrightnessOrangePermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{e064fe30-39d9-47ab-9938-0407c334174f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessOrangePermille := nBrightnessOrange;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f03358cf-ee16-4e27-aabc-0335c922eb3b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+ nBrightnessOrange := LIMIT(0, BrightnessOrangePermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="DurationImpuls" Id="{ce4c75a7-e34f-4804-84dd-c63d6895bb15}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Duration of LED flash impulse [ns]
+PROPERTY DurationImpuls : UDINT]]></Declaration>
+      <Get Name="Get" Id="{3c643854-c60e-43fc-a417-486b5298035e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DurationImpuls := nDurationImpuls;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e2ebe423-b59a-4589-90f0-6a5bc76bb52a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[nDurationImpuls := DurationImpuls;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="EarliestPossibleTriggerTime" Id="{dd44cd24-6717-4fa7-aae7-c54f5faec0e5}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//[ns] Next posible trigger time
+PROPERTY EarliestPossibleTriggerTime : T_DCTIME64
+]]></Declaration>
+      <Get Name="Get" Id="{c852cce7-87d4-441d-84dd-98867fd756ca}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EarliestPossibleTriggerTime := fbTriggerEtherCat.EarliestPossibleTriggerTime;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="EmptySpaceInBuffer" Id="{e2e47074-1a9d-489c-b8dc-8618b37e6ea3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+(*This FB can buffer several trigger time stamps. This property shows whether another trigger can be stored.*)
+PROPERTY EmptySpaceInBuffer : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{7e47dbb0-5ac1-4b40-a401-75786ad95918}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EmptySpaceInBuffer := fbTriggerEtherCat.EmptySpaceInBuffer;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Feedback" Id="{081479ae-7647-4e4a-b144-457ff8f93dfe}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Feedback : I_CH_Feedback]]></Declaration>
+      <Get Name="Get" Id="{1ddd259f-0ae2-4975-889a-bd4f1fdf0211}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Feedback := THIS^.fbFeedback;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Initialize" Id="{573004b0-2ea0-47c5-b142-5e4213ca69ef}">
+      <Declaration><![CDATA[METHOD Initialize : HRESULT
+VAR 
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[hr := SUPER^.Initialize();
+
+//Subelement
+hr := GetMostSignificant(hr, fbTriggerEtherCat.Initialize());
+
+Initialize := hr;
+
+IF Initialize = S_OK THEN
+	THIS^.bInitDone := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{fbae047b-72df-4e08-84c8-3f057bb1b65d}">
+      <Declaration><![CDATA[{attribute 'monitoring':='call'}
+PROPERTY Initialized : BOOL]]></Declaration>
+      <Get Name="Get" Id="{437d30f9-41cf-4c96-a0d3-e303704cb250}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := THIS^.bInitDone;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="LastTriggerTime" Id="{05ed97a3-88bb-49f9-9a4f-f53daec1a392}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//[ns]
+PROPERTY LastTriggerTime : T_DCTIME64
+]]></Declaration>
+      <Get Name="Get" Id="{5107b451-2d0f-472a-a455-dec157643ebe}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastTriggerTime := fbTriggerEtherCat.LastTriggerTime;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Mapped" Id="{9f5a588e-70f4-4f68-bbb1-4a7f562ac25b}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+(*FB is mapped to hardware*)
+PROPERTY Mapped : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{8bcd8b12-651a-480a-bf4b-a07db1839f51}">
+        <Declaration><![CDATA[VAR
+	bNotMapped 	: BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.nBrightnessBlue), SIZEOF(THIS^.nBrightnessBlue)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.nBrightnessGreen), SIZEOF(THIS^.nBrightnessGreen)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.nBrightnessInfrared), SIZEOF(THIS^.nBrightnessInfrared)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.nBrightnessOrange), SIZEOF(THIS^.nBrightnessOrange)) <> EPlcMappingStatus.MS_Mapped;
+
+Mapped := NOT bNotMapped;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="TaskCycleTime" Id="{92bc739a-c562-452c-a891-5293bacfccf4}">
+      <Declaration><![CDATA[(*Cycle time in ns. This can be helpful for calculating the next trigger.*)
+PROPERTY TaskCycleTime : UDINT
+]]></Declaration>
+      <Get Name="Get" Id="{e07ea42e-8d58-438d-9a5f-a7d1032c13e7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TaskCycleTime := fbTriggerEtherCat.TaskCycleTime;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Trigger" Id="{13a9cea9-8cbf-4fba-9569-424f57be4c5d}">
+      <Declaration><![CDATA[{warning 'Add method implementation '}
+METHOD Trigger : HRESULT
+VAR_INPUT
+	(*The data type T_DCTIME64 represents the distributed clock system time (abbreviated as DC time) as a linear 64-bit integer value. 
+The time is expressed in nanoseconds since 1/1/2000 UTC. The smallest unit is a nanosecond.
+F_GetCurDcTickTime64()*)
+	nDCTimeStamp	: T_DCTIME64;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Update" Id="{804946a9-cf33-4ba0-8bdd-dc3f156ace92}">
+      <Declaration><![CDATA[METHOD Update : HRESULT
+VAR
+	hr : HRESULT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Force to initialize first
+IF NOT THIS^.Initialized THEN
+	THIS^.Initialize();
+	RETURN;
+END_IF
+
+//Subelement - if not in simulation
+fbTriggerEtherCat.Update();
+
+
+
+//Check for errors
+IF NOT THIS^.bReady THEN
+	THIS^.fbFeedback.ErrorID := Global.E_Win32EventClass.ERROR_NOT_READY;
+ELSE	
+	THIS^.fbFeedback.hr := fbTriggerEtherCat.Feedback.HR;
+END_IF
+
+
+
+//Write Outputs
+THIS^.nTimestamp := fbTriggerEtherCat.nTimestamp;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

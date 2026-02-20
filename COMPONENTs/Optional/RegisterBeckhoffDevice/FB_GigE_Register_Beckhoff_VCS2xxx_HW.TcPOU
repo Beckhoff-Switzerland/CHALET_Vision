@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
-  <POU Name="FB_GigE_Register_Beckhoff_VCS2xxx" Id="{15833fd6-b4b7-4828-a96b-9c644879be7b}" SpecialFunc="None">
+  <POU Name="FB_GigE_Register_Beckhoff_VCS2xxx_HW" Id="{51a93bdd-6ce9-4bba-a57e-e20e8b2f4093}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 {attribute 'enable_dynamic_creation'}
-FUNCTION_BLOCK FB_GigE_Register_Beckhoff_VCS2xxx EXTENDS FB_GigE_Register_Any IMPLEMENTS I_GigE_Beckhoff_Camera, I_GigeRegisterBase
+FUNCTION_BLOCK FB_GigE_Register_Beckhoff_VCS2xxx_HW EXTENDS FB_GigE_Register_Any IMPLEMENTS I_GigE_Beckhoff_Camera, I_GigeRegisterBase
 VAR	
+	nExposure_1us 			AT %Q* : UDINT := 200;
+	
 	//GigE-Camera-Register
 	//Read/Write
 	{attribute 'hide'}
@@ -13,8 +15,6 @@ VAR
 	fbRegTriggerMode	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pTriggerModeFrameStartReg, nEndian := 0);
 	{attribute 'hide'}                                                  
 	fbRegTriggerSource	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pTriggerSourceFrameStartReg, nEndian := 0);
-	{attribute 'hide'}                                                  
-	fbRegExposureTime	 		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pExposureTimeReg, nEndian := 0);
 	{attribute 'hide'}                                                  
 	fbRegDeviceDefaultState		: FB_VnRegister_UDINT(bReadOnly := FALSE, nAddress := E_CameraRegisters_Beckhoff.pDeviceDefaultStateReg, nEndian := 0);
 	{attribute 'hide'}                                                  
@@ -51,20 +51,20 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Folder Name="RegisterParameter" Id="{d5fdb964-dfee-45e6-88b8-6565742baa0c}">
-      <Folder Name="Acquisition and Trigger" Id="{1055459e-2632-4ea9-81dc-8fbf38b8d1d8}" />
-      <Folder Name="Device" Id="{b871647f-d1a4-4c60-804c-3e3f63053cb5}" />
-      <Folder Name="Region" Id="{753991fa-0cbd-40c5-86ec-45d6c94e3ced}" />
-      <Folder Name="Sensor" Id="{52a7efd1-0bfd-4902-9b6a-5ed702219317}" />
+    <Folder Name="RegisterParameter" Id="{e9904f2a-9f63-4b39-b28a-52b9c383a578}">
+      <Folder Name="Acquisition and Trigger" Id="{994f9c85-767c-4982-ac5a-d7b9abd55479}" />
+      <Folder Name="Device" Id="{597aecce-04a3-4eb7-ab28-43b509a296ff}" />
+      <Folder Name="Region" Id="{f4a5f9ca-4cec-4db1-8b31-3024f67fe84d}" />
+      <Folder Name="Sensor" Id="{58a462b3-160a-47e2-bf55-dcb9572bfc48}" />
     </Folder>
-    <Property Name="AcquisitionMode" Id="{ef244aed-f1df-4463-8d79-7a3b36a831f6}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+    <Property Name="AcquisitionMode" Id="{86fb26e9-9411-438b-a2d3-1a9f44b66859}" FolderPath="RegisterParameter\Acquisition and Trigger\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Number of frames captured in the acquisition. 
 //SingleFrame: One frame is captured. 
 //MultiFrame: The number of frames specified by AcquisitionFrameCount is captured. 
 //Continuous: Frames are captured continuously until stopped with the AcquisitionStop command.
 PROPERTY AcquisitionMode : E_AcquisitionModeReg]]></Declaration>
-      <Get Name="Get" Id="{9ad73c05-11a1-473e-bd5b-d01ba5e68f28}">
+      <Get Name="Get" Id="{8a8e0918-949e-4590-9512-57388f071f06}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -72,7 +72,7 @@ END_VAR
           <ST><![CDATA[AcquisitionMode := THIS^.fbRegAcquisitionMode.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{616420e8-fc7a-4544-a8ab-822cd7fae41f}">
+      <Set Name="Set" Id="{f3c318d4-6e5e-4ac4-8c45-724c816e81ce}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -83,12 +83,12 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="DeviceDefaultState" Id="{34afc0de-dcf7-4be5-86e8-f98969a9d7fd}" FolderPath="RegisterParameter\Device\">
+    <Property Name="DeviceDefaultState" Id="{6b8cda19-76ba-4ed2-854e-297cc0f4610e}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Controls whether most of the camera settings is controlled by GigE Vision or EtherCAT. 
 //A change from EtherCAT to GigE Vision requires a reboot.
 PROPERTY DeviceDefaultState : E_DeviceDefaultState]]></Declaration>
-      <Get Name="Get" Id="{7664beb5-88fa-4201-8791-0677c3cab887}">
+      <Get Name="Get" Id="{f3f6e078-3363-47e5-8531-ccf246e2a229}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -96,7 +96,7 @@ END_VAR
           <ST><![CDATA[DeviceDefaultState := THIS^.fbRegDeviceDefaultState.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{91179343-bee6-4894-8b4c-cf2f619f06c9}">
+      <Set Name="Set" Id="{119dd98c-94ed-4f56-8ef3-f72726f5d666}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -106,11 +106,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="DeviceSerialNumber" Id="{8413e07c-8274-4f81-8977-84a6e9751f51}" FolderPath="RegisterParameter\Device\">
+    <Property Name="DeviceSerialNumber" Id="{7f742cf9-4a0c-41a0-996a-16556b46e4e9}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Device's serial number. This string is a unique identifier of the device.
 PROPERTY DeviceSerialNumber : STRING(16)]]></Declaration>
-      <Get Name="Get" Id="{0f5241e2-3d6a-4be1-8697-6427fb4e5d16}">
+      <Get Name="Get" Id="{7326b935-899a-4515-a301-750ae40b8638}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -119,11 +119,11 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="DeviceVersion" Id="{7f09e316-3f65-4f08-b1c4-fc08195a38f1}" FolderPath="RegisterParameter\Device\">
+    <Property Name="DeviceVersion" Id="{05c01328-a940-461f-9c41-9c3ecdefeeda}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Displays the device version which includes the firmware release and build.
 PROPERTY DeviceVersion : STRING(32)]]></Declaration>
-      <Get Name="Get" Id="{1c6fb4c2-c34b-47fb-ad3a-1d4199dac7a7}">
+      <Get Name="Get" Id="{9d172982-5d57-4144-8d9e-fe696e2f532b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -132,28 +132,28 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="Exposure_1us" Id="{9c41c965-62da-4a60-b8bd-a89a1fe1642d}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+    <Property Name="Exposure_1us" Id="{2fb107a0-dd72-46df-a510-0303c76f0721}" FolderPath="RegisterParameter\Acquisition and Trigger\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 PROPERTY Exposure_1us : UDINT]]></Declaration>
-      <Get Name="Get" Id="{b04c876e-18dc-43fb-908e-5629b46c781d}">
+      <Get Name="Get" Id="{40fff91e-8933-4488-bca6-531d47347932}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[Exposure_1us := THIS^.fbRegExposureTime.Value;]]></ST>
+          <ST><![CDATA[Exposure_1us := nExposure_1us;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{617189e7-d42c-49c8-83d6-a03f6910b168}">
+      <Set Name="Set" Id="{f40aea18-f87e-483d-b430-e33f75a28012}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[THIS^.fbRegExposureTime.Value := Exposure_1us;
+          <ST><![CDATA[nExposure_1us := Exposure_1us;
 ]]></ST>
         </Implementation>
       </Set>
     </Property>
-    <Method Name="FB_init" Id="{07eb15c8-e3c3-4bc2-9e87-ad285d7e7049}">
+    <Method Name="FB_init" Id="{81d2f840-6ac8-4502-86d4-0dabbfbc2f22}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
 	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
@@ -175,7 +175,6 @@ IF NOT bInCopyCode THEN
 	SUPER^.fbVnRegisterList.AddObject(fbRegAcquisitionMode);
 	SUPER^.fbVnRegisterList.AddObject(fbRegTriggerMode);
 	SUPER^.fbVnRegisterList.AddObject(fbRegTriggerSource);
-	SUPER^.fbVnRegisterList.AddObject(fbRegExposureTime);
 	SUPER^.fbVnRegisterList.AddObject(fbRegDeviceDefaultState);
 	SUPER^.fbVnRegisterList.AddObject(fbRegRegionModeOn);
 	SUPER^.fbVnRegisterList.AddObject(fbRegRegionWidth);
@@ -212,11 +211,11 @@ IF NOT bInCopyCode THEN
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Property Name="GainAnalog" Id="{d3d2aebc-6313-46d0-947f-ed5d24d21bc8}" FolderPath="RegisterParameter\Sensor\">
+    <Property Name="GainAnalog" Id="{9ad77037-8656-47ef-b004-63e422d58c59}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Analog gain in 0.1 dB steps
 PROPERTY GainAnalog : LREAL]]></Declaration>
-      <Get Name="Get" Id="{1a338836-888b-4c62-963e-9acc3399066f}">
+      <Get Name="Get" Id="{15732b8a-5ccf-48fb-a810-11ff4dfecd98}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -224,7 +223,7 @@ END_VAR
           <ST><![CDATA[GainAnalog := 0.1 * TO_LREAL(THIS^.fbRegGainAnalog.Value);]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{cfa97108-54b6-44b4-86c1-54bc78db566b}">
+      <Set Name="Set" Id="{14384796-dca0-4d52-b809-3eaa3d4aac52}">
         <Declaration><![CDATA[VAR
 	nIncrements : UINT; //0.1db Steps 0-240Inc.
 END_VAR
@@ -243,11 +242,11 @@ THIS^.fbRegGainAnalog.Value := nIncrements;
         </Implementation>
       </Set>
     </Property>
-    <Property Name="IPAddress" Id="{1fb51da5-1faf-4b4a-9843-e4da33f59764}" FolderPath="RegisterParameter\Device\">
+    <Property Name="IPAddress" Id="{10ffb7a0-159b-4fd3-aff0-c5e3a562894b}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //IP-Adress as STRING(15)
 PROPERTY IPAddress : T_IPv4Addr ]]></Declaration>
-      <Get Name="Get" Id="{a5352a5c-7ce0-444c-b895-bae3a0215352}">
+      <Get Name="Get" Id="{723567d4-1f67-4a07-8e95-393582ba5685}">
         <Declaration><![CDATA[VAR
 	nValueTemp : UDINT;
 	stAdressByteArray   : T_IPv4AddrArr; // Byte-Array
@@ -278,11 +277,11 @@ IPAddress := F_CreateIPv4Addr(stAdressByteArray); //Byte-Array to String]]></ST>
         </Implementation>
       </Get>
     </Property>
-    <Property Name="MacAddress" Id="{e0a424d2-01ce-4866-bb40-a6c6f58823fc}" FolderPath="RegisterParameter\Device\">
+    <Property Name="MacAddress" Id="{063802c9-d9e2-4cd8-a01c-afa1e5d0eab8}" FolderPath="RegisterParameter\Device\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //MAC-Adress from camera
 PROPERTY MacAddress : STRING(12) ]]></Declaration>
-      <Get Name="Get" Id="{abb82e33-502f-4cf7-8efa-5b6ef1884c1d}">
+      <Get Name="Get" Id="{d60f600c-6fa0-44e7-8c47-bca4b0879437}">
         <Declaration><![CDATA[VAR
 
 END_VAR
@@ -303,11 +302,11 @@ MacAddress := Tc2_Standard.CONCAT(
         </Implementation>
       </Get>
     </Property>
-    <Property Name="RegionEnable" Id="{75431256-5337-4fbc-b9a9-db86ed8b01ca}" FolderPath="RegisterParameter\Region\">
+    <Property Name="RegionEnable" Id="{ec38f29d-d142-4d2c-9529-e59f9f212102}" FolderPath="RegisterParameter\Region\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Controls if the selected Region of interest is active and streaming.
 PROPERTY RegionEnable : BOOL]]></Declaration>
-      <Get Name="Get" Id="{37dc7639-d0ba-4ed8-82c9-cb63e5c86b91}">
+      <Get Name="Get" Id="{990c0859-8649-4e02-a625-80b055dbc5ba}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -315,7 +314,7 @@ END_VAR
           <ST><![CDATA[RegionEnable := (THIS^.fbRegRegionModeOn.Value = 16#01);]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{634963f9-002e-4f2c-96a6-69c8a0f2b841}">
+      <Set Name="Set" Id="{c903b9ab-02fd-46db-9fcf-5a926190bbb3}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -331,11 +330,11 @@ END_IF
         </Implementation>
       </Set>
     </Property>
-    <Property Name="RegionHeight" Id="{c13b9ead-d18d-4ad4-a238-8839251cc104}" FolderPath="RegisterParameter\Region\">
+    <Property Name="RegionHeight" Id="{3df47a6d-08b6-4d59-9835-09c3a9da2b6c}" FolderPath="RegisterParameter\Region\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Height of the image region of interest
 PROPERTY RegionHeight : UDINT]]></Declaration>
-      <Get Name="Get" Id="{bbc4a35a-2fb1-4f72-87a4-ae25115c43d7}">
+      <Get Name="Get" Id="{4b652ce7-01fa-4efb-a4a5-c6d07848812b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -343,7 +342,7 @@ END_VAR
           <ST><![CDATA[RegionHeight := THIS^.fbRegRegionHeight.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{4feea163-c59c-47aa-b683-c17e4cb21478}">
+      <Set Name="Set" Id="{41aefe03-7392-42b2-8bcb-128dd3ee5b61}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -353,11 +352,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="RegionOffsetX" Id="{de4cebd3-f65a-4941-8309-58cb4a38b9c9}" FolderPath="RegisterParameter\Region\">
+    <Property Name="RegionOffsetX" Id="{9c5f5a74-28dd-44c6-af36-e594d02d1864}" FolderPath="RegisterParameter\Region\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Horizontal offset from the origin to the region of interest (in pixels).
 PROPERTY RegionOffsetX : UDINT]]></Declaration>
-      <Get Name="Get" Id="{7ba345e1-0737-46d7-a9e6-f2599adaf25a}">
+      <Get Name="Get" Id="{1ba80af5-ba26-4f0a-9700-46d3f4a2cda0}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -365,7 +364,7 @@ END_VAR
           <ST><![CDATA[RegionOffsetX := THIS^.fbRegRegionOffsetX.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{a1ffe563-44fd-4b0a-ab90-c3eaf8e7048f}">
+      <Set Name="Set" Id="{47fe8cbd-5fbe-4988-9876-c6f7993ad4b5}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -375,11 +374,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="RegionOffsetY" Id="{b572822b-3d6c-4c28-96f4-44978139300c}" FolderPath="RegisterParameter\Region\">
+    <Property Name="RegionOffsetY" Id="{6e6c48da-3b03-4705-bc92-509e3cb38d29}" FolderPath="RegisterParameter\Region\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Vertical offset in lines of the uppermost pixel relative to the active sensor area.
 PROPERTY RegionOffsetY : UDINT]]></Declaration>
-      <Get Name="Get" Id="{43049e85-1cb4-4679-a77f-439e95fd4b03}">
+      <Get Name="Get" Id="{c1c4b670-415e-4f44-944e-22762b862d01}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -387,7 +386,7 @@ END_VAR
           <ST><![CDATA[RegionOffsetY := THIS^.fbRegRegionOffsetY.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{95500b20-46be-4c7d-a7e1-172a10260b50}">
+      <Set Name="Set" Id="{5f83728d-b71a-4689-b017-039b232bc9ba}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -397,11 +396,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="RegionWidth" Id="{2921d5c8-811d-4e97-820b-3d4b4801c0b8}" FolderPath="RegisterParameter\Region\">
+    <Property Name="RegionWidth" Id="{df5f1170-820e-42ac-ae1b-faa08fff8330}" FolderPath="RegisterParameter\Region\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Width of the image region of interest (must be an even value)
 PROPERTY RegionWidth : UDINT]]></Declaration>
-      <Get Name="Get" Id="{2858e1c0-2c86-490d-a672-9487790ec8dd}">
+      <Get Name="Get" Id="{e0738026-ae0e-49ea-84b0-7be5a1ac433b}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -409,7 +408,7 @@ END_VAR
           <ST><![CDATA[RegionWidth := THIS^.fbRegRegionWidth.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{e27e8c70-05c3-4a7c-84a6-7152f13ab4ab}">
+      <Set Name="Set" Id="{1e3decb5-605a-4d0a-b0f1-ea2d693d2a65}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -419,11 +418,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="SensorHeight" Id="{06a328d9-01ea-4779-877c-5af943a17ed8}" FolderPath="RegisterParameter\Sensor\">
+    <Property Name="SensorHeight" Id="{bf8a9bc5-9933-4d8b-8e6e-d2fcbeb5574b}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //The number of effective pixels in horizontal direction
 PROPERTY SensorHeight : UDINT]]></Declaration>
-      <Get Name="Get" Id="{bd1d3123-64c5-43de-9d4d-434bd1afaca8}">
+      <Get Name="Get" Id="{61a48d62-0f34-426b-b4c6-c4af4bdc9ed8}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -432,11 +431,11 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="SensorName" Id="{f92008fd-e978-4eeb-9ebf-e424f613b3bb}" FolderPath="RegisterParameter\Sensor\">
+    <Property Name="SensorName" Id="{4a2fb63b-c160-4597-9585-c1721915b04f}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Displays the model of the sensor.
 PROPERTY SensorName : STRING]]></Declaration>
-      <Get Name="Get" Id="{38bc0f17-8d53-48ef-9140-58cd8635c3b9}">
+      <Get Name="Get" Id="{9d377e20-0565-49d0-bfe8-31fd915e2b05}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -445,11 +444,11 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="SensorWidth" Id="{0c3916c4-8033-405c-8fc7-32e3b86930bc}" FolderPath="RegisterParameter\Sensor\">
+    <Property Name="SensorWidth" Id="{d8e0cda0-f332-40c6-b8bb-03b25077da6e}" FolderPath="RegisterParameter\Sensor\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //The number of effective pixels in vertical direction
 PROPERTY SensorWidth : UDINT]]></Declaration>
-      <Get Name="Get" Id="{f6c54ede-a5af-4dfd-92c4-dca7045973e2}">
+      <Get Name="Get" Id="{83b45784-e7f9-44c4-b33a-da883d5a876d}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -458,11 +457,11 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="TriggerMode" Id="{58ef174a-3f93-4197-939a-f22a2a707a5b}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+    <Property Name="TriggerMode" Id="{e524b303-7dbc-4a1f-8ab4-87dfb7b1e403}" FolderPath="RegisterParameter\Acquisition and Trigger\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Acquisition Trigger Mode On or Off
 PROPERTY TriggerMode : E_TriggerMode]]></Declaration>
-      <Get Name="Get" Id="{fad31867-d14c-4672-8241-37358c6a797e}">
+      <Get Name="Get" Id="{5eb8787d-8787-42dc-a5f3-ef59d80546d4}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -470,7 +469,7 @@ END_VAR
           <ST><![CDATA[TriggerMode := THIS^.fbRegTriggerMode.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{ba36022c-743a-4cbe-854e-d3ff4e23b137}">
+      <Set Name="Set" Id="{b25ee2bb-84cb-469f-888a-fdc8732fe170}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -479,11 +478,11 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Property Name="TriggerSource" Id="{5acf50c9-5d81-4bbd-a92f-0491a9da3908}" FolderPath="RegisterParameter\Acquisition and Trigger\">
+    <Property Name="TriggerSource" Id="{612ed994-03d0-4beb-bcb5-e7f028df539d}" FolderPath="RegisterParameter\Acquisition and Trigger\">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
 //Select the external input or software signal for use as trigger source.s
 PROPERTY TriggerSource : E_TriggerSource]]></Declaration>
-      <Get Name="Get" Id="{2d778395-14df-4dea-9c2e-8d16e2631787}">
+      <Get Name="Get" Id="{5ade8d8b-d882-4fa6-adce-e715fae20bfc}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -491,7 +490,7 @@ END_VAR
           <ST><![CDATA[TriggerSource := THIS^.fbRegTriggerSource.Value;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{c8ce26c7-85b0-43d3-ab07-cbae2bd0012f}">
+      <Set Name="Set" Id="{9a11afff-68ea-4cda-b6e4-e4f5d0968746}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>

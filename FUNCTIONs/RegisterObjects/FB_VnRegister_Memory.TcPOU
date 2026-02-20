@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.13">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
   <POU Name="FB_VnRegister_Memory" Id="{03d7b645-a394-4d9f-ba43-675e81b370bb}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 FUNCTION_BLOCK FB_VnRegister_Memory EXTENDS FB_VnRegister_Base

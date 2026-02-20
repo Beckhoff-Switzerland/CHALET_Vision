@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
-  <POU Name="FB_VnRegister_REAL" Id="{0a53dafa-91e8-4760-a251-3e7fb1900b70}" SpecialFunc="None">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="FB_VnRegister_ULINT" Id="{63e5f593-6918-4bda-ab03-ab07016979a8}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
-FUNCTION_BLOCK FB_VnRegister_REAL EXTENDS FB_VnRegister_Base
+FUNCTION_BLOCK FB_VnRegister_ULINT EXTENDS FB_VnRegister_Base
 VAR
 	{attribute 'hide'}
-	fValue : REAL;
+	nValue : ULINT;
 	
 	{attribute 'hide'}	
-	fbVnReadRegister_REAL : FB_VN_ReadRegister_REAL;
+	fbVnReadRegister_ULINT : FB_VN_ReadRegister_ULINT;
 	{attribute 'hide'}	
-	fbVnWriteRegister_REAL : FB_VN_WriteRegister_REAL;
+	fbVnWriteRegister_ULINT : FB_VN_WriteRegister_ULINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="FB_init" Id="{df22757f-9405-4692-9011-47b79484bb9f}">
+    <Method Name="FB_init" Id="{e9b8e816-5c80-44ec-a038-a09767f772e5}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
 	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
@@ -35,7 +35,7 @@ END_IF
 ]]></ST>
       </Implementation>
     </Method>
-    <Method Name="LinkCamera" Id="{2e1a18d3-1921-4c24-acdc-8ca021695ff7}">
+    <Method Name="LinkCamera" Id="{138d01cb-2479-4e2f-89ab-48a24ca78776}">
       <Declaration><![CDATA[//Linkt one the interface to camera. Normaly during FB_init
 METHOD LinkCamera : BOOL
 VAR_INPUT
@@ -47,15 +47,15 @@ END_VAR
 
 
 //Copy ObjectId from Camera to this fbVnReadRegister.
-MEMCPY(destAddr := ADR(fbVnReadRegister_REAL.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
-MEMCPY(destAddr := ADR(fbVnWriteRegister_REAL.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+MEMCPY(destAddr := ADR(fbVnReadRegister_ULINT.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
+MEMCPY(destAddr := ADR(fbVnWriteRegister_ULINT.oidITcVnGevImageProvider), srcAddr:=ADR(SUPER^.OidCamera), n:= SIZEOF(SUPER^.OidCamera));
 
 //Force to do an init after set OID
-fbVnReadRegister_REAL.FB_init(FALSE,FALSE);	
-fbVnWriteRegister_REAL.FB_init(FALSE,FALSE);]]></ST>
+fbVnReadRegister_ULINT.FB_init(FALSE,FALSE);	
+fbVnWriteRegister_ULINT.FB_init(FALSE,FALSE);]]></ST>
       </Implementation>
     </Method>
-    <Method Name="Update" Id="{c0bd15a1-2232-46d1-b0b7-1ab64223487f}">
+    <Method Name="Update" Id="{80b4fc8d-0332-4088-bf24-f81de47bd8fd}">
       <Declaration><![CDATA[METHOD Update : HRESULT
 
 ]]></Declaration>
@@ -63,7 +63,7 @@ fbVnWriteRegister_REAL.FB_init(FALSE,FALSE);]]></ST>
         <ST><![CDATA[SUPER^.Update();
 
 
-fbVnReadRegister_REAL(
+fbVnReadRegister_ULINT(
 	nAddress:= SUPER^.nAddress, 
 	nEndian:= SUPER^.nEndian, 
 	bRead:= SUPER^.bExecuteRead, 
@@ -71,12 +71,12 @@ fbVnReadRegister_REAL(
 	bError=> SUPER^.bReadError
 	);
 IF fbRTrigReadDone.Q AND THIS^.bWriteDone THEN
-	fValue := fbVnReadRegister_REAL.fValue;
+	nValue := fbVnReadRegister_ULINT.nValue;
 END_IF
 	
-fbVnWriteRegister_REAL(
+fbVnWriteRegister_ULINT(
 	nAddress:= SUPER^.nAddress, 
-	fValue:= fValue,  
+	nValue:= nValue,  
 	nEndian:= SUPER^.nEndian,   
 	bWrite:= SUPER^.bExecuteWrite, 
 	bBusy=> SUPER^.bWriteBusy, 
@@ -84,36 +84,40 @@ fbVnWriteRegister_REAL(
 	);
 	
 IF bReadError THEN
-	SUPER^.nErrorId := fbVnReadRegister_REAL.nErrorId;
+	SUPER^.nErrorId := fbVnReadRegister_ULINT.nErrorId;
 ELSIF bWriteError THEN
-	SUPER^.nErrorId := fbVnWriteRegister_REAL.nErrorId;
+	SUPER^.nErrorId := fbVnWriteRegister_ULINT.nErrorId;
 ELSE
 	SUPER^.nErrorId := 0;
-END_IF]]></ST>
+END_IF
+	]]></ST>
       </Implementation>
     </Method>
-    <Property Name="Value" Id="{9d3119a3-0e19-43c6-a2d4-375279d66fef}">
+    <Property Name="Value" Id="{11041084-10de-429c-9e69-215a1fb3adc2}">
       <Declaration><![CDATA[{attribute 'monitoring':='call'}
-PROPERTY Value : REAL]]></Declaration>
-      <Get Name="Get" Id="{f28c199b-da46-44ab-9dee-bed80691cf64}">
+PROPERTY Value : ULINT]]></Declaration>
+      <Get Name="Get" Id="{9d3e8a6f-77d9-4217-bb8a-268c91c51ea2}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[Value := fValue;]]></ST>
+          <ST><![CDATA[Value := nValue;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{2946e42d-5f68-449b-8a4a-03a64ec58e64}">
+      <Set Name="Set" Id="{4d9f74a3-a22e-4162-859e-edbe62c28bc7}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[IF fValue <> Value THEN
+          <ST><![CDATA[IF nValue <> Value THEN
 	//Trigger a new write cycle
 	THIS^.bWriteDone 	:= FALSE;
 END_IF
 
-fValue := Value;]]></ST>
+
+nValue := Value;
+
+]]></ST>
         </Implementation>
       </Set>
     </Property>

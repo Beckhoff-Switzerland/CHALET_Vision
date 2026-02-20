@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="FB_GigE_Register_Beckhoff_VUI2xxx_HW" Id="{355e1c21-9001-48eb-9a46-8dcca6c18a60}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK FB_GigE_Register_Beckhoff_VUI2xxx_HW EXTENDS FB_GigE_Register_Beckhoff_VCS2xxx_HW IMPLEMENTS I_GigE_Beckhoff_Lighting, I_GigE_Beckhoff_OpticControl
+VAR	
+	nBrightnessBlue			AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessGreen		AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessOrange		AT %Q*	: UINT := N_MAX_BRIGTHNESS; //[0-1000‰]
+	nBrightnessInfrared		AT %Q*	: UINT := 0; //[0-1000‰]
+	
+	nOpticControlSensorDist AT %Q* : UDINT := 477; 	//40-1024mm
+	
+	//GigE-Camera-Register
+	//Read/Write Light
+
+	//Read/Write Optic control
+                                                                    
+
+END_VAR
+VAR CONSTANT
+	{attribute 'hide'}	
+	N_MAX_BRIGTHNESS 				: UINT := 1000; //[1000‰]
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="RegisterParameter" Id="{c8a317a8-46fc-40c7-b599-e7cd15a5091d}">
+      <Folder Name="Acquisition and Trigger" Id="{1a99ac33-e9b8-403f-9277-2c862cc3259b}" />
+      <Folder Name="Device" Id="{6a3f134a-3472-4cc6-b26c-d6cd87d8284f}" />
+      <Folder Name="Lighting" Id="{157e7dea-08d0-4d55-9dac-fa80a4f12941}" />
+      <Folder Name="Optic Control" Id="{4f2557fe-3205-46bf-9aea-e517e5392832}" />
+      <Folder Name="Region" Id="{e38dd885-8e26-44e5-9451-1d59f407df64}" />
+      <Folder Name="Sensor" Id="{89f0237e-f555-4738-8a42-1e58f5cc03c5}" />
+    </Folder>
+    <Property Name="BrightnessBluePermille" Id="{427a1214-6cf8-4157-9b7d-a776635e2b34}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel blue. [0-1000‰]
+PROPERTY BrightnessBluePermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{f8a15d0c-c517-48c8-90c1-b2bb71fce665}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessBluePermille := nBrightnessBlue;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{d9df3b86-d6a3-44f8-9b65-6c7cfe78469a}">
+        <Declaration><![CDATA[]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+nBrightnessBlue := LIMIT(0, BrightnessBluePermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessGreenPermille" Id="{3b1ef6d9-40ea-45ee-8238-8d776b0b141b}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel green. [0-1000‰]
+PROPERTY BrightnessGreenPermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{e85795ad-24e0-4d69-b9d0-e498691bd93b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessGreenPermille := nBrightnessGreen;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{6f8dbc7e-d488-400b-9da8-11d284e861b1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+nBrightnessGreen := LIMIT(0, BrightnessGreenPermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessInfraredPermille" Id="{df5d3f52-0588-45d1-97d5-fc5062f20b17}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel infrared. [0-1000‰]
+PROPERTY BrightnessInfraredPermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{0b1c5e3f-723a-4301-9a3f-86763e0f8f0e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessInfraredPermille := nBrightnessInfrared;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{0374b281-4192-4f60-b583-2fe3c9a6ee2e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+nBrightnessInfrared := LIMIT(0, BrightnessInfraredPermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="BrightnessOrangePermille" Id="{9473fce4-2e1d-4f9a-9894-53c215cb9a2d}" FolderPath="RegisterParameter\Lighting\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//The brightness of the channel orange. [0-1000‰]
+PROPERTY BrightnessOrangePermille : UINT]]></Declaration>
+      <Get Name="Get" Id="{1d239fc8-4dc1-467d-be18-e93ffb2ea881}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[BrightnessOrangePermille := nBrightnessOrange;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{0fada71c-c97c-4adb-8f2b-5e53ef5bb03a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//LIMIT(min,in,max) Returns in if it lies in the interval [min,max]. Otherwise, the violated bound (min or max) is returned.
+nBrightnessOrange := LIMIT(0, BrightnessOrangePermille, N_MAX_BRIGTHNESS);
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{0bec3342-631d-4382-a919-8b1955715ebb}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	
+	ipCamera : I_GigE_Beckhoff_Standalone;
+END_VAR
+VAR
+	ipVnRegisterStatus : I_VnRegister;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Do the following code once during start up and not during onlinechange
+IF NOT bInCopyCode THEN 
+
+	//Add this registerparameter to the allready existing list off the VCS2xxx parent
+
+	//GigE-Camera-Register
+	//Read/Write Light
+
+	//Read/Write Optic control
+
+	//Link to Camera to allow an parameter to switch the camera in open state
+	SUPER^.fbVnRegisterList.ResetIterator();
+	WHILE SUPER^.fbVnRegisterList.HasNextObject() DO
+		IF __QUERYINTERFACE(SUPER^.fbVnRegisterList.GetNextObject(),ipVnRegisterStatus) THEN
+			ipVnRegisterStatus.LinkCamera(ipCamera);
+		END_IF
+	END_WHILE
+	SUPER^.fbVnRegisterList.RestoreIterator();
+	
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="SensorDistance" Id="{95a54d1b-b71d-4d60-b985-5fee99cad7ed}" FolderPath="RegisterParameter\Optic Control\">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Distance from the image sensor surface to the object in millimeters (mm).
+//40mm - 4000mm
+PROPERTY SensorDistance : UDINT]]></Declaration>
+      <Get Name="Get" Id="{8a218e75-8edf-477d-8cb5-74e375255c00}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SensorDistance := nOpticControlSensorDist;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{3ef7048d-a438-4b77-9c45-8d441dbb5cf4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[//40-1024mm
+nOpticControlSensorDist := MIN(MAX(40, SensorDistance), 4000);]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

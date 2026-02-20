@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="FB_VCS2xxx_MappingToHW" Id="{287291af-7d84-404e-98df-318abb0d87ac}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_VCS2xxx_MappingToHW EXTENDS FB_GigeCamera_Any
+VAR	
+	fbGigeBeckhoffRegisterVCS2xxxHW 			: FB_GigE_Register_Beckhoff_VCS2xxx_HW(ipCamera := THIS^);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="CameraType" Id="{21412f20-fc2e-4976-a92b-caba34e3120e}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Once as a Beckhoff camera is detected at startup, the corresponding type is loaded automatically. 
+PROPERTY CameraType : E_CameraType]]></Declaration>
+      <Get Name="Get" Id="{84287ec2-2eab-41c3-8698-dc2e47d9164c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CameraType := E_CameraType.Beckhoff_VCS2xxx_MappingToHW;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{0f39926d-aa04-4999-806a-7829d76d9913}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{025bd2f6-6dab-4020-9498-ef77fcf780b9}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+VAR
+	fbGetCurTaskIdx  : GETCURTASKINDEX;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInCopyCode THEN
+		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegisterVCS2xxxHW;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Mapped" Id="{467ac8c1-3c48-4d1b-bb78-7727d5243229}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+(*FB is mapped to hardware*)
+PROPERTY Mapped : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{060e2486-288b-4a7c-bd2d-f97aea3c9327}">
+        <Declaration><![CDATA[VAR
+	bNotMapped 	: BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVCS2xxxHW.nExposure_1us), SIZEOF(THIS^.fbGigeBeckhoffRegisterVCS2xxxHW.nExposure_1us)) <> EPlcMappingStatus.MS_Mapped;
+
+
+Mapped := NOT bNotMapped;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

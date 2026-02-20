@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
   <POU Name="FB_EtherCAT_Timestamp" Id="{9d20c851-b748-444b-bf44-9b7c6f6eded6}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
 FUNCTION_BLOCK FB_EtherCAT_Timestamp EXTENDS FB_CH_Object IMPLEMENTS  I_EtherCat_Trigger
@@ -22,7 +22,7 @@ END_VAR
     </Implementation>
     <Property Name="EarliestPossibleTriggerTime" Id="{bb46e498-77eb-45c8-976b-5aeb1050a687}">
       <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
-//[ns]
+//[ns] Next posible trigger time
 PROPERTY EarliestPossibleTriggerTime : T_DCTIME64]]></Declaration>
       <Get Name="Get" Id="{331eb13e-7165-415a-af8f-0463d67e1c4a}">
         <Declaration><![CDATA[VAR

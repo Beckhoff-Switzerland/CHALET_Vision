@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+  <POU Name="FB_VUI2xxx_MappingToHW" Id="{17f4d432-3fbc-4bf4-9735-c66df8f96755}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_VUI2xxx_MappingToHW EXTENDS FB_GigeCamera_Any
+VAR
+	fbGigeBeckhoffRegisterVUI2xxx_HW 			: FB_GigE_Register_Beckhoff_VUI2xxx_HW(ipCamera := THIS^);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="CameraType" Id="{9553069d-2831-40e4-84b4-c2fff23e44fd}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+//Once as a Beckhoff camera is detected at startup, the corresponding type is loaded automatically. 
+PROPERTY CameraType : E_CameraType]]></Declaration>
+      <Get Name="Get" Id="{9b9a89ab-c280-48e4-bfdb-4d815f303492}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CameraType := E_CameraType.Beckhoff_VUI2xxx_MappingToHW;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f842b645-e5b5-47e8-891b-6dcccc2d1d1a}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="FB_init" Id="{31681431-b87a-46e2-bbbc-33e6ecb9b393}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+VAR
+	fbGetCurTaskIdx  : GETCURTASKINDEX;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bInCopyCode THEN
+		THIS^.ipRegister := THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Mapped" Id="{5da9c1af-978b-4b08-b429-c13789d038d3}">
+      <Declaration><![CDATA[{attribute 'monitoring' := 'call'}
+(*FB is mapped to hardware*)
+PROPERTY Mapped : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{2e110725-fbd6-4cf3-9a70-b4cf53f3e202}">
+        <Declaration><![CDATA[VAR
+	bNotMapped 	: BOOL;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessBlue), SIZEOF(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessBlue)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessGreen), SIZEOF(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessGreen)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessOrange), SIZEOF(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessOrange)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessInfrared), SIZEOF(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nBrightnessInfrared)) <> EPlcMappingStatus.MS_Mapped;
+bNotMapped := bNotMapped OR F_GetMappingStatus(ADR(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nOpticControlSensorDist), SIZEOF(THIS^.fbGigeBeckhoffRegisterVUI2xxx_HW.nOpticControlSensorDist)) <> EPlcMappingStatus.MS_Mapped;
+
+
+Mapped := NOT bNotMapped;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>
