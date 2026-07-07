@@ -7,8 +7,8 @@
     <DownloadApplicationInfo>true</DownloadApplicationInfo>
     <WriteProductVersion>true</WriteProductVersion>
     <GenerateTpy>false</GenerateTpy>
-    <Name>Plc_CHALET_Vision</Name>
-    <ProgramVersion>3.1.4026.20</ProgramVersion>
+    <Name>Lib_CHALET_Vision</Name>
+    <ProgramVersion>3.1.4026.24</ProgramVersion>
     <Application>{93a4ac9c-f3b7-4da0-bd78-f6c396de53f4}</Application>
     <TypeSystem>{55e0eab5-0d01-42ff-9205-08d61a695095}</TypeSystem>
     <Implicit_Task_Info>{10e43833-4945-4397-af31-49c760b84bc0}</Implicit_Task_Info>
@@ -18,7 +18,7 @@
     <Company>Beckhoff CH</Company>
     <Released>false</Released>
     <Title>CHALET_Vision</Title>
-    <ProjectVersion>4.4.0</ProjectVersion>
+    <ProjectVersion>4.5.0</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory xmlns="">
         <Id>{cbf89c28-b790-4701-8e32-e9e980280c19}</Id>
@@ -32,6 +32,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="ExternalTypes.tmc">
+      <SubType>Content</SubType>
+    </None>
+    <None Include="Lib_CHALET_Vision.tmc">
       <SubType>Content</SubType>
     </None>
     <Content Include="LICENSE.md">
@@ -336,7 +339,7 @@
           </d>
           <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
             <v>PerformStaticAnalyse</v>
-            <v>False</v>
+            <v>True</v>
           </d>
         </o>
         <v>{40450F57-0AA3-4216-96F3-5444ECB29763}</v>
