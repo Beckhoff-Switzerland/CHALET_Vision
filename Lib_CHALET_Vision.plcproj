@@ -8,7 +8,7 @@
     <WriteProductVersion>true</WriteProductVersion>
     <GenerateTpy>false</GenerateTpy>
     <Name>Lib_CHALET_Vision</Name>
-    <ProgramVersion>3.1.4026.24</ProgramVersion>
+    <ProgramVersion>3.1.4026.26</ProgramVersion>
     <Application>{93a4ac9c-f3b7-4da0-bd78-f6c396de53f4}</Application>
     <TypeSystem>{55e0eab5-0d01-42ff-9205-08d61a695095}</TypeSystem>
     <Implicit_Task_Info>{10e43833-4945-4397-af31-49c760b84bc0}</Implicit_Task_Info>
@@ -18,7 +18,7 @@
     <Company>Beckhoff CH</Company>
     <Released>false</Released>
     <Title>CHALET_Vision</Title>
-    <ProjectVersion>4.5.0</ProjectVersion>
+    <ProjectVersion>4.6.2</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory xmlns="">
         <Id>{cbf89c28-b790-4701-8e32-e9e980280c19}</Id>
@@ -96,6 +96,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="COMPONENTs\Optional\I_EtherCat_Trigger.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="COMPONENTs\Optional\I_GetImage.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="COMPONENTs\Optional\I_GevCameraControl.TcIO">

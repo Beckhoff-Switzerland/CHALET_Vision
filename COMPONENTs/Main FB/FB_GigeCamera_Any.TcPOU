@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.17">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.19">
   <POU Name="FB_GigeCamera_Any" Id="{e8c292d8-c8f1-47c5-8349-a7443f582da7}" SpecialFunc="None">
     <Declaration><![CDATA[{attribute 'no_explicit_call' := 'Do not call the body - Stick to OOP'}
-FUNCTION_BLOCK FB_GigeCamera_Any EXTENDS FB_CH_Object IMPLEMENTS I_GevCameraControl, I_GigE_Beckhoff_Standalone
+FUNCTION_BLOCK FB_GigeCamera_Any EXTENDS FB_CH_Object IMPLEMENTS I_GevCameraControl, I_GigE_Beckhoff_Standalone, I_GetImage
 VAR
 	// This FB provides the basic functionality to control a GigE Vision camera and access its calibration data.
 	fbCamera 						: FB_VN_GevCameraControl;	
@@ -431,7 +431,7 @@ TriggerSoftware := fbFeedback.hr;
     </Method>
     <Method Name="TryGetImage" Id="{a7872ab3-e0b7-44ca-a9ad-ab28324c5ff8}">
       <Declaration><![CDATA[//Gets the current available image (first in receive queue) and its corresponding GVSP info
-METHOD  TryGetImage : HRESULT
+METHOD TryGetImage : HRESULT
 VAR_INPUT
 	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
 END_VAR

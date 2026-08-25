@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.19">
   <POU Name="FB_Filesource" Id="{470bcf04-8d17-4f13-b417-a4e088ea3333}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Filesource EXTENDS FB_CH_Object IMPLEMENTS I_GigE_Beckhoff_FileSource
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Filesource EXTENDS FB_CH_Object IMPLEMENTS I_GigE_Beckhoff_FileSource, I_GetImage
 VAR
 	fbFileSource 			: FB_VN_FileSourceControl;
 	{attribute 'hide'}	

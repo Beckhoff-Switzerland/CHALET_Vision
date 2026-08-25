@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.19">
+  <Itf Name="I_GetImage" Id="{f2e80b97-796f-422d-9ee5-c6c89c2c94e7}">
+    <Declaration><![CDATA[INTERFACE I_GetImage EXTENDS __SYSTEM.IQueryInterface
+
+]]></Declaration>
+    <Method Name="TryGetImage" Id="{66e974ca-d953-41a7-b923-66c5b359954c}">
+      <Declaration><![CDATA[//Gets the current available image (first in receive queue) and its corresponding GVSP info
+METHOD TryGetImage : HRESULT
+VAR_INPUT
+	stImageWithInfo : REFERENCE TO ST_ImageWithInfo;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>
